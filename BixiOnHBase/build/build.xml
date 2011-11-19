@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="bixi" default="main" basedir="../">
+
+	<property environment="env" />		
+	
+	<property name="src.root" location="../" />
+	
+	<property name="bixi.src" location="${src.root}/BixiOnHBase"/>
+	
+	<property name="java.home" value="${env.JAVA_HOME}" />
+	<property name="ant.home" value="${env.ANT_HOME}" />
+	<property name="build.home" value="${bixi.src}/bin" />	
+	<property name="lib.home" value="${bixi.src}/lib" />
+	<property name="src.home" value="${bixi.src}/src" />
+	
+	<property name="hbase.home" location="${env.HBASE_HOME}" />
+	<property name="hadoop.home" location="${env.HADOOP}" />
+
+	<path id="classpath">
+		<fileset dir="${lib.home}">
+			<include name="*.jar" />
+		</fileset>
+		<fileset dir="${hbase.home}">
+			<include name="hbase-0.93-SNAPSHOT.jar" />
+		</fileset>
+		<fileset dir="${hbase.home}/lib">
+			<include name="log4j-1.2.16.jar" />
+			<include name="commons-logging-1.1.1.jar" />		
+			<include name="hadoop-0.20.2-core.jar" />
+			<include name="zookeeper-3.3.3.jar" />
+		</fileset>
+		<fileset dir="${hadoop.home}/lib">
+			<include name="commons-cli-1.2.jar" />
+		</fileset>
+	</path>
+
+	<target name="compile" depends="clean">
+		<mkdir dir="${build.home}" />
+		<javac srcdir="${src.home}" destdir="${build.home}/">
+			<classpath refid="classpath" />
+		</javac>
+	</target>
+	
+	<!--create bixi.jar -->
+	<target name="main" depends="compile">
+		<mkdir dir="${lib.home}" />		
+		<jar jarfile="${lib.home}/bixi.jar" basedir="${build.home}" />
+	</target>
+	
+	<target name="clean">
+		<description>clean the jar file last time</description>
+		<delete dir="${lib.home}" />
+		<delete dir="${bin.home}" />
+	</target>	
+	
+	
+</project>
