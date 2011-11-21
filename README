@@ -1,1 +1,5 @@
-this is for test
+1 test_client.sh is to call run_bixi_client.sh to send the query to HBase
+
+2 should put the library in /lib/bixi.jar into HBase nodes and configure the coprocessor class
+
+3 Before run test, make sure hadoop and hbase are running and there is a table for Bixi.

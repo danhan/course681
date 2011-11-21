@@ -14,19 +14,16 @@
 	<property name="src.home" value="${bixi.src}/src" />
 	
 	<property name="hbase.home" location="${env.HBASE_HOME}" />
-	<property name="hadoop.home" location="${env.HADOOP}" />
+	<property name="hadoop.home" location="${env.HADOOP_HOME}" />
 
 	<path id="classpath">
-		<fileset dir="${lib.home}">
-			<include name="*.jar" />
-		</fileset>
 		<fileset dir="${hbase.home}">
 			<include name="hbase-0.93-SNAPSHOT.jar" />
 		</fileset>
 		<fileset dir="${hbase.home}/lib">
 			<include name="log4j-1.2.16.jar" />
 			<include name="commons-logging-1.1.1.jar" />		
-			<include name="hadoop-0.20.2-core.jar" />
+			<include name="hadoop-core-0.20-append-r1057313.jar" />
 			<include name="zookeeper-3.3.3.jar" />
 		</fileset>
 		<fileset dir="${hadoop.home}/lib">
@@ -43,14 +40,14 @@
 	
 	<!--create bixi.jar -->
 	<target name="main" depends="compile">
-		<mkdir dir="${lib.home}" />		
+		<mkdir dir="${lib.home}"/>
 		<jar jarfile="${lib.home}/bixi.jar" basedir="${build.home}" />
 	</target>
 	
 	<target name="clean">
 		<description>clean the jar file last time</description>
-		<delete dir="${lib.home}" />
-		<delete dir="${bin.home}" />
+		<delete dir="${lib.home}" />	
+		<delete dir="${build.home}" />	
 	</target>	
 	
 	

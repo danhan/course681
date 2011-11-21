@@ -5,7 +5,9 @@
 myDir=$(readlink -f $0 | xargs dirname)
 pushd .
 
-echo "test getAvailBikes\n "
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
+echo "test getAvailBikes, stationid 01_10_2010__00"
+echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
 ${myDir}/run_bixi_client.sh 1 1 01_10_2010__00
 
 echo "@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"
