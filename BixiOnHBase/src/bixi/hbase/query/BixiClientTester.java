@@ -56,18 +56,26 @@ public class BixiClientTester {
   }
 
   private void test(String[] args) throws Throwable {
+	  
     List<String> l = new ArrayList<String>();
     String[] idStr = null;
-    if ("1".equals(args[0]))
-      callAvailBikes(args);
-    else if ("2".equals(args[0]))
-      callAverage(args);
-    else if (("3").equals(args[0]))
-      callAvailBikesFromAPoint(args);
-    else if (("13").equals(args[0]))
-      callAvailBikesFromAPointWithScan(args);
-    else if (("12").equals(args[0]))
-      callAverageAvailBikesWithScan(args);
+    
+    long start_time = 0,end_time = 0;
+    start_time = System.currentTimeMillis();
+    if ("1".equals(args[0])){    	
+    	callAvailBikes(args); // get available bike for one station
+    }else if ("2".equals(args[0])){
+    	callAverage(args); // get average usage for hours for a list of stations
+    }else if (("3").equals(args[0])){
+    	callAvailBikesFromAPoint(args); // get available bikes with a given points
+    }else if (("13").equals(args[0])){
+    	callAvailBikesFromAPointWithScan(args); // get available bikes with a given points
+    }else if (("12").equals(args[0])){
+    	callAverageAvailBikesWithScan(args); // get 
+    }
+    
+	end_time = System.currentTimeMillis();
+	System.out.println("execution time : "+ (end_time-start_time));
 
     // BixiClient client = new BixiClient(conf);
     // Map<String, Integer> availBikesMap = client.getAvailBikes(l, args[0]);

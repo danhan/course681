@@ -26,6 +26,7 @@ public class XStation {
 	private String terminalName;
 	private double latitude;
 	private double longtitude;
+	private XLocation point;
 	private boolean installed;
 	private boolean locked;
 	private long installDate;
@@ -33,6 +34,27 @@ public class XStation {
 	private boolean temporary;
 	private int nbBikes;
 	private int nbEmptyDocks;
+	private String clusterId;
+	
+	public XStation(){
+		this.point = new XLocation();
+	}
+	
+	public String getMetadata(){
+		
+		String result = "";
+		result += "name="+this.name+";";
+		result += "terminalName="+this.terminalName+";";
+		result += "latitude="+this.latitude+";";
+		result += "longtitude="+this.longtitude+";";
+		result += "installed="+this.installed+";";
+		result += "locked="+this.locked+";";
+		result += "installDate="+this.installDate+";";
+		result += "removeDate="+this.removeDate+";";
+		result += "temporary="+this.temporary+";";
+		
+		return result;		
+	}
 	
 	
 	public String getId() {
@@ -58,12 +80,14 @@ public class XStation {
 	}
 	public void setLatitude(double latitude) {
 		this.latitude = latitude;
+		this.point.setLatitude(latitude);
 	}
 	public double getLongtitude() {
 		return longtitude;
 	}
 	public void setLongtitude(double longtitude) {
 		this.longtitude = longtitude;
+		this.point.setLongitude(this.longtitude);
 	}
 	public boolean isInstalled() {
 		return installed;
@@ -108,7 +132,15 @@ public class XStation {
 		this.nbEmptyDocks = nbEmptyDocks;
 	}
 	
-	
+	public XLocation getPoint() {
+		return point;
+	}
+	public String getClusterId() {
+		return clusterId;
+	}
+	public void setClusterId(String clusterId) {
+		this.clusterId = clusterId;
+	}
 	public void print(){
 		String output = "id" + "=>" + this.id +";"+
 						"name" + "=>" + this.name +";"+

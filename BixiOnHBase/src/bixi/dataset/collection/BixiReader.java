@@ -31,13 +31,18 @@ public class BixiReader {
 		}
 	}
 
+	public void cleanStationList(){
+		if(stationList != null && stationList.size()>0){
+			stationList.clear();
+		}
+	}
+	
 	/*
 	 * fileName includes full path of the file and the file name
 	 */
 	public List<XStation> parseXML(String fileFullName) throws IOException {
 
-		File f = new File(fileFullName);
-		System.out.println(fileFullName);
+		File f = new File(fileFullName);		
 		Document dom = null;
 		try {
 			dom = db.parse(f);
@@ -49,13 +54,16 @@ public class BixiReader {
 			System.err.println("File is malformed:" + fileFullName);
 		}
 		if (dom != null) {
-			Element elem = dom.getDocumentElement();		
+			Element elem = dom.getDocumentElement();	
+			
 			NodeList nodes = elem.getElementsByTagName("station");
+			
 			System.out.println(nodes.getLength());
 			
-			Element e;			
+			Element e;	
+			
 			for (int i = 0; i < nodes.getLength(); i++) {
-				try {
+				try {								
 					e = (Element) nodes.item(i);
 					XStation station = this.getStation(e);
 					stationList.add(station);
@@ -82,9 +90,10 @@ public class BixiReader {
 			}
 			NodeList nodes = item.getElementsByTagName(name);			
 			Element ele = (Element) nodes.item(0);
-			
+						
 			if(ele != null && ele.getFirstChild() != null){
-				String value = ele.getFirstChild().getNodeValue();
+				String value = ele.getFirstChild().getNodeValue();				
+
 				//System.out.println(name+"==>"+value);
 				if (name.contains("lat")) {
 					station.setLatitude(Double.valueOf(value).doubleValue());
