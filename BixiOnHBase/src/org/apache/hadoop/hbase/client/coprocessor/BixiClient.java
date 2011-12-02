@@ -26,7 +26,7 @@ public class BixiClient {
 
   HTable table, stat_table, cluster_table;;
   Configuration conf;
-  private static final byte[] TABLE_NAME = Bytes.toBytes(BixiConstant.schema1_bixidata);
+  private static final byte[] TABLE_NAME = Bytes.toBytes(BixiConstant.SCHEMA1_TABLE_NAME);
   private static final byte[] STATION_TABLE_NAME = Bytes.toBytes(BixiConstant.SCHEMA2_BIKE_TABLE_NAME);
   private static final byte[] STATION_CLUSTER_TABLE_NAME = Bytes.toBytes(BixiConstant.SCHEMA2_CLUSTER_TABLE_NAME);
 

@@ -39,7 +39,7 @@ public class TableInsertStatistics {
 		//String fileDir = "/home/dan/Downloads/BixiData/BixiData";
 		String fileDir = "/home/dan/Downloads/BixiData/BixiData/";
 		//inserter.batchInsertRow(fileDir);
-		inserter.batchInsertRow4schema3(fileDir);
+		inserter.batchInsertRow(fileDir);
 	}
 
 	public void insertRow(String fileDir) {
