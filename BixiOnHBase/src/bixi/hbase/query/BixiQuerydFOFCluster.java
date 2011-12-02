@@ -24,9 +24,9 @@ public class BixiQuerydFOFCluster extends BixiQueryAbstraction{
 	
 	
 
-/****************************************************
- * ***********************Coprocessor***************
- ***************************************************/
+/***********************************************************************
+ * *******************Not to do anything with Coprocessor***************
+ **********************************************************************/
 	
 	@Override
 	public void queryAvgUsageByTimeSlot4Stations(String start, String end,

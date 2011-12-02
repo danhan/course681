@@ -15,67 +15,68 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.coprocessor.BixiClient;
 import org.apache.hadoop.hbase.util.Bytes;
 
+// TODO we need get breakdown time
 
-public class BixiQuerySchema1 extends BixiQueryAbstraction{
-	
-	String table_name = BixiConstant.SCHEMA1_TABLE_NAEM;
+public class BixiQuerySchema1 extends BixiQueryAbstraction {
+
+	String table_name = BixiConstant.SCHEMA1_TABLE_NAME;
 	String family_name = BixiConstant.SCHEMA1_FAMILY_NAME;
-	
-/******************************************************
- * ********************************Coprocessor*********
- ******************************************************/
+
+	/******************************************************
+	 * ********************************Coprocessor*********
+	 ******************************************************/
 	@Override
-	public void queryAvgUsageByTimeSlot4Stations(String start,
-			String end, String stations) {
-		// TODO // because the coprocessor is only for onehour
-	    /*
-	     * if (args[1] != null && args[1].contains(BixiConstant.ID_DELIMITER)) {
-	     * idStr = args[1].split(BixiConstant.ID_DELIMITER); for (String id : idStr)
-	     * { l.add(id); } }
-	     */
-//	    /**
-//	     * [2, startDate, endDate, List]
-//	     */
-//	    List<String> l = new ArrayList<String>();
-//	    if (s.length < 3) {
-//	      System.err.println("Error! must be 3");
-//	      return;
-//	    }
-//	    String ids = s[2], sDate = s[1];
-//	    if (!("All".equals(ids))) {
-//	      String[] idStr = ids.split(BixiConstant.ID_DELIMITER);
-//	      for (String id : idStr) {
-//	        l.add(id);
-//	      }
-//	    }
-//	   Map<String, Integer> avgUsage = client.getAvgUsageForAHr(l, sDate);
-//	    System.out.println("Average Usage: " + avgUsage);  		
-			
+	public void queryAvgUsageByTimeSlot4Stations(String start, String end,
+			String stations) {
+		// TODO // because the coprocessor is only for onehour ==> finished 
+		List<String> stationIds = new ArrayList<String>();
+
+		if (!("All").equals(stations)) {
+			String[] idStr = stations.split(BixiConstant.ID_DELIMITER);
+			for (String id : idStr) {
+				stationIds.add(id);
+			}
+		}
+		try {
+			BixiClient client = new BixiClient(conf);
+			Map<String, Integer> avgusage = client.getAvgUsageForPeriod(
+					stationIds, start, end);
+			System.out.println("Average Usage: " + avgusage);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	@Override
 	public void queryAvailableByTimeStamp4Point(String timestamp,
-			double latitude, double longitude,double radius) {
-	    System.out.println("callAvailBikesFromAPoint");
-	    try{
-		    BixiClient client = new BixiClient(conf);
-		    Map<String, Double> availBikesFromAPoint = client
-		        .getAvailableBikesFromAPoint(latitude, longitude, radius, timestamp);
-		    System.out.println("availBikes is: " + availBikesFromAPoint);	    	
-	    }catch(Exception e){
-	    	e.printStackTrace();
-	    }catch(Throwable e){
-	    	e.printStackTrace();
-	    }
+			double latitude, double longitude, double radius) {
+		System.out.println("callAvailBikesFromAPoint");
+		try {
+			BixiClient client = new BixiClient(conf);
+			Map<String, Double> availBikesFromAPoint = client
+					.getAvailableBikesFromAPoint(latitude, longitude, radius,
+							timestamp);
+			System.out.println("availBikes is: " + availBikesFromAPoint);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} catch (Throwable e) {
+			e.printStackTrace();
+		}
 	}
 
 	/******************************************************
 	 * ********************************Scan and Get*********
 	 ******************************************************/
-	
+
 	@Override
 	public void queryAvgUsageByTimeSlot4StationsWithScan(String sDateWithHour,
-			String eDateWithHour, String stations){
+			String eDateWithHour, String stations) {
+		
+		//TODO do we need to add filter on that??
+		
 		List<String> stationIds = new ArrayList<String>();
 
 		if (!("All").equals(stations)) {
@@ -86,6 +87,8 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction{
 		}
 		Scan scan = new Scan();
 		scan.setCaching(this.cacheSize);
+		System.out
+				.println(sDateWithHour + "_00" + "; " + eDateWithHour + "_59");
 		if (sDateWithHour != null && eDateWithHour != null) {
 			scan.setStartRow((sDateWithHour + "_00").getBytes());
 			scan.setStopRow((eDateWithHour + "_59").getBytes());
@@ -94,11 +97,11 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction{
 		for (String qualifier : stationIds) {
 			scan.addColumn(BixiConstant.FAMILY, qualifier.getBytes());
 		}
-		
+
 		Map<String, Integer> result = new HashMap<String, Integer>();
 
 		long starttime = System.currentTimeMillis();
-		
+
 		int counter = 0;
 		ResultScanner scanner = null;
 		try {
@@ -115,16 +118,21 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction{
 							+ (prevVal != null ? prevVal.intValue() : 0);
 
 					result.put(id, emptyDocks);
-					counter++;
+
 				}
+				counter++;
 			}
-		}catch(IOException e){
+			System.out.println("schema1 get data execution time: "
+					+ (System.currentTimeMillis() - starttime));
+
+		} catch (IOException e) {
 			e.printStackTrace();
-		}finally {
+		} finally {
 			if (scanner != null)
 				scanner.close();
 		}
 
+		starttime = System.currentTimeMillis();
 		for (Map.Entry<String, Integer> e : result.entrySet()) {
 			// System.out.println("counter and value is" + counter
 			// +","+e.getKey()+": " + e.getValue());
@@ -134,23 +142,28 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction{
 		System.out.println("schema1 counter: " + counter + "; time = "
 				+ (System.currentTimeMillis() - starttime));
 		System.out.println("schema1 Avg map is: " + result);
-		
-	}	
 
+	}
+
+	/*
+	 * timestamp: 01_10_2010__00_20 => October 1st, 00:20
+	 * (non-Javadoc)
+	 * @see bixi.hbase.query.BixiQueryAbstraction#queryAvailableByTimeStamp4PointWithScan(java.lang.String, double, double, double)
+	 */
 	@Override
 	public void queryAvailableByTimeStamp4PointWithScan(String timestamp,
-			double latitude, double longitude,double radius) {
-		//TODO change the time stamp
-		
+			double latitude, double longitude, double radius) {
+		// TODO change the time stamp ==> finished
+
 		double lat = latitude;// Double.parseDouble(latitude);
 		double lon = longitude; // Double.parseDouble(longitude);
-		double rad = radius; //Double.parseDouble(radius);
+		double rad = radius; // Double.parseDouble(radius);
 		String dateWithHr = timestamp;
-		try{
+		try {
 			long starttime = System.currentTimeMillis();
-			Get g = new Get(Bytes.toBytes(dateWithHr + "_00"));
+			Get g = new Get(Bytes.toBytes(timestamp)); //Bytes.toBytes(dateWithHr + "_00"));
 			System.out.println(dateWithHr + "_00");
-			HTable table = new HTable(conf, "BixiData".getBytes());
+			HTable table = new HTable(conf, this.table_name.getBytes());
 			Result r = table.get(g);
 			Map<String, Double> result = new HashMap<String, Double>();
 			// this r contains the entire row for the hr+00 min. Now compute the
@@ -159,7 +172,8 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction{
 			for (KeyValue kv : r.raw()) {
 				valStr = Bytes.toString(kv.getValue());
 				// log.debug("cell value is: "+s);
-				String[] sArr = valStr.split(BixiConstant.ID_DELIMITER); // array of
+				String[] sArr = valStr.split(BixiConstant.ID_DELIMITER); // array
+																			// of
 				// key=value
 				// pairs
 				latStr = sArr[3];
@@ -168,22 +182,23 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction{
 				lonStr = lonStr.substring(lonStr.indexOf("=") + 1);
 				// log.debug("lon/lat values are: "+lonStr +"; "+latStr);
 				double distance = giveDistance(Double.parseDouble(latStr),
-						Double.parseDouble(lonStr), lat, lon)
-						- rad;
+						Double.parseDouble(lonStr), lat, lon) - rad;
 
 				if (distance < 0) {// with in the distance: add it
 					result.put(sArr[0], distance);
 				}
-			}		
+			}
 
-			System.out.println("schema1 execution time: "+ (System.currentTimeMillis() - starttime) + "  schema1 availBikes is with Scan: " + result.size());
-					//+ ":" + result);					
-		}catch(Exception e){
+			System.out.println("schema1 execution time: "
+					+ (System.currentTimeMillis() - starttime)
+					+ "  schema1 availBikes is with Scan: " + result.size());
+			// + ":" + result);
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	private int getEmptyDocks(KeyValue kv) {
 		String[] str = Bytes.toString(kv.getValue()).split(
 				BixiConstant.ID_DELIMITER);
@@ -214,9 +229,5 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction{
 		double distance = RADIUS * res;
 		return distance;
 	}
-	
-
-	
-	
 
 }
