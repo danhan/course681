@@ -75,8 +75,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 	@Override
 	public void queryAvgUsageByTimeSlot4StationsWithScan(String start,
 			String end, String stations) {
-		// TODO split stations and add the stations to the list, filter the
-		// stations
+		// TODO split stations and add the stations to the list, ==finished 
 
 		List<String> stationIds = new ArrayList<String>();
 		if (!("All").equals(stations)) {
@@ -113,7 +112,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 						regex += "|";
 					first = false;
 					regex += "-" + sId + "$";
-				}
+				}				
 				Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL,
 						new RegexStringComparator(regex));
 				scan.setFilter(filter);

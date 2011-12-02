@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Get;
@@ -13,17 +14,18 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.coprocessor.BixiClient;
+import org.apache.hadoop.hbase.filter.CompareFilter;
+import org.apache.hadoop.hbase.filter.Filter;
+import org.apache.hadoop.hbase.filter.RegexStringComparator;
+import org.apache.hadoop.hbase.filter.RowFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
 // TODO we need get breakdown time
 
-<<<<<<< HEAD
-public class BixiQuerySchema1 extends BixiQueryAbstraction{
 	
-=======
+
 public class BixiQuerySchema1 extends BixiQueryAbstraction {
 
->>>>>>> 066c5b00b1839193194db8b76dab0f92b63d735c
 	String table_name = BixiConstant.SCHEMA1_TABLE_NAME;
 	String family_name = BixiConstant.SCHEMA1_FAMILY_NAME;
 
@@ -31,15 +33,10 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 	 * ********************************Coprocessor*********
 	 ******************************************************/
 	@Override
-<<<<<<< HEAD
 	public void queryAvgUsageByTimeSlot4Stations(String start,
 			String end, String stations) {
-
-=======
-	public void queryAvgUsageByTimeSlot4Stations(String start, String end,
-			String stations) {
 		// TODO // because the coprocessor is only for onehour ==> finished 
->>>>>>> 066c5b00b1839193194db8b76dab0f92b63d735c
+	
 		List<String> stationIds = new ArrayList<String>();
 
 		if (!("All").equals(stations)) {
@@ -48,19 +45,19 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 				stationIds.add(id);
 			}
 		}
-<<<<<<< HEAD
+
 		try{
 		    BixiClient client = new BixiClient(conf);
 		    Map<String, Integer> avgusage = client
 		        .getAvgUsageForPeriod(stationIds, start, end);
-		    System.out.println("Average Usage: " + avgusage);	    	
+		    System.out.println("schema1: Average Usage: " + avgusage);	    	
 	    }catch(Exception e){
 	    	e.printStackTrace();
 	    }catch(Throwable e){
 	    	e.printStackTrace();
 	    } 		
 			
-=======
+
 		try {
 			BixiClient client = new BixiClient(conf);
 			Map<String, Integer> avgusage = client.getAvgUsageForPeriod(
@@ -72,7 +69,6 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 			e.printStackTrace();
 		}
 
->>>>>>> 066c5b00b1839193194db8b76dab0f92b63d735c
 	}
 
 	@Override
@@ -100,7 +96,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 	public void queryAvgUsageByTimeSlot4StationsWithScan(String sDateWithHour,
 			String eDateWithHour, String stations) {
 		
-		//TODO do we need to add filter on that??
+		//TODO do we need to add filter on that === finished
 		
 		List<String> stationIds = new ArrayList<String>();
 
@@ -112,13 +108,19 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		}
 		Scan scan = new Scan();
 		scan.setCaching(this.cacheSize);
-		System.out
-				.println(sDateWithHour + "_00" + "; " + eDateWithHour + "_59");
+		//System.out.println(sDateWithHour + "_00" + "; " + eDateWithHour + "_59");
 		if (sDateWithHour != null && eDateWithHour != null) {
 			scan.setStartRow((sDateWithHour + "_00").getBytes());
 			scan.setStopRow((eDateWithHour + "_59").getBytes());
 		}
 
+		String regex = getFilterRegex(sDateWithHour,eDateWithHour);
+		
+		Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL,
+				new RegexStringComparator(regex));
+		scan.setFilter(filter);			
+		
+		
 		for (String qualifier : stationIds) {
 			scan.addColumn(BixiConstant.FAMILY, qualifier.getBytes());
 		}
@@ -253,6 +255,153 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		double res = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 		double distance = RADIUS * res;
 		return distance;
+	}
+	/*
+	 * 10 days time span as followed:
+	 * start : 01_10_2010__00
+	 * end:    10_10_2010__23
+	 */
+	
+	public static String getFilterRegex(String start,String end){
+		String regex = "";
+		if(start !=null && end != null){
+			StringTokenizer start_tokens = new StringTokenizer(start,"_");
+			int s_day = Integer.valueOf(start_tokens.nextToken());
+			int s_month = Integer.valueOf(start_tokens.nextToken());
+			//int s_year = Integer.valueOf(start_tokens.nextToken());
+			
+			StringTokenizer end_tokens = new StringTokenizer(end,"_");
+			int e_day = Integer.valueOf(end_tokens.nextToken());
+			int e_month = Integer.valueOf(end_tokens.nextToken());
+			int e_year = Integer.valueOf(end_tokens.nextToken());		
+			
+			if(e_month == s_month){
+				boolean first = true;
+				for(int i=s_day;i<=e_day;i++){
+					
+					if(first) 
+						regex = "";
+					else 
+						regex += "|";
+					first = false;
+					
+					if (i<10) 
+						regex +="^0"+i;
+					else  
+						regex +="^"+i;
+					
+					regex += "_";
+					regex += s_month;
+					regex += "_"+e_year+"__";
+					
+				}
+			}else {				
+				if(s_month == 10){					
+					if(e_month == 11){		
+						boolean first = true;
+						for(int i=s_day;i<=31;i++){
+							if(first) 
+								regex = "";
+							else 
+								regex += "|";
+							first = false;
+							
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;
+							regex += "_";
+							regex += s_month;
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}
+						for(int i=1;i<=e_day;i++){
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;														
+							regex += "_";
+							regex += e_month;
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}						
+						
+					}else if(e_month == 12){
+						boolean first = true;
+						for(int i=s_day;i<=31;i++){ // October
+							
+							if(first) 
+								regex = "";
+							else 
+								regex += "|";
+							first = false;
+														
+							
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;														
+							regex += "_";
+							regex += s_month;
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}
+						for(int i=1;i<=31;i++){ // November
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;
+							regex += "_";
+							regex += (s_month+1);
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}						
+						for(int i=1;i<=e_day;i++){ // 
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;
+							regex += "_";
+							regex += e_month;
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}						
+					}
+				
+				}else if(s_month == 11){
+					boolean first = true;
+					if(e_month == 12){
+						
+						if(first) 
+							regex = "";
+						else 
+							regex += "|";
+						first = false;						
+						
+						for(int i=s_day;i<=31;i++){ // November
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;
+							regex += "_";
+							regex += s_month;
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}						
+						for(int i=1;i<=e_day;i++){ // 
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;
+							regex += "_";
+							regex += e_month;
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}						
+					}
+					
+				}
+				
+				
+			}
+		//	System.out.println("regex is : "+regex);
+					
+		}
+		
+		return regex;
+	}
+	
+	
+	public static void  main(String args[]){
+		String start = "31_10_2010__00";
+		String end = "01_11_2010__00";
+		BixiQuerySchema1.getFilterRegex(start,end);
 	}
 
 }
