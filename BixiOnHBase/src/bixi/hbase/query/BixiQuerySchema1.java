@@ -27,29 +27,25 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction{
 	@Override
 	public void queryAvgUsageByTimeSlot4Stations(String start,
 			String end, String stations) {
-		// TODO // because the coprocessor is only for onehour
-	    /*
-	     * if (args[1] != null && args[1].contains(BixiConstant.ID_DELIMITER)) {
-	     * idStr = args[1].split(BixiConstant.ID_DELIMITER); for (String id : idStr)
-	     * { l.add(id); } }
-	     */
-//	    /**
-//	     * [2, startDate, endDate, List]
-//	     */
-//	    List<String> l = new ArrayList<String>();
-//	    if (s.length < 3) {
-//	      System.err.println("Error! must be 3");
-//	      return;
-//	    }
-//	    String ids = s[2], sDate = s[1];
-//	    if (!("All".equals(ids))) {
-//	      String[] idStr = ids.split(BixiConstant.ID_DELIMITER);
-//	      for (String id : idStr) {
-//	        l.add(id);
-//	      }
-//	    }
-//	   Map<String, Integer> avgUsage = client.getAvgUsageForAHr(l, sDate);
-//	    System.out.println("Average Usage: " + avgUsage);  		
+
+		List<String> stationIds = new ArrayList<String>();
+
+		if (!("All").equals(stations)) {
+			String[] idStr = stations.split(BixiConstant.ID_DELIMITER);
+			for (String id : idStr) {
+				stationIds.add(id);
+			}
+		}
+		try{
+		    BixiClient client = new BixiClient(conf);
+		    Map<String, Integer> avgusage = client
+		        .getAvgUsageForPeriod(stationIds, start, end);
+		    System.out.println("Average Usage: " + avgusage);	    	
+	    }catch(Exception e){
+	    	e.printStackTrace();
+	    }catch(Throwable e){
+	    	e.printStackTrace();
+	    } 		
 			
 	}
 

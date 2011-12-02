@@ -74,13 +74,14 @@ public class BixiClient {
     return callBack.res;
   }
 
-  public Map<String, Integer> getAvgUsageForAHr(final List<String> stationIds,
-      String dateWithHour) throws IOException, Throwable {
+  public Map<String, Integer> getAvgUsageForPeriod(final List<String> stationIds,
+      String startDate, String endDate) throws IOException, Throwable {
     final Scan scan = new Scan();
-    log.debug("in getAvgUsageForAHr: " + dateWithHour);
-    if (dateWithHour != null) {
-      scan.setStartRow((dateWithHour + "_00").getBytes());
-      scan.setStopRow((dateWithHour + "_59").getBytes());
+    if(endDate == null)
+    	endDate = startDate;
+    if (startDate != null) {
+      scan.setStartRow((startDate + "_00").getBytes());
+      scan.setStopRow((endDate + "_59").getBytes());
     }
     class BixiCallBack implements Batch.Callback<Map<String, Integer>> {
       Map<String, Integer> res = new HashMap<String, Integer>();
