@@ -14,6 +14,7 @@ public class TestCase4Schema1 extends TestCaseBase{
 	BixiQueryAbstraction getBixiQuery(){
 		return new BixiQuerySchema1();
 	}
+	
 	//convert to 01_10_2010__00 form
 	protected String convertDate(String a){
 		try{
@@ -26,6 +27,5 @@ public class TestCase4Schema1 extends TestCaseBase{
 		}
 		return "";
 	}
-
 
 }

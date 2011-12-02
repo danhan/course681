@@ -1,20 +1,18 @@
 package experiment;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.Properties;
 
-import bixi.hbase.query.BixiQueryAbstraction;
 import junit.framework.TestCase;
+import bixi.hbase.query.BixiQueryAbstraction;
 
 public abstract class TestCaseBase extends TestCase {
 	
 	private static final double RADIUS = 100;
 	
 	BixiQueryAbstraction bixiQuery;
+	Properties tests;
 	
 	abstract BixiQueryAbstraction getBixiQuery();
 	protected String convertDate(String a){
@@ -24,71 +22,96 @@ public abstract class TestCaseBase extends TestCase {
 	@Override
 	protected void setUp() throws Exception {
 		bixiQuery = getBixiQuery();
-	}
-	
-	private BufferedReader readFile(String name){
-		FileInputStream fstream;
+		tests = new Properties();
 		try {
-			fstream = new FileInputStream(name);
-		} catch (FileNotFoundException e) {
+		    tests.load(new FileInputStream("src/experiment/tests.properties"));
+		} catch (IOException e) {
 			e.printStackTrace();
-			return null;
 		}
-		DataInputStream in = new DataInputStream(fstream);
-		BufferedReader br = new BufferedReader(new InputStreamReader(in));
-		return br;
-	}
-
-	public void test_quad_tree_query_by_time_4_stations_coprocessor() throws IOException{
-		
-		BufferedReader br = readFile("src/experiment/query_by_time_stations.txt");
-		String line;
-		while ((line = br.readLine()) != null)   {
-			String[] args = line.split(" ");
-			String start = args[0];
-			String end = args[1];
-			String stations = args[2];
-			bixiQuery.queryAvgUsageByTimeSlot4Stations(convertDate(start), convertDate(end), stations);
-		}
-
 	}
 	
-	public void test_quad_tree_query_by_time_4_stations_scan() throws IOException{
-		
-		BufferedReader br = readFile("src/experiment/query_by_time_stations.txt");
-		String line;
-		while ((line = br.readLine()) != null)   {
-			String[] args = line.split(" ");
-			String start = args[0];
-			String end = args[1];
-			String stations = args[2];
-			bixiQuery.queryAvgUsageByTimeSlot4StationsWithScan(convertDate(start), convertDate(end), stations);
-		}
-		
-	}	
+	public void test_quad_tree_query_by_time_4_stations_coprocessor_1day() throws IOException{
+		callTimeSlot4Stations("1day");
+	}
+	
+	public void test_quad_tree_query_by_time_4_stations_coprocessor_10day() throws IOException{
+		callTimeSlot4Stations("10day");
+	}
+	
+	public void test_quad_tree_query_by_time_4_stations_coprocessor_20day() throws IOException{
+		callTimeSlot4Stations("20day");
+	}
+	
+	public void test_quad_tree_query_by_time_4_stations_coprocessor_40day() throws IOException{
+		callTimeSlot4Stations("40day");
+	}
+	
+	public void test_quad_tree_query_by_time_4_stations_coprocessor_60day() throws IOException{
+		callTimeSlot4Stations("60day");
+	}
+	
+	public void test_quad_tree_query_by_time_4_stations_scan_1day() throws IOException{
+		callTimeSlot4StationsScan("1day");
+	}
+	
+	public void test_quad_tree_query_by_time_4_stations_scan_10day() throws IOException{
+		callTimeSlot4StationsScan("10day");
+	}
+	
+	public void test_quad_tree_query_by_time_4_stations_scan_20day() throws IOException{
+		callTimeSlot4StationsScan("20day");
+	}
+	
+	public void test_quad_tree_query_by_time_4_stations_scan_40day() throws IOException{
+		callTimeSlot4StationsScan("40day");
+	}
+	
+	public void test_quad_tree_query_by_time_4_stations_scan_60day() throws IOException{
+		callTimeSlot4StationsScan("60day");
+	}
 	
 	public void test_quad_tree_query_4_location_coprocessor() throws NumberFormatException, IOException{
-		BufferedReader br = readFile("src/experiment/query_4_location.txt");
-		String line;
-		while ((line = br.readLine()) != null)   {
-			String[] args = line.split(" ");
-			String timestamp = args[0];
-			Double latitude = Double.parseDouble(args[1]);
-			Double longitude = Double.parseDouble(args[2]);
-			bixiQuery.queryAvailableByTimeStamp4PointWithScan(convertDate(timestamp), latitude, longitude, RADIUS);
-		}	
-	}		
+		callTimeStamp4Point("location");
+	}
 	
-	public void test_quad_tree_query_4_location_scan() throws IOException{
-		BufferedReader br = readFile("src/experiment/query_4_location.txt");
-		String line;
-		while ((line = br.readLine()) != null)   {
-			String[] args = line.split(" ");
-			String timestamp = args[0];
-			Double latitude = Double.parseDouble(args[1]);
-			Double longitude = Double.parseDouble(args[2]);
-			bixiQuery.queryAvailableByTimeStamp4PointWithScan(convertDate(timestamp), latitude, longitude, RADIUS);
-		}
-	}	
+	public void test_quad_tree_query_4_location_scan() throws NumberFormatException, IOException{
+		callTimeStamp4PointScan("location");
+	}
+	
+	
+	/* Private Methods */
+	
+	private void callTimeSlot4Stations(String propertyName){
+		String property = tests.getProperty(propertyName);
+		String[] args = property.split(" ");
+		String start = convertDate(args[0]);
+		String end = convertDate(args[1]);
+		String stations = args[2];;
+		bixiQuery.queryAvgUsageByTimeSlot4Stations(start, end, stations);
+	}
+	private void callTimeSlot4StationsScan(String propertyName){
+		String property = tests.getProperty(propertyName);
+		String[] args = property.split(" ");
+		String start = convertDate(args[0]);
+		String end = convertDate(args[1]);
+		String stations = args[2];
+		bixiQuery.queryAvgUsageByTimeSlot4StationsWithScan(start, end, stations);
+	}
+	private void callTimeStamp4Point(String propertyName){
+		String property = tests.getProperty(propertyName);
+		String[] args = property.split(" ");
+		String timestamp = convertDate(args[0]);
+		Double latitude = Double.parseDouble(args[1]);
+		Double longitude = Double.parseDouble(args[2]);
+		bixiQuery.queryAvailableByTimeStamp4Point(timestamp, latitude, longitude, RADIUS);
+	}
+	private void callTimeStamp4PointScan(String propertyName){
+		String property = tests.getProperty(propertyName);
+		String[] args = property.split(" ");
+		String timestamp = convertDate(args[0]);
+		Double latitude = Double.parseDouble(args[1]);
+		Double longitude = Double.parseDouble(args[2]);
+		bixiQuery.queryAvailableByTimeStamp4PointWithScan(timestamp, latitude, longitude, RADIUS);
+	}
 	
 }
