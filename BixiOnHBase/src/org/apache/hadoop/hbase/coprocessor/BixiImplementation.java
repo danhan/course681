@@ -296,7 +296,7 @@ BixiProtocol {
 					System.err.println("got a kv: " + kv);
 					String clusterId = Bytes.toString(kv.getRow());
 					System.err.println("clusterId: " + clusterId);
-					String[] parts = clusterId.split("-");
+					String[] parts = clusterId.split(":");
 					double cLat = Double.parseDouble(parts[0]);
 					double cLon = Double.parseDouble(parts[1]);
 					double dx = Double.parseDouble(parts[2]);
