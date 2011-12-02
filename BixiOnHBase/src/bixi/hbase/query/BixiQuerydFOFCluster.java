@@ -1,6 +1,6 @@
 package bixi.hbase.query;
 
-public class BixiQuerydFOFClustering extends BixiQueryAbstraction{
+public class BixiQuerydFOFCluster extends BixiQueryAbstraction{
 
 
 	@Override
