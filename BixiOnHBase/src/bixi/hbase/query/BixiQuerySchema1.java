@@ -22,7 +22,6 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 // TODO we need get breakdown time
 
-	
 
 public class BixiQuerySchema1 extends BixiQueryAbstraction {
 
@@ -45,7 +44,6 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 				stationIds.add(id);
 			}
 		}
-
 		try{
 		    BixiClient client = new BixiClient(conf);
 		    Map<String, Integer> avgusage = client
