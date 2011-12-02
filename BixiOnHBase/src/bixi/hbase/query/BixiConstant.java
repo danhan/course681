@@ -19,10 +19,13 @@ public class BixiConstant {
 	public static String SCHEMA1_TABLE_NAME = "BixiData";
 	public static String SCHEMA1_FAMILY_NAME = "Data";  
 	
-	public static String SCHEMA2_CLUSTER_TABLE_NAME = "schema2_cluster";
-	public static String SCHEMA2_CLUSTER_FAMILY_NAME = "s";
-	public static String SCHEMA2_BIKE_TABLE_NAME = "schema2_bike";
-	public static String SCHEMA2_BIKE_FAMILY_NAME = "t";
+	public static String SCHEMA2_CLUSTER_TABLE_NAME = "Station_Cluster";//"schema2_cluster";
+	public static String SCHEMA2_CLUSTER_FAMILY_NAME = "stations";
+	public static String SCHEMA2_BIKE_TABLE_NAME = "Station_Statistics";//"schema2_bike";
+	public static String SCHEMA2_BIKE_FAMILY_NAME = "statistics";
+	
+	public static String SCHEMA2_dFOF_CLUSTER_TABLE_NAME = "dfof_cluster";
+	public static String SCHEMA2_dFOF_CLUSTER_FAMILY_NAME = "s";
 	
 	public static String ID_DELIMITER = "#";
   
