@@ -154,12 +154,19 @@ public class BixiClientTester {
     System.out.println("callAvailBikesFromAPointWithScan");
     if (s.length != 5)
       System.err.println("Error! Must be 5 params");
+    
+    s[1]="45.52830025";
+    s[2]="-73.526967";
+    s[3]="7";
+    s[4]="01_10_2010__03";
+    
     double lat = Double.parseDouble(s[1]);
     double lon = Double.parseDouble(s[2]);
     double rad = Double.parseDouble(s[3]);
     String dateWithHr = s[4];
 
     Get g = new Get(Bytes.toBytes(dateWithHr + "_00"));
+    System.out.println(dateWithHr + "_00");
     HTable table = new HTable(conf, "BixiData".getBytes());
     Result r = table.get(g);
     Map<String, Double> result = new HashMap<String, Double>();
@@ -180,7 +187,7 @@ public class BixiClientTester {
       double distance = giveDistance(Double.parseDouble(latStr), Double
           .parseDouble(lonStr), lat, lon)
           - rad;
-      // log.debug("distance is : "+ distance);
+      // log.debug("distance is : "+ distance);      
       if (distance < 0) {// with in the distance: add it
         result.put(sArr[0], distance);
       }
@@ -215,8 +222,14 @@ public class BixiClientTester {
       return;
     }
     List<String> stationIds = new ArrayList<String>();
-    String ids = s[4], sDateWithHour = s[1], eDateWithHour = s[2];
+    String ids = s[4], sDateWithHour = s[1], eDateWithHour = s[2];    
+    
+    ids = "All";
+    sDateWithHour = "00_10_2010__59";
+    eDateWithHour = "02_10_2010__00";
+   
     int catchSize = Integer.parseInt(s[3]);
+    catchSize = 1000;
     if (!("All").equals(ids)) {
       String[] idStr = ids.split(BixiConstant.ID_DELIMITER);
       for (String id : idStr) {
@@ -235,12 +248,13 @@ public class BixiClientTester {
     }
     HTable table = new HTable(conf, "BixiData".getBytes());
     Map<String, Integer> result = new HashMap<String, Integer>();
+    
+    long starttime = System.currentTimeMillis();
     ResultScanner scanner = table.getScanner(scan);
     int counter = 0;
     try {
 
-      for (Result r : scanner) {
-        counter++;
+      for (Result r : scanner) {       
         //System.out.println("Row number:"+counter);
         for (KeyValue kv : r.raw()) {
           int emptyDocks = getEmptyDocks(kv);
@@ -250,11 +264,15 @@ public class BixiClientTester {
      //     System.out.println("result to be added is: " + emptyDocks + " id: "
        //       + id);
           result.put(id, emptyDocks);
+          counter++;
         }
       }
     } finally {
       scanner.close();
     }
+    
+    System.out.println("counter: "+counter + "; time = "+ (System.currentTimeMillis()-starttime));
+    
     for (Map.Entry<String, Integer> e : result.entrySet()) {
     //  System.out.println("counter and value is" + counter + ","+e.getKey()+": " + e.getValue());
       int i = e.getValue() / counter;

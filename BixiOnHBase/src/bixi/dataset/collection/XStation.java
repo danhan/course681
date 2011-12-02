@@ -1,5 +1,8 @@
 package bixi.dataset.collection;
 
+import java.util.Iterator;
+import java.util.StringTokenizer;
+
 /*
  * It is the data structure for one station
  */
@@ -25,7 +28,7 @@ public class XStation {
 	private String name;
 	private String terminalName;
 	private double latitude;
-	private double longtitude;
+	private double longitude;
 	private XLocation point;
 	private boolean installed;
 	private boolean locked;
@@ -46,7 +49,7 @@ public class XStation {
 		result += "name="+this.name+";";
 		result += "terminalName="+this.terminalName+";";
 		result += "latitude="+this.latitude+";";
-		result += "longtitude="+this.longtitude+";";
+		result += "longitude="+this.longitude+";";
 		result += "installed="+this.installed+";";
 		result += "locked="+this.locked+";";
 		result += "installDate="+this.installDate+";";
@@ -55,6 +58,7 @@ public class XStation {
 		
 		return result;		
 	}
+
 	
 	
 	public String getId() {
@@ -82,12 +86,12 @@ public class XStation {
 		this.latitude = latitude;
 		this.point.setLatitude(latitude);
 	}
-	public double getLongtitude() {
-		return longtitude;
+	public double getlongitude() {
+		return longitude;
 	}
-	public void setLongtitude(double longtitude) {
-		this.longtitude = longtitude;
-		this.point.setLongitude(this.longtitude);
+	public void setlongitude(double longitude) {
+		this.longitude = longitude;
+		this.point.setLongitude(this.longitude);
 	}
 	public boolean isInstalled() {
 		return installed;
@@ -145,7 +149,7 @@ public class XStation {
 		String output = "id" + "=>" + this.id +";"+
 						"name" + "=>" + this.name +";"+
 						"latitude" + "=>" + this.latitude +";"+ 
-						"longtitude" + "=>" + this.longtitude +";"+ 
+						"longitude" + "=>" + this.longitude +";"+ 
 						"nbBikes" + "=>" + this.nbBikes + ";"+
 						"nbEmptyDocks" + "=>" + this.nbEmptyDocks + ";"+ 
 						"terminalName" + "=>" + this.terminalName;						

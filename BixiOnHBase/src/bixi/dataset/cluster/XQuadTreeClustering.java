@@ -16,7 +16,7 @@ import bixi.dataset.collection.XStation;
 
 public class XQuadTreeClustering {
 	
-	private static int MAX_DEPTH = 3;
+	private static int MAX_DEPTH = 2;
 		
 	BixiReader reader = null;
 	private XQuadSpace space = null;
@@ -82,6 +82,7 @@ public class XQuadTreeClustering {
 			XStation station = stations.get(i);
 			XLocation location = station.getPoint();
 			XQuadNode node = space.locate(location);		
+			
 			if(node != null){
 				station.setClusterId(node.getId());
 			}else{
@@ -157,9 +158,10 @@ public class XQuadTreeClustering {
 			Set<String> keys = this.clusters.keySet();
 			Iterator<String> ie = keys.iterator();
 			int counter = 0;
+			int c_counter = 0;
 			while(ie.hasNext()){
 				String cluster = ie.next();
-				System.out.print(cluster+": ( ");	
+				System.out.print((++c_counter)+":   "+cluster+": ( ");	
 				Iterator<String> ids = this.clusters.get(cluster).iterator();
 				int index  = 0;
 				while(ids.hasNext()){

@@ -37,11 +37,11 @@ public class XQuadSpace {
     
     public static void main(String[] args){
     	XLocation location = new XLocation(45,-73);
-    	XQuadSpace space = new XQuadSpace(location,3,2,3);
+    	XQuadSpace space = new XQuadSpace(location,1,2,2);
     	
     	
     	
-    	//space.print_tree();
+    	space.print_tree();
     	
     	XLocation current = new XLocation(46.3,-73);    	
     	XQuadNode node = space.locate(current);

@@ -56,9 +56,7 @@ public class BixiReader {
 		if (dom != null) {
 			Element elem = dom.getDocumentElement();	
 			
-			NodeList nodes = elem.getElementsByTagName("station");
-			
-			System.out.println(nodes.getLength());
+			NodeList nodes = elem.getElementsByTagName("station");				
 			
 			Element e;	
 			
@@ -98,7 +96,7 @@ public class BixiReader {
 				if (name.contains("lat")) {
 					station.setLatitude(Double.valueOf(value).doubleValue());
 				} else if (name.contains("long")) {
-					station.setLongtitude(Double.valueOf(value).doubleValue());
+					station.setlongitude(Double.valueOf(value).doubleValue());
 				} else if (name.contains("id")) {
 					station.setId(value);
 				} else if (name.contains("name")) {
