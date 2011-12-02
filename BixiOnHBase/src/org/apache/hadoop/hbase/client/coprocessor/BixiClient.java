@@ -1,7 +1,10 @@
 package org.apache.hadoop.hbase.client.coprocessor;
 
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,14 +22,16 @@ import org.apache.hadoop.hbase.filter.RowFilter;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import bixi.hbase.query.BixiConstant;
+
 public class BixiClient {
   public static final Log log = LogFactory.getLog(BixiClient.class);
 
   HTable table, stat_table, cluster_table;;
   Configuration conf;
-  private static final byte[] TABLE_NAME = Bytes.toBytes("BixiData");
-  private static final byte[] STATION_TABLE_NAME = Bytes.toBytes("Station_Statistics");
-  private static final byte[] STATION_CLUSTER_TABLE_NAME = Bytes.toBytes("Station_Cluster");
+  private static final byte[] TABLE_NAME = Bytes.toBytes(BixiConstant.SCHEMA1_TABLE_NAME);
+  private static final byte[] STATION_TABLE_NAME = Bytes.toBytes(BixiConstant.SCHEMA2_BIKE_TABLE_NAME);
+  private static final byte[] STATION_CLUSTER_TABLE_NAME = Bytes.toBytes(BixiConstant.SCHEMA2_CLUSTER_TABLE_NAME);
 
   public BixiClient(Configuration conf) throws IOException {
     this.conf = conf;
@@ -74,13 +79,14 @@ public class BixiClient {
     return callBack.res;
   }
 
-  public Map<String, Integer> getAvgUsageForAHr(final List<String> stationIds,
-      String dateWithHour) throws IOException, Throwable {
+  public Map<String, Integer> getAvgUsageForPeriod(final List<String> stationIds,
+      String startDate, String endDate) throws IOException, Throwable {
     final Scan scan = new Scan();
-    log.debug("in getAvgUsageForAHr: " + dateWithHour);
-    if (dateWithHour != null) {
-      scan.setStartRow((dateWithHour + "_00").getBytes());
-      scan.setStopRow((dateWithHour + "_59").getBytes());
+    if(endDate == null)
+    	endDate = startDate;
+    if (startDate != null) {
+      scan.setStartRow((startDate + "_00").getBytes());
+      scan.setStopRow((endDate + "_59").getBytes());
     }
     class BixiCallBack implements Batch.Callback<Map<String, Integer>> {
       Map<String, Integer> res = new HashMap<String, Integer>();
@@ -169,7 +175,7 @@ public class BixiClient {
   
   /* Schema 2 implementation */
   
-  public Map<String, Integer> getAvgUsageForPeriod_Schema2(final List<String> stationIds,
+  public Map<String, Double> getAvgUsageForPeriod_Schema2(final List<String> stationIds,
 	      String startDateWithHour, String endDateWithHour) throws IOException, Throwable {
 	    final Scan scan = new Scan();
 	    log.debug("in getAvgUsageForPeriod: " + startDateWithHour);
@@ -178,7 +184,7 @@ public class BixiClient {
 	    }
 	    if (startDateWithHour != null) {
 	      scan.setStartRow((startDateWithHour).getBytes());
-	      scan.setStopRow((endDateWithHour + "_ZZ").getBytes());
+	      scan.setStopRow((endDateWithHour + "-ZZ").getBytes());
 	      if(stationIds!=null && stationIds.size()>0){
 	    	  String regex = "(";
 	    	  boolean start = true;
@@ -186,36 +192,39 @@ public class BixiClient {
 	    		  if(!start)
 	    			  regex += "|";
 	    		  start = false;
-	    		  regex += sId;
+	    		  regex += "-" + sId;
 	    	  }
 	    	  regex += ")$";
 	    	  Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regex));
 	    	  scan.setFilter(filter);
 	      }
 	    }
+	    DateFormat formatter = new SimpleDateFormat("yyyyMMddHH");
+	    Date start = formatter.parse(startDateWithHour);
+	    Date end = formatter.parse(endDateWithHour);
+	    long comp = (end.getTime()/3600000)-(start.getTime()/3600000);
+	    final long numHours = comp;
 	    class BixiCallBack implements Batch.Callback<Map<String, Integer>> {
-	      Map<String, Integer> res = new HashMap<String, Integer>();
-	      int count = 0;
+	      Map<String, Double> res = new HashMap<String, Double>();
 
 	      @Override
 	      public void update(byte[] region, byte[] row, Map<String, Integer> result) {
-	        count++;
 	        log.debug("in update, result is: " + result.toString());
 	        System.out.println("in update as a sop" + result.toString());
 	        for (Map.Entry<String, Integer> e : result.entrySet()) {
 	          if (res.containsKey(e.getKey())) { // add the val
 	            int t = e.getValue();
 	            t += res.get(e.getKey());
-	            res.put(e.getKey(), t);
+	            res.put(e.getKey(), (double)t);
 	          } else {
-	            res.put(e.getKey(), e.getValue());
+	            res.put(e.getKey(), (double)e.getValue());
 	          }
 	        }
 	      }
 
-	      private Map<String, Integer> getResult() {
-	        for (Map.Entry<String, Integer> e : res.entrySet()) {
-	          int i = e.getValue() / count;
+	      private Map<String, Double> getResult() {
+	        for (Map.Entry<String, Double> e : res.entrySet()) {
+	          double i = e.getValue() / (double)numHours;
 	          res.put(e.getKey(), i);
 	        }
 	        return res;
@@ -227,7 +236,7 @@ public class BixiClient {
 	        .getStopRow(), new Batch.Call<BixiProtocol, Map<String, Integer>>() {
 	      public Map<String, Integer> call(BixiProtocol instance)
 	          throws IOException {
-	        return instance.getAverageUsage_Schema2(stationIds, scan);
+	        return instance.getTotalUsage_Schema2(stationIds, scan);
 	      };
 	    }, callBack);
 
@@ -256,7 +265,7 @@ public class BixiClient {
 		  final Scan scan = new Scan();
 		  if (dateWithHour != null) {
 		      scan.setStartRow((dateWithHour).getBytes());
-		      scan.setStopRow((dateWithHour + "_ZZ").getBytes());
+		      scan.setStopRow((dateWithHour + "-ZZ").getBytes());
 		      if(stationIds!=null && stationIds.size()>0){
 		    	  String regex = "(";
 		    	  boolean start = true;
@@ -264,7 +273,7 @@ public class BixiClient {
 		    		  if(!start)
 		    			  regex += "|";
 		    		  start = false;
-		    		  regex += sId;
+		    		  regex += "-" + sId;
 		    	  }
 		    	  regex += ")$";
 		    	  Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regex));

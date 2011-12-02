@@ -126,8 +126,8 @@ public class BixiClientTester {
         l.add(id);
       }
     }
-   Map<String, Integer> avgUsage = client.getAvgUsageForAHr(l, sDate);
-    System.out.println("Average Usage: " + avgUsage);  
+   //Map<String, Integer> avgUsage = client.getAvgUsageForAHr(l, sDate);
+    //System.out.println("Average Usage: " + avgUsage);  
     
   }
 

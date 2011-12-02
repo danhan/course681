@@ -17,8 +17,13 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 // TODO we need get breakdown time
 
+<<<<<<< HEAD
+public class BixiQuerySchema1 extends BixiQueryAbstraction{
+	
+=======
 public class BixiQuerySchema1 extends BixiQueryAbstraction {
 
+>>>>>>> 066c5b00b1839193194db8b76dab0f92b63d735c
 	String table_name = BixiConstant.SCHEMA1_TABLE_NAME;
 	String family_name = BixiConstant.SCHEMA1_FAMILY_NAME;
 
@@ -26,9 +31,15 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 	 * ********************************Coprocessor*********
 	 ******************************************************/
 	@Override
+<<<<<<< HEAD
+	public void queryAvgUsageByTimeSlot4Stations(String start,
+			String end, String stations) {
+
+=======
 	public void queryAvgUsageByTimeSlot4Stations(String start, String end,
 			String stations) {
 		// TODO // because the coprocessor is only for onehour ==> finished 
+>>>>>>> 066c5b00b1839193194db8b76dab0f92b63d735c
 		List<String> stationIds = new ArrayList<String>();
 
 		if (!("All").equals(stations)) {
@@ -37,6 +48,19 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 				stationIds.add(id);
 			}
 		}
+<<<<<<< HEAD
+		try{
+		    BixiClient client = new BixiClient(conf);
+		    Map<String, Integer> avgusage = client
+		        .getAvgUsageForPeriod(stationIds, start, end);
+		    System.out.println("Average Usage: " + avgusage);	    	
+	    }catch(Exception e){
+	    	e.printStackTrace();
+	    }catch(Throwable e){
+	    	e.printStackTrace();
+	    } 		
+			
+=======
 		try {
 			BixiClient client = new BixiClient(conf);
 			Map<String, Integer> avgusage = client.getAvgUsageForPeriod(
@@ -48,6 +72,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 			e.printStackTrace();
 		}
 
+>>>>>>> 066c5b00b1839193194db8b76dab0f92b63d735c
 	}
 
 	@Override

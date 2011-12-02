@@ -19,6 +19,7 @@ import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.RegexStringComparator;
 import org.apache.hadoop.hbase.filter.RowFilter;
+
 import org.apache.hadoop.hbase.util.Bytes;
 
 public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
@@ -32,6 +33,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 	@Override
 	public void queryAvgUsageByTimeSlot4Stations(String start, String end,
 			String stations) {
+
 		List<String> stationIds = new ArrayList<String>();
 
 		if (!("All").equals(stations)) {
@@ -40,35 +42,35 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 				stationIds.add(id);
 			}
 		}
-		try {
-			BixiClient client = new BixiClient(conf);
-			Map<String, Integer> avgusage = client
-					.getAvgUsageForPeriod_Schema2(stationIds, start, end);
-			System.out.println("Average Usage: " + avgusage);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-
+		try{
+		    BixiClient client = new BixiClient(conf);
+		    Map<String, Double> avgusage = client
+		        .getAvgUsageForPeriod_Schema2(stationIds, start, end);
+		    System.out.println("Average Usage: " + avgusage);	    	
+	    }catch(Exception e){
+	    	e.printStackTrace();
+	    }catch(Throwable e){
+	    	e.printStackTrace();
+	    } 	
+		
 	}
 
 	@Override
 	public void queryAvailableByTimeStamp4Point(String timestamp,
 			double latitude, double longitude, double radius) {
-		try {
-			BixiClient client = new BixiClient(conf);
-			Map<String, Double> availBikesFromAPoint = client
-					.getAvailableBikesFromAPoint_Schema2(latitude, longitude,
-							timestamp);
-			System.out.println("availBikes is: " + availBikesFromAPoint);
-		} catch (Exception e) {
-			e.printStackTrace();
-		} catch (Throwable e) {
-			e.printStackTrace();
-		}
-
-	}
+		
+		try{
+		    BixiClient client = new BixiClient(conf);
+		    Map<String, Double> availBikesFromAPoint = client
+		        .getAvailableBikesFromAPoint_Schema2(latitude, longitude, timestamp);
+		    System.out.println("availBikes is: " + availBikesFromAPoint);	    	
+	    }catch(Exception e){
+	    	e.printStackTrace();
+	    }catch(Throwable e){
+	    	e.printStackTrace();
+	    }
+		
+	}	
 
 	@Override
 	public void queryAvgUsageByTimeSlot4StationsWithScan(String start,
