@@ -139,12 +139,12 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction{
 
 	@Override
 	public void queryAvailableByTimeStamp4PointWithScan(String timestamp,
-			String latitude, String longitude, String radius) {
+			double latitude, double longitude,double radius) {
 		//TODO change the time stamp
 		
-		double lat = Double.parseDouble(latitude);
-		double lon = Double.parseDouble(longitude);
-		double rad = Double.parseDouble(radius);
+		double lat = latitude;// Double.parseDouble(latitude);
+		double lon = longitude; // Double.parseDouble(longitude);
+		double rad = radius; //Double.parseDouble(radius);
 		String dateWithHr = timestamp;
 		try{
 			long starttime = System.currentTimeMillis();

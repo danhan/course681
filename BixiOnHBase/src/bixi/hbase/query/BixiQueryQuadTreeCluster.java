@@ -127,7 +127,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction{
 
 	@Override
 	public void queryAvailableByTimeStamp4PointWithScan(String timestamp,
-			String latitude, String longitude, String radius) {
+			double latitude, double longitude,double radius) {
 		Scan scan = new Scan();
 		scan.setCaching(cacheSize);
 		scan.setCacheBlocks(true);
@@ -252,12 +252,12 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction{
 
 	}	
 
-	private String getClusterId(List<String> cluster_ids, String latitude,
-			String longitude) {
+	private String getClusterId(List<String> cluster_ids, double latitude,
+			double longitude) {
 		String result = null;
 		try {
-			double x = Double.valueOf(latitude).doubleValue();
-			double y = Double.valueOf(longitude).doubleValue();
+			double x = latitude;
+			double y = longitude;
 			double distance = Double.MAX_VALUE;
 
 			if (cluster_ids != null) {

@@ -44,7 +44,7 @@ public abstract class BixiQueryAbstraction {
 	 * @throws Throwable
 	 */
 	public abstract void queryAvailableByTimeStamp4PointWithScan(String timestamp,
-			String latitude, String longitude, String radius);	
+			double latitude, double longitude,double radius);	
 	
 
 }
