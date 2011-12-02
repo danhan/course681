@@ -18,7 +18,7 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 public class BixiQuerySchema1 extends BixiQueryAbstraction{
 	
-	String table_name = BixiConstant.SCHEMA1_TABLE_NAEM;
+	String table_name = BixiConstant.SCHEMA1_TABLE_NAME;
 	String family_name = BixiConstant.SCHEMA1_FAMILY_NAME;
 	
 /******************************************************
