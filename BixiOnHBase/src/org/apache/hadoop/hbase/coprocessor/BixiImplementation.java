@@ -16,6 +16,8 @@ import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.regionserver.InternalScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import bixi.hbase.query.BixiConstant;
+
 /**
 * @author hv
 */
@@ -24,7 +26,7 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements
 
   static final Log log = LogFactory.getLog(BixiImplementation.class);
 
-  private static byte[] colFamily = "Data".getBytes();
+  private static byte[] colFamily = BixiConstant.SCHEMA1_FAMILY_NAME.getBytes();
   private final static String BIXI_DELIMITER = "#";
   private final static int BIXI_DATA_LENGTH = 11;
 
@@ -185,7 +187,7 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements
   }
   
   /* Schema 2 implementation */
-  private static byte[] colFamilyStat = "statistics".getBytes();
+  private static byte[] colFamilyStat = BixiConstant.SCHEMA2_BIKE_FAMILY_NAME.getBytes();
 
   @Override
   public Map<String, Integer> getAverageUsage_Schema2(List<String> stationIds,

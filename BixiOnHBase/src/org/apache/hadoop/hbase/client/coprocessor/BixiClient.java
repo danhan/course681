@@ -19,14 +19,16 @@ import org.apache.hadoop.hbase.filter.RowFilter;
 import org.apache.hadoop.hbase.filter.CompareFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import bixi.hbase.query.BixiConstant;
+
 public class BixiClient {
   public static final Log log = LogFactory.getLog(BixiClient.class);
 
   HTable table, stat_table, cluster_table;;
   Configuration conf;
-  private static final byte[] TABLE_NAME = Bytes.toBytes("BixiData");
-  private static final byte[] STATION_TABLE_NAME = Bytes.toBytes("Station_Statistics");
-  private static final byte[] STATION_CLUSTER_TABLE_NAME = Bytes.toBytes("Station_Cluster");
+  private static final byte[] TABLE_NAME = Bytes.toBytes(BixiConstant.schema1_bixidata);
+  private static final byte[] STATION_TABLE_NAME = Bytes.toBytes(BixiConstant.SCHEMA2_BIKE_TABLE_NAME);
+  private static final byte[] STATION_CLUSTER_TABLE_NAME = Bytes.toBytes(BixiConstant.SCHEMA2_CLUSTER_TABLE_NAME);
 
   public BixiClient(Configuration conf) throws IOException {
     this.conf = conf;

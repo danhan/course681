@@ -14,9 +14,9 @@ public class TestCase4QuadTree extends TestCase{
 
 	public void test_quad_tree_query_by_time_4_stations_coprocessor(){
 		
-		String start = "";
-		String end = "";
-		String stations= "1#2...";
+		String start = "2010100100";
+		String end = "2010100123";
+		String stations= "10#22#33#44#55#56#47#88#99#100";
 		quad_cluster.queryAvgUsageByTimeSlot4Stations(start, end, stations);
 		
 	}
