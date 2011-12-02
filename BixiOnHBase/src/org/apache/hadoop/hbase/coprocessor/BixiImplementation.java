@@ -190,7 +190,7 @@ BixiProtocol {
 	private static byte[] colFamilyStat = BixiConstant.SCHEMA2_BIKE_FAMILY_NAME.getBytes();
 
 	@Override
-	public Map<String, Integer> getAverageUsage_Schema2(List<String> stationIds,
+	public Map<String, Integer> getTotalUsage_Schema2(List<String> stationIds,
 			Scan scan) throws IOException {
 
 		System.err.println("scanning");
@@ -200,7 +200,6 @@ BixiProtocol {
 				.getRegion().getScanner(scan);
 		List<KeyValue> res = new ArrayList<KeyValue>();
 		Map<String, Integer> result = new HashMap<String, Integer>();
-		Map<String, Integer> numHours = new HashMap<String, Integer>();
 		boolean hasMoreResult = false;
 		try {
 			do {
@@ -214,7 +213,6 @@ BixiProtocol {
 					System.err.println("value: " + value);
 					Integer usage = Integer.parseInt(value.split(";")[1]);
 					System.err.println("usage: " + usage);
-					numHours.put(stationId, numHours.get(stationId) +1 );
 					if(result.containsKey(stationId)){
 						result.put(stationId, usage + result.get(stationId));
 					}else{
@@ -225,12 +223,6 @@ BixiProtocol {
 			} while (hasMoreResult);
 		} finally {
 			scanner.close();
-		}
-		for (Map.Entry<String, Integer> e : result.entrySet()) {
-			int rowCounter = numHours.get(e.getKey());
-			System.err.println("counter and value is" + rowCounter + "," + e.getValue());
-			int i = e.getValue() / rowCounter;
-			result.put(e.getKey(), i);
 		}
 		return result;
 	}

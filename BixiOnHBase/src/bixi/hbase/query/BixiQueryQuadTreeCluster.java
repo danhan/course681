@@ -40,7 +40,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction{
 		}
 		try{
 		    BixiClient client = new BixiClient(conf);
-		    Map<String, Integer> avgusage = client
+		    Map<String, Double> avgusage = client
 		        .getAvgUsageForPeriod_Schema2(stationIds, start, end);
 		    System.out.println("Average Usage: " + avgusage);	    	
 	    }catch(Exception e){
