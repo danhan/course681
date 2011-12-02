@@ -13,6 +13,7 @@ import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.client.coprocessor.BixiClient;
 import org.apache.hadoop.hbase.util.Bytes;
 
 
@@ -28,14 +29,42 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction{
 	@Override
 	public void queryAvgUsageByTimeSlot4Stations(String start, String end,
 			String stations) {
-		// TODO Auto-generated method stub
+		
+		List<String> stationIds = new ArrayList<String>();
+
+		if (!("All").equals(stations)) {
+			String[] idStr = stations.split(BixiConstant.ID_DELIMITER);
+			for (String id : idStr) {
+				stationIds.add(id);
+			}
+		}
+		try{
+		    BixiClient client = new BixiClient(conf);
+		    Map<String, Integer> avgusage = client
+		        .getAvgUsageForPeriod_Schema2(stationIds, start, end);
+		    System.out.println("Average Usage: " + avgusage);	    	
+	    }catch(Exception e){
+	    	e.printStackTrace();
+	    }catch(Throwable e){
+	    	e.printStackTrace();
+	    } 	
 		
 	}
 	
 	@Override
 	public void queryAvailableByTimeStamp4Point(String timestamp,
 			double latitude, double longitude, double radius) {
-		// TODO Auto-generated method stub
+		
+		try{
+		    BixiClient client = new BixiClient(conf);
+		    Map<String, Double> availBikesFromAPoint = client
+		        .getAvailableBikesFromAPoint_Schema2(latitude, longitude, timestamp);
+		    System.out.println("availBikes is: " + availBikesFromAPoint);	    	
+	    }catch(Exception e){
+	    	e.printStackTrace();
+	    }catch(Throwable e){
+	    	e.printStackTrace();
+	    }
 		
 	}	
 	
