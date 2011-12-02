@@ -200,11 +200,10 @@ BixiProtocol {
 				.getRegion().getScanner(scan);
 		List<KeyValue> res = new ArrayList<KeyValue>();
 		Map<String, Integer> result = new HashMap<String, Integer>();
+		Map<String, Integer> numHours = new HashMap<String, Integer>();
 		boolean hasMoreResult = false;
-		int rowCounter = 0;
 		try {
 			do {
-				rowCounter++;
 				hasMoreResult = scanner.next(res);
 				for (KeyValue kv : res) {
 					System.err.println("got a kv: " + kv);
@@ -215,7 +214,7 @@ BixiProtocol {
 					System.err.println("value: " + value);
 					Integer usage = Integer.parseInt(value.split(";")[1]);
 					System.err.println("usage: " + usage);
-
+					numHours.put(stationId, numHours.get(stationId) +1 );
 					if(result.containsKey(stationId)){
 						result.put(stationId, usage + result.get(stationId));
 					}else{
@@ -228,6 +227,7 @@ BixiProtocol {
 			scanner.close();
 		}
 		for (Map.Entry<String, Integer> e : result.entrySet()) {
+			int rowCounter = numHours.get(e.getKey());
 			System.err.println("counter and value is" + rowCounter + "," + e.getValue());
 			int i = e.getValue() / rowCounter;
 			result.put(e.getKey(), i);

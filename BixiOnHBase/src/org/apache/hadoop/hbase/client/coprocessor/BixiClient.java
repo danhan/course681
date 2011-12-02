@@ -189,7 +189,7 @@ public class BixiClient {
 	    		  if(!start)
 	    			  regex += "|";
 	    		  start = false;
-	    		  regex += sId;
+	    		  regex += "-" + sId;
 	    	  }
 	    	  regex += ")$";
 	    	  Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regex));
@@ -267,7 +267,7 @@ public class BixiClient {
 		    		  if(!start)
 		    			  regex += "|";
 		    		  start = false;
-		    		  regex += sId;
+		    		  regex += "-" + sId;
 		    	  }
 		    	  regex += ")$";
 		    	  Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regex));
