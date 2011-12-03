@@ -19,6 +19,7 @@ public abstract class TestCaseBase {
 	}
 	
 	private static final String[] stationTests = {"1day","10day","20day","40day","60day"};
+	private static final String[] shortTests = {"1hour","6hour","12hour","18hour"};
 	private static final String[] pointTests = {"location"};
 
 
@@ -34,28 +35,28 @@ public abstract class TestCaseBase {
 	
 	public void runTests(){
 		System.out.println("RUNNING SCAN query_by_time_4_stations TESTS");
-		for(String test : stationTests){
+		for(String test : shortTests){
 			System.out.println("RUNNING TEST: "+test);
 			callTimeSlot4StationsScan(test);
 		}
 		
-		System.out.println("RUNNING COPROCESSOR query_by_time_4_stations TESTS");
-		for(String test : stationTests){
-			System.out.println("RUNNING TEST: "+test);
-			callTimeSlot4Stations(test);
-		}
-		
-		System.out.println("RUNNING SCAN query_4_location TESTS");
-		for(String test : pointTests){
-			System.out.println("RUNNING TEST: "+test);
-			callTimeStamp4PointScan(test);
-		}
-		
-		System.out.println("RUNNING COPROCESSOR query_4_location TESTS");
-		for(String test : pointTests){
-			System.out.println("RUNNING TEST: "+test);
-			callTimeStamp4Point(test);
-		}
+//		System.out.println("RUNNING COPROCESSOR query_by_time_4_stations TESTS");
+//		for(String test : shortTests){
+//			System.out.println("RUNNING TEST: "+test);
+//			callTimeSlot4Stations(test);
+//		}
+//		
+//		System.out.println("RUNNING SCAN query_4_location TESTS");
+//		for(String test : pointTests){
+//			System.out.println("RUNNING TEST: "+test);
+//			callTimeStamp4PointScan(test);
+//		}
+//		
+//		System.out.println("RUNNING COPROCESSOR query_4_location TESTS");
+//		for(String test : pointTests){
+//			System.out.println("RUNNING TEST: "+test);
+//			callTimeStamp4Point(test);
+//		}
 	}
 	
 	/* Private Methods */

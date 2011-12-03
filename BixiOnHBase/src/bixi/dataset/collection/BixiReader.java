@@ -98,6 +98,7 @@ public class BixiReader {
 				} else if (name.contains("long")) {
 					station.setlongitude(Double.valueOf(value).doubleValue());
 				} else if (name.contains("id")) {
+					if (Integer.valueOf(value) < 10) value = "0"+value;
 					station.setId(value);
 				} else if (name.contains("name")) {
 					station.setName(value);

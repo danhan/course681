@@ -84,7 +84,7 @@ public class HBaseClient {
 				String[] metrics = {"statistics"}; 
 				System.out.println("start to create table");
 				hbase.createTable(tablename, metrics);	
-			}else if("23".equals(args[0])){
+			}else if("23".equals(args[0])){ // insert cluster value
 				try{
 					  TableInsertCluster inserter = new TableInsertCluster();
 					  inserter.insertRow();										

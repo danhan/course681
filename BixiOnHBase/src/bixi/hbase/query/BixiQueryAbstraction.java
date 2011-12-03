@@ -38,7 +38,7 @@ public abstract class BixiQueryAbstraction {
 	/**
 	 * A scan method that will fetch the row from the RS and compute the
 	 * distance of the points from the given ones.
-	 * 
+	 * @timestamp 2011100100, detail to hour
 	 * @param s
 	 * @throws IOException
 	 * @throws Throwable

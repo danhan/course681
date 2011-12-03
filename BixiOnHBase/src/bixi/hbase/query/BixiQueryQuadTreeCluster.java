@@ -145,6 +145,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 					int usage = 0;
 					String row = Bytes.toString(r.getRow());
 					String station_id = row.substring(11, row.length());
+					System.out.println(row);
 					row_num++;
 					for (int m = 0; m < columns.length; m++) {
 						byte[] metrics = r.getValue(
@@ -223,7 +224,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 			starttime = System.currentTimeMillis();
 
 			if (inside_cluster != null) {
-				try {
+				try {					
 					avaible_list = this
 							.queryAvailableByTimestampAndStations(
 									timestamp,
@@ -353,6 +354,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 		HashMap<String, Integer> nABikes = new HashMap<String, Integer>();
 		try {
 			HTable table = new HTable(conf, this.bike_table_name.getBytes());
+			if (timestamp.length()<12) timestamp = timestamp+"00";
 			String toHour = timestamp.substring(0, timestamp.length() - 2);
 			String minute = timestamp.substring(timestamp.length() - 2,
 					timestamp.length());

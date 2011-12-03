@@ -26,9 +26,12 @@ public class TestCase4Schema1 extends TestCaseBase{
 		return "";
 	}
 	
-	public static void main(String[] args){
-		TestCase4Schema1 tests = new TestCase4Schema1();
-		tests.runTests();
+	public static void main(String[] args){		
+		String timestamp = "2011100111";
+		if (timestamp.length()<12) timestamp = timestamp+"00";
+		System.out.println(timestamp);
+		//TestCase4Schema1 tests = new TestCase4Schema1();
+		//tests.runTests();
 	}
 
 }

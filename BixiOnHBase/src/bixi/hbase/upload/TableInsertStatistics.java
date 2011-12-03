@@ -198,10 +198,7 @@ public class TableInsertStatistics {
 				System.err.println("File is corrupt!" + f.getAbsolutePath());
 				continue;// erroreneous file
 			}
-			// String fileName_sub = fileName.substring(0,
-			// fileName.lastIndexOf("_"));
-			// String toHours = fileName_sub.substring(0,
-			// fileName_sub.lastIndexOf("_"));
+
 			String[] timestampes = this.parseTimeStamp(fileName);
 			if (fileHash.containsKey(timestampes[0])) {
 				fileHash.get(timestampes[0]).add(fileName);
@@ -211,9 +208,6 @@ public class TableInsertStatistics {
 				fileHash.put(timestampes[0], file_list);
 			}
 		}
-
-		// TreeMap<String,List<String>> sorted = new
-		// TreeMap<String,List<String>>(fileHash);
 
 		Iterator<String> keys = fileHash.keySet().iterator();
 
@@ -238,6 +232,7 @@ public class TableInsertStatistics {
 						.get(station_id);
 				Iterator<String> minutes = minutes_map.keySet().iterator();
 				try {
+					if (Integer.valueOf(station_id).intValue()<10) station_id = "0"+station_id;
 					Put put = new Put((prefix + "-" + station_id).getBytes());
 					while (minutes.hasNext()) {
 						String oneMinute = minutes.next();
@@ -434,10 +429,6 @@ public class TableInsertStatistics {
 	private HashMap<String, String> parseOneFile(String filename) {
 
 		File f = new File(filename);
-		if (f.length() < 1024 * 5) { // < 5k
-			System.err.println("File is corrupt!" + f.getAbsolutePath());
-			return null;
-		}
 		HashMap<String, String> station_statistics = new HashMap<String, String>();
 		String[] timestamps = this.parseTimeStamp(f.getName());
 

@@ -160,7 +160,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 	}
 
 	/*
-	 * timestamp: 01_10_2010__00_20 => October 1st, 00:20
+	 * timestamp: 01_10_2010__00=> October 1st, 00:00
 	 * (non-Javadoc)
 	 * @see bixi.hbase.query.BixiQueryAbstraction#queryAvailableByTimeStamp4PointWithScan(java.lang.String, double, double, double)
 	 */
@@ -175,8 +175,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		String dateWithHr = timestamp;
 		try {
 			long starttime = System.currentTimeMillis();
-			Get g = new Get(Bytes.toBytes(timestamp)); //Bytes.toBytes(dateWithHr + "_00"));
-			System.out.println(dateWithHr + "_00");
+			Get g = new Get(Bytes.toBytes(dateWithHr + "_00"));
 			HTable table = new HTable(conf, this.table_name.getBytes());
 			Result r = table.get(g);
 			Map<String, Double> result = new HashMap<String, Double>();
@@ -387,8 +386,11 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 	
 	public static void  main(String args[]){
 		String s = "";
-		for(int i=1;i<=100;i++){
-			s +=i+"#";
+		for(int i=1;i<=400;i++){			
+			if (i<10) 
+				s += "0"+i+"#";
+			else
+				s +=i+"#";
 		}
 		System.out.println(s);
 		

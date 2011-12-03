@@ -48,6 +48,7 @@ public class TableInsertCluster {
 		String filename = dir.getAbsolutePath()+"/01_10_2010__00_00_01.xml";
 		clustering.doClustering(filename);
 		clustering.aggreateCluster();
+		
 		Hashtable<String,List<String>> cluster_structure = clustering.getClusters();
 		int row = 0;
 	  try{
@@ -60,7 +61,8 @@ public class TableInsertCluster {
 				
 				Iterator<String> ids = cluster_structure.get(cluster).iterator();				
 				while(ids.hasNext()){					
-					String stationId = ids.next();					
+					String stationId = ids.next();	
+					if(Integer.valueOf(stationId).intValue()<10) stationId = "0"+stationId;
 					put.add(idsFamily, stationId.getBytes(), clustering.getOneStation(stationId).getMetadata().getBytes());
 				}	
 			    //System.out.println(new String(put.getRow()));
