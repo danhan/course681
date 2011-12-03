@@ -221,7 +221,7 @@ public class BixiClient {
 	    	endDateWithHour = startDateWithHour;
 	    }
 	    if (startDateWithHour != null) {
-	      scan.setStartRow((startDateWithHour + "-1").getBytes());
+	      scan.setStartRow((startDateWithHour + "-01").getBytes());
 	      scan.setStopRow((endDateWithHour + "-408").getBytes());
 	      if(stationIds!=null && stationIds.size()>0){
 	    	  String regex = "(";
@@ -300,25 +300,27 @@ public class BixiClient {
 	      throws IOException, Throwable {
 		  
 		  List<String> stationIds = this.getStationsNearPoint(lat, lon);
+		  if(stationIds==null || stationIds.size()<=0){
+			  System.out.println("NO STATIONS FOUND.");
+			  return new HashMap<String, Integer>();
+		  }
 		  
 		  final Scan scan = new Scan();
 		  if (dateWithHour != null) {
-		      scan.setStartRow((dateWithHour + "-1").getBytes());
-		      scan.setStopRow((dateWithHour + "-408").getBytes());
-		      if(stationIds!=null && stationIds.size()>0){
-		    	  String regex = "(";
-		    	  boolean start = true;
-		    	  for(String sId : stationIds){
-		    		  if(!start)
-		    			  regex += "|";
-		    		  start = false;
-		    		  regex += "-" + sId;
-		    	  }
-		    	  regex += ")$";
-		    	  Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regex));
-		    	  scan.setFilter(filter);
-		      }
-		    }
+			  scan.setStartRow((dateWithHour + "-01").getBytes());
+			  scan.setStopRow((dateWithHour + "-408").getBytes());
+			  String regex = "(";
+			  boolean start = true;
+			  for(String sId : stationIds){
+				  if(!start)
+					  regex += "|";
+				  start = false;
+				  regex += "-" + sId;
+			  }
+			  regex += ")$";
+			  Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regex));
+			  scan.setFilter(filter);
+		  }
 	    class BixiAvailCallBack implements Batch.Callback<Map<String, Integer>> {
 	      Map<String, Integer> res = new HashMap<String, Integer>();
 

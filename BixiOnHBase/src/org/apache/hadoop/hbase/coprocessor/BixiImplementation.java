@@ -265,7 +265,7 @@ BixiProtocol {
 			do {
 				hasMoreResult = scanner.next(res);
 				for (KeyValue kv : res) {
-					if(!Bytes.toString(kv.getQualifier()).equalsIgnoreCase("ids")){
+					if(!Bytes.toString(kv.getQualifier()).equalsIgnoreCase("stations")){
 						//only look at stationid column
 						continue;
 					}
