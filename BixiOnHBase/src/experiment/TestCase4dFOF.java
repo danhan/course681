@@ -14,5 +14,10 @@ public class TestCase4dFOF extends TestCaseBase{
 	BixiQueryAbstraction getBixiQuery(){
 		return new BixiQuerydFOFCluster();
 	}
+	
+	public static void main(String[] args){
+		TestCase4dFOF tests = new TestCase4dFOF();
+		tests.runTests();
+	}
 
 }

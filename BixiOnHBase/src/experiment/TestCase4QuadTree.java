@@ -12,4 +12,9 @@ public class TestCase4QuadTree extends TestCaseBase{
 		return new BixiQueryQuadTreeCluster();
 	}	
 	
+	public static void main(String[] args){
+		TestCase4QuadTree tests = new TestCase4QuadTree();
+		tests.runTests();
+	}
+	
 }

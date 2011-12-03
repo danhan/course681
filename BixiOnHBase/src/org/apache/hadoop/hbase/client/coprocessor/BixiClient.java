@@ -62,8 +62,6 @@ public class BixiClient {
 
       @Override
       public void update(byte[] region, byte[] row, Map<String, Integer> result) {
-        log.debug("in update, result is: " + result.toString());
-        System.out.println("in update as a sop" + result.toString());
         res = result;
       }
     }
@@ -95,8 +93,6 @@ public class BixiClient {
       @Override
       public void update(byte[] region, byte[] row, Map<String, Integer> result) {
         count++;
-        log.debug("in update, result is: " + result.toString());
-        System.out.println("in update as a sop" + result.toString());
         for (Map.Entry<String, Integer> e : result.entrySet()) {
           if (res.containsKey(e.getKey())) { // add the val
             int t = e.getValue();
@@ -214,8 +210,6 @@ public class BixiClient {
 
 	      @Override
 	      public void update(byte[] region, byte[] row, Map<String, Integer> result) {
-	        log.debug("in update, result is: " + result.toString());
-	        System.out.println("in update as a sop" + result.toString());
 	        for (Map.Entry<String, Integer> e : result.entrySet()) {
 	          if (res.containsKey(e.getKey())) { // add the val
 	            int t = e.getValue();
