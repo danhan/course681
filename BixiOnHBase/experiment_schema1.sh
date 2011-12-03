@@ -35,8 +35,7 @@ fi
 COMMONLIB=${HBASE_HOME}/lib/log4j-1.2.16.jar:\
 ${HBASE_HOME}/lib/commons-logging-1.1.1.jar:\
 ${HBASE_HOME}/lib/commons-cli-1.2.jar:\
-${HBASE_HOME}/lib/zookeeper-3.3.3.jar:\
-${PWD}/lib/junit.jar
+${HBASE_HOME}/lib/zookeeper-3.3.3.jar:
 
 
 MYLIB=${PWD}/bin/bixi.jar

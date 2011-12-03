@@ -25,6 +25,7 @@
 			<include name="commons-logging-1.1.1.jar" />		
 			<include name="hadoop-core-0.20-append-r1057313.jar" />
 			<include name="zookeeper-3.3.3.jar" />
+			<include name="commons-httpclient-3.1.jar" />
 		</fileset>
 		<fileset dir="${hadoop.home}/lib">
 			<include name="commons-cli-1.2.jar" />

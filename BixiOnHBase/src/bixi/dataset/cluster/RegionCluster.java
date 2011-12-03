@@ -13,6 +13,8 @@ import java.util.*;
 import org.apache.hadoop.hbase.io.*;
 import org.apache.hadoop.mapreduce.lib.output.*;
 
+import bixi.hbase.query.BixiConstant;
+
 
 /*
  * Region cluster class
@@ -22,7 +24,7 @@ public class RegionCluster
 {
 	
 	private static String srcTable = "test1001";
-	private static String dstTable = "test1002";
+	private static String dstTable = BixiConstant.SCHEMA2_dFOF_CLUSTER_TABLE_NAME;
 	
 
 	private static int latitudeSplitNum = 6;
@@ -230,15 +232,15 @@ public class RegionCluster
 		
 		if (args.length >= 0 )
 		{
-			filename = args[0];
+			//filename = args[0];
 			
-			srcTable = args[1];
+			//srcTable = args[1];
 			
-			dstTable = args[2];
+			//dstTable = args[2];
 			
-			latitudeSplitNum = Integer.valueOf(args[3]);
+			latitudeSplitNum = Integer.valueOf(args[0]);
 			
-			longitudeSplitNum = Integer.valueOf(args[4]);
+			longitudeSplitNum = Integer.valueOf(args[1]);
 			
 			//new feature
 			//thre = Bytes.toInt(args[6].getBytes());
