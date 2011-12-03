@@ -49,10 +49,10 @@ BixiProtocol {
 			do {
 				hasMoreResult = scanner.next(res);
 				for (KeyValue kv : res) {
-					log.debug("got a kv: " + kv);
+					//log.debug("got a kv: " + kv);
 					int availBikes = getFreeBikes(kv);
 					String id = Bytes.toString(kv.getQualifier());
-					log.debug("result to be added is: " + availBikes + " id: " + id);
+					//log.debug("result to be added is: " + availBikes + " id: " + id);
 					result.put(id, availBikes);
 				}
 				res.clear();
@@ -65,7 +65,7 @@ BixiProtocol {
 
 	private int getFreeBikes(KeyValue kv) {
 		String availBikes = processKV(kv, 9);
-		log.debug("availbikes::" + availBikes);
+		//log.debug("availbikes::" + availBikes);
 		try {
 			return Integer
 					.parseInt(availBikes.substring(availBikes.indexOf("=") + 1));
@@ -78,7 +78,7 @@ BixiProtocol {
 	private String processKV(KeyValue kv, int index) {
 		if (kv == null || index > 10 || index < 0)
 			return null;
-		log.debug("kv.getValue()" + Bytes.toString(kv.getValue()));
+		//log.debug("kv.getValue()" + Bytes.toString(kv.getValue()));
 		String[] str = Bytes.toString(kv.getValue()).split(
 				BixiImplementation.BIXI_DELIMITER);
 		// malformed value (shouldn't had been here.
@@ -105,12 +105,12 @@ BixiProtocol {
 				rowCounter++;
 				hasMoreResult = scanner.next(res);
 				for (KeyValue kv : res) {
-					log.debug("got a kv: " + kv);
+					//log.debug("got a kv: " + kv);
 					int emptyDocks = getEmptyDocks(kv);
 					String id = Bytes.toString(kv.getQualifier());
 					Integer prevVal = result.get(id);
 					emptyDocks = emptyDocks + (prevVal != null ? prevVal.intValue() : 0);
-					log.debug("result to be added is: " + emptyDocks + " id: " + id);
+					//log.debug("result to be added is: " + emptyDocks + " id: " + id);
 					result.put(id, emptyDocks);
 				}
 				res.clear();
@@ -193,7 +193,7 @@ BixiProtocol {
 	public Map<String, Integer> getTotalUsage_Schema2(List<String> stationIds,
 			Scan scan) throws IOException {
 
-		System.err.println("scanning");
+		//System.err.println("scanning");
 		scan.addFamily(colFamilyStat);
 
 		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment())
@@ -205,14 +205,9 @@ BixiProtocol {
 			do {
 				hasMoreResult = scanner.next(res);
 				for (KeyValue kv : res) {
-					System.err.println("got a kv: " + kv);
-					System.err.println("key: " + Bytes.toString(kv.getRow()));
 					String stationId = Bytes.toString(kv.getRow()).split("-")[1];
-					System.err.println("stationid: " + stationId);
 					String value = new String(kv.getValue());
-					System.err.println("value: " + value);
 					Integer usage = Integer.parseInt(value.split(";")[1]);
-					System.err.println("usage: " + usage);
 					if(result.containsKey(stationId)){
 						result.put(stationId, usage + result.get(stationId));
 					}else{
@@ -247,13 +242,9 @@ BixiProtocol {
 				rowCounter++;
 				hasMoreResult = scanner.next(res);
 				for (KeyValue kv : res) {
-					System.err.println("got a kv: " + kv);
 					String stationId = Bytes.toString(kv.getRow()).split("-")[1];
-					System.err.println("stationid: " + stationId);
 					String value = new String(kv.getValue());
-					System.err.println("value: " + value);
 					Integer free = Integer.parseInt(value.split(";")[0]);
-					System.err.println("free: " + free);
 
 					if(result.containsKey(stationId)){
 						result.put(stationId, free + result.get(stationId));
@@ -285,9 +276,7 @@ BixiProtocol {
 						//only look at stationid column
 						continue;
 					}
-					System.err.println("got a kv: " + kv);
 					String clusterId = Bytes.toString(kv.getRow());
-					System.err.println("clusterId: " + clusterId);
 					String[] parts = clusterId.split(":");
 					double cLat = Double.parseDouble(parts[0]);
 					double cLon = Double.parseDouble(parts[1]);

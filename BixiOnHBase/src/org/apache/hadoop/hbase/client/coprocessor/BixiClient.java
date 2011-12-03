@@ -206,7 +206,7 @@ public class BixiClient {
 	    DateFormat formatter = new SimpleDateFormat("yyyyMMddHH");
 	    Date start = formatter.parse(startDateWithHour);
 	    Date end = formatter.parse(endDateWithHour);
-	    long comp = (end.getTime()/3600000)-(start.getTime()/3600000);
+	    long comp = (end.getTime()/3600000)-(start.getTime()/3600000)+1;
 	    final long numHours = comp;
 	    class BixiCallBack implements Batch.Callback<Map<String, Integer>> {
 	      Map<String, Double> res = new HashMap<String, Double>();
