@@ -86,9 +86,9 @@ public class BixiClient {
       scan.setStartRow((startDate + "_00").getBytes());
       scan.setStopRow((endDate + "_59").getBytes());
     }
-    DateFormat formatter = new SimpleDateFormat("dd_MM_yyyy__HH");
-    Date start = formatter.parse(startDate);
-    Date end = formatter.parse(endDate);
+    DateFormat formatter = new SimpleDateFormat("dd_MM_yyyy__HHmm");
+    Date start = formatter.parse(startDate+"00");
+    Date end = formatter.parse(endDate+"59");
     long comp = (end.getTime()/60000)-(start.getTime()/60000)+1;
     final double count = comp;
     class BixiCallBack implements Batch.Callback<Map<String, Long>> {
@@ -208,9 +208,9 @@ public class BixiClient {
 	    	  scan.setFilter(filter);
 	      }
 	    }
-	    DateFormat formatter = new SimpleDateFormat("yyyyMMddHH");
-	    Date start = formatter.parse(startDateWithHour);
-	    Date end = formatter.parse(endDateWithHour);
+	    DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm");
+	    Date start = formatter.parse(startDateWithHour+"00");
+	    Date end = formatter.parse(endDateWithHour+"59");
 	    long comp = (end.getTime()/60000)-(start.getTime()/60000)+1;
 	    final long numHours = comp;
 	    class BixiCallBack implements Batch.Callback<Map<String, Long>> {
@@ -230,7 +230,7 @@ public class BixiClient {
 	      }
 
 	      private Map<String, Double> getResult() {
-	    	  System.out.println("numHours: " + numHours);
+	    	  System.out.println("numMins: " + numHours);
 	        for (Map.Entry<String, Double> e : res.entrySet()) {
 	          double i = e.getValue() / (double)numHours;
 	          res.put(e.getKey(), i);
