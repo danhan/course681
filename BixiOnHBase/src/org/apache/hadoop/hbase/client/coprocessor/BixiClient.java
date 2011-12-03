@@ -187,8 +187,8 @@ public class BixiClient {
 	    	endDateWithHour = startDateWithHour;
 	    }
 	    if (startDateWithHour != null) {
-	      scan.setStartRow((startDateWithHour).getBytes());
-	      scan.setStopRow((endDateWithHour + "-ZZ").getBytes());
+	      scan.setStartRow((startDateWithHour + "-1").getBytes());
+	      scan.setStopRow((endDateWithHour + "-407").getBytes());
 	      if(stationIds!=null && stationIds.size()>0){
 	    	  String regex = "(";
 	    	  boolean start = true;
@@ -225,6 +225,7 @@ public class BixiClient {
 	      }
 
 	      private Map<String, Double> getResult() {
+	    	  System.out.println("numHours: " + numHours);
 	        for (Map.Entry<String, Double> e : res.entrySet()) {
 	          double i = e.getValue() / (double)numHours;
 	          res.put(e.getKey(), i);
@@ -239,7 +240,7 @@ public class BixiClient {
 	        .getStopRow(), new Batch.Call<BixiProtocol, Map<String, Integer>>() {
 	      public Map<String, Integer> call(BixiProtocol instance)
 	          throws IOException {
-	        return instance.getTotalUsage_Schema2(stationIds, scan);
+	        return instance.getTotalUsage_Schema2(scan);
 	      };
 	    }, callBack);
 	    long cluster_access = System.currentTimeMillis();
@@ -269,8 +270,8 @@ public class BixiClient {
 		  
 		  final Scan scan = new Scan();
 		  if (dateWithHour != null) {
-		      scan.setStartRow((dateWithHour).getBytes());
-		      scan.setStopRow((dateWithHour + "-ZZ").getBytes());
+		      scan.setStartRow((dateWithHour + "-1").getBytes());
+		      scan.setStopRow((dateWithHour + "-407").getBytes());
 		      if(stationIds!=null && stationIds.size()>0){
 		    	  String regex = "(";
 		    	  boolean start = true;
@@ -304,7 +305,7 @@ public class BixiClient {
 	        new Batch.Call<BixiProtocol, Map<String, Integer>>() {
 	          public Map<String, Integer> call(BixiProtocol instance)
 	              throws IOException {
-	            return instance.getAvailableBikesFromAPoint_Schema2(lat, lon, scan);
+	            return instance.getAvailableBikesFromAPoint_Schema2(scan);
 	          };
 	        }, callBack);
 	    long cluster_access = System.currentTimeMillis();

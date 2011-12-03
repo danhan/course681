@@ -29,11 +29,10 @@ public interface BixiProtocol extends CoprocessorProtocol {
   Map<String, Integer> getAvailableBikesFromAPoint(double lat, double lon,
       double radius, Get get) throws IOException;
   
-  Map<String, Integer> getTotalUsage_Schema2(List<String> stationIds, Scan scan)
+  Map<String, Integer> getTotalUsage_Schema2(Scan scan)
   throws IOException;
 
-  Map<String, Integer> getAvailableBikesFromAPoint_Schema2(double lat, double lon,
-		  Scan scan) throws IOException;
+  Map<String, Integer> getAvailableBikesFromAPoint_Schema2(Scan scan) throws IOException;
   List<String> getStationsNearPoint_Schema2(double lat, double lon) throws IOException;
 
 }
