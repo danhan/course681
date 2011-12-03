@@ -62,7 +62,7 @@ public class TableInsertCluster {
 				Iterator<String> ids = cluster_structure.get(cluster).iterator();				
 				while(ids.hasNext()){					
 					String stationId = ids.next();	
-					if(Integer.valueOf(stationId).intValue()<10) stationId = "0"+stationId;
+					
 					put.add(idsFamily, stationId.getBytes(), clustering.getOneStation(stationId).getMetadata().getBytes());
 				}	
 			    //System.out.println(new String(put.getRow()));

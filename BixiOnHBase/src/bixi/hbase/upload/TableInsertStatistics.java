@@ -225,19 +225,17 @@ public class TableInsertStatistics {
 					.iterator();
 			while (station_iterator.hasNext()) {
 				String station_id = station_iterator.next();
-				System.out.println(counter + "||" + (row_counter++)
-						+ " station: " + station_id + "=> ");
+				//System.out.println(counter + "||" + (row_counter++)+ " station: " + station_id + "=> ");
 
 				HashMap<String, String> minutes_map = station_list
 						.get(station_id);
 				Iterator<String> minutes = minutes_map.keySet().iterator();
-				try {
-					if (Integer.valueOf(station_id).intValue()<10) station_id = "0"+station_id;
+				try {				
 					Put put = new Put((prefix + "-" + station_id).getBytes());
 					while (minutes.hasNext()) {
 						String oneMinute = minutes.next();
 						String value = minutes_map.get(oneMinute);
-						System.out.print("(" + oneMinute + ":" + value + ");");
+						//System.out.print("(" + oneMinute + ":" + value + ");");
 						put.add(idsFamily, oneMinute.getBytes(),
 								value.getBytes());
 					}
