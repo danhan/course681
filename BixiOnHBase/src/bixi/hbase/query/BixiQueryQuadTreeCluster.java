@@ -96,7 +96,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 			String max_station = stationIds.get(stationIds.size() - 1);			
 			if (start != null && end != null) {
 				scan.setStartRow((start + "-" + min_station).getBytes());
-				scan.setStopRow((end + "-" + max_station+"01").getBytes());
+				scan.setStopRow((end + "-" + max_station+"1").getBytes());
 			}
 
 			//System.out.println((start + "-" + min_station) + ";  "+ (end + "-" + max_station));
@@ -134,12 +134,14 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 			long starttime = System.currentTimeMillis();
 			ResultScanner scanner = null;
 			int row_num = 0;
+			int row_size = 0;
 			try {
-				scanner = table.getScanner(scan);
-
+				scanner = table.getScanner(scan);				
+				System.out.println("schema2 : scan execution time: "+ (System.currentTimeMillis() - starttime));
+				starttime = System.currentTimeMillis();				
 				for (Result r : scanner) {
 					int counter = 0;
-					int usage = 0;
+					int usage = 0;				
 					String row = Bytes.toString(r.getRow());
 					String station_id = row.substring(11, row.length());
 					//System.out.println("debug:   "+row);
@@ -149,6 +151,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 								Bytes.toBytes(this.bike_family_name),
 								Bytes.toBytes(columns[m]));
 						String metrics_str = Bytes.toString(metrics);
+						if (row_size == 0) row_size = metrics.length*60;
 						if (metrics_str != null) {
 							usage += Integer.valueOf(
 									metrics_str.substring(0,
@@ -160,15 +163,15 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 					result.put(station_id, (int) (usage / (counter * 1.0)));
 
 				}
+				System.out.println("schema 2: row size =>"+row_size+"; get data execution time => " + (System.currentTimeMillis() - starttime));
+						
 			} catch (Exception e) {
 				e.printStackTrace();
 			} finally {
 				scanner.close();
 			}
-			System.out
-					.println("schema 2 : queryAvgUsageByTimeSlot4StationsWithScan time : "
-							+ (System.currentTimeMillis() - starttime));
-			System.out.print("schema 2 avg usage are: " + row_num + "");
+						
+			System.out.print("schema 2 avg usage are: row => " + row_num + "; ");
 			for (Map.Entry<String, Integer> e : result.entrySet()) {
 				System.out.print("(" + e.getKey() + "=>" + e.getValue() + ");");
 			}
@@ -295,8 +298,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 				scanner.close();
 			}
 			long cluster_access = System.currentTimeMillis();
-			System.out.println("cluster access time : "
-					+ (cluster_access - starttime));
+			System.out.println("cluster access time : " + (cluster_access - starttime));
 
 			System.out.println("cluster size : " + relations.size());
 

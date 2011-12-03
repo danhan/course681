@@ -91,42 +91,55 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		if (!("All").equals(stations)) {			
 			String[] idStr = stations.split(BixiConstant.ID_DELIMITER);
 			for (String id : idStr) {
-				stationIds.add(id);
+				stationIds.add(Integer.valueOf(id).toString());
 			}
 		}
 		Scan scan = new Scan();
 		scan.setCaching(this.cacheSize);
-		//System.out.println(sDateWithHour + "_00" + "; " + eDateWithHour + "_59");
+		
+		// because the rowkey , it is sored in the bigtable. So need to treat with it in this way.
+		String start_point = sDateWithHour;
+		String end_point = eDateWithHour;
+		if(start_point.compareTo(end_point) > 0){
+			start_point = eDateWithHour;
+			end_point = sDateWithHour;
+		}		
+		
 		if (sDateWithHour != null && eDateWithHour != null) {
-			scan.setStartRow((sDateWithHour + "_00").getBytes());
-			scan.setStopRow((eDateWithHour + "_59"+"01").getBytes());
-		}
-	
-		for (String qualifier : stationIds) {
-			scan.addColumn(BixiConstant.SCHEMA1_FAMILY_NAME.getBytes(), qualifier.getBytes());
+			scan.setStartRow((start_point + "_00").getBytes());
+			scan.setStopRow((end_point + "_59"+"1").getBytes());
 		}
 		
 		String regex = getFilterRegex(sDateWithHour,eDateWithHour);
-		System.out.println(regex);
+		//System.out.println("regex is "+regex);
 		
 		Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL,
 				new RegexStringComparator(regex));
 		scan.setFilter(filter);			
 
+		for (String qualifier : stationIds) {
+			scan.addColumn(BixiConstant.SCHEMA1_FAMILY_NAME.getBytes(), qualifier.getBytes());
+		}		
+		
+		
 		Map<String, Integer> result = new HashMap<String, Integer>();
 
 		long starttime = System.currentTimeMillis();
 
 		int counter = 0;
+		int row_size = 0;		
 		ResultScanner scanner = null;
 		try {
 			HTable table = new HTable(conf, this.bike_table_name.getBytes());
 			scanner = table.getScanner(scan);
-
+			System.out.println("schema1 scan execution time: "+ (System.currentTimeMillis() - starttime));
+			 starttime = System.currentTimeMillis();
 			for (Result r : scanner) {
-				// System.out.println("Row number:"+counter);
+				// System.out.println("Row number:"+counter);				
+				
 				for (KeyValue kv : r.raw()) {
-					//System.out.println(Bytes.toString(kv.getRow()));
+					//System.out.println(Bytes.toString(kv.getRow()));					
+					if (row_size == 0) row_size = kv.getValue().length * r.raw().length;
 					int emptyDocks = getEmptyDocks(kv);
 					String id = Bytes.toString(kv.getQualifier());
 					Integer prevVal = result.get(id);
@@ -138,8 +151,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 				}
 				counter++;
 			}
-			System.out.println("schema1 get data execution time: "
-					+ (System.currentTimeMillis() - starttime));
+			System.out.println("schema1: row_size=>"+row_size+"; get data execution time: "+ (System.currentTimeMillis() - starttime));
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -155,8 +167,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 			int i = e.getValue() / counter;
 			result.put(e.getKey(), i);
 		}
-		System.out.println("schema1 counter: " + counter + "; time = "
-				+ (System.currentTimeMillis() - starttime));
+		System.out.println("schema1 counter: " + counter + "; calculate time = "+ (System.currentTimeMillis() - starttime));
 		System.out.println("schema1 Avg map is: " + result);
 
 	}
@@ -263,7 +274,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 			String e_month = end_tokens.nextToken();
 			String e_year = end_tokens.nextToken();		
 			
-			if(e_month == s_month){
+			if(e_month.equals(s_month)){
 				boolean first = true;
 				for(int i=Integer.valueOf(s_day);i<=Integer.valueOf(e_day);i++){					
 					if(first) 
@@ -279,12 +290,11 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 					
 					regex += "_";
 					regex += s_month;
-					regex += "_"+e_year+"__";
-					
-				}
+					regex += "_"+e_year+"__";					
+				}			
 			}else {				
-				if(s_month == "9"){	
-					if(e_month == "10"){		
+				if(s_month.equals("09")){	
+					if(e_month.equals("10")){		
 						boolean first = true;
 						for(int i=Integer.valueOf(s_day);i<=30;i++){
 							if(first) 
@@ -297,9 +307,8 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							else  regex +="^"+i;
 							regex += "_";
 							regex += s_month;
-							regex += "_"+e_year+"__";
-							regex += "|";							
-						}
+							regex += "_"+e_year+"__";													
+						}						
 						for(int i=1;i<=Integer.valueOf(e_day);i++){
 							if (i<10) regex +="^0"+i;
 							else  regex +="^"+i;														
@@ -308,7 +317,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							regex += "_"+e_year+"__";
 							regex += "|";							
 						}												
-					}else if(e_month == "11"){		
+					}else if(e_month.equals("11")){		
 						boolean first = true;
 						for(int i=Integer.valueOf(s_day);i<=31;i++){
 							if(first) 
@@ -333,7 +342,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							regex += "|";							
 						}						
 						
-					}else if(e_month == "12"){
+					}else if(e_month.equals("12")){
 						boolean first = true;
 						for(int i=Integer.valueOf(s_day);i<=31;i++){ // October
 							
@@ -368,8 +377,8 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							regex += "|";							
 						}						
 					}		
-				}else if(s_month == "10"){					
-					if(e_month == "11"){		
+				}else if(s_month.equals("10")){					
+					if(e_month.equals("11")){		
 						boolean first = true;
 						for(int i=Integer.valueOf(s_day);i<=31;i++){
 							if(first) 
@@ -394,7 +403,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							regex += "|";							
 						}						
 						
-					}else if(e_month == "12"){
+					}else if(e_month.equals("12")){
 						boolean first = true;
 						for(int i=Integer.valueOf(s_day);i<=31;i++){ // October
 							
@@ -430,7 +439,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 						}						
 					}
 				
-				}else if(s_month == "11"){
+				}else if(s_month.equals("11")){
 					boolean first = true;
 					if(e_month == "12"){
 						
@@ -463,11 +472,21 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 				
 			}		
 					
-		}
-		
+		}		
+		if(regex.lastIndexOf('|') == regex.length()-1)
+			regex = regex.substring(0,regex.length()-2);
+		//System.out.println(regex);
 		return regex;
 	}
 	
+	public static void main(String[] args){
+		String s = "25_09_2010__00";
+		String e = "04_10_2010__23";
+		if(s.compareTo(e)> 0){
+			s = e;
+		}
+		System.out.println(s);
+	}
 	
 
 }

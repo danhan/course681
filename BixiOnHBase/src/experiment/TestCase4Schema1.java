@@ -29,6 +29,7 @@ public class TestCase4Schema1 extends TestCaseBase{
 	public static void main(String[] args){		
 		TestCase4Schema1 tests = new TestCase4Schema1();
 		tests.runTests();
+			
 	}
 
 }
