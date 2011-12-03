@@ -106,7 +106,12 @@ BixiProtocol {
 					//log.debug("got a kv: " + kv);
 					long emptyDocks = getEmptyDocks(kv);
 					String id = Bytes.toString(kv.getQualifier());
-					TotalNum tn = result.get(id);
+					TotalNum tn;
+					if(result.containsKey(id)){
+						tn = result.get(id);
+					}else{
+						tn = new TotalNum();
+					}
 					tn.add(emptyDocks);
 					//emptyDocks = emptyDocks + (prevVal != null ? prevVal.intValue() : 0);
 					//log.debug("result to be added is: " + emptyDocks + " id: " + id);

@@ -1,6 +1,12 @@
 package org.apache.hadoop.hbase.coprocessor;
 
-public class TotalNum {
+import java.io.Serializable;
+
+public class TotalNum implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8630535750024456779L;
 	public long total;
 	public int num;
 	
