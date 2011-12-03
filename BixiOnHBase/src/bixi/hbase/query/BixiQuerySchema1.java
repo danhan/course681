@@ -43,18 +43,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 			for (String id : idStr) {
 				stationIds.add(id);
 			}
-		}
-		try{
-		    BixiClient client = new BixiClient(conf);
-		    Map<String, Integer> avgusage = client
-		        .getAvgUsageForPeriod(stationIds, start, end);
-		    System.out.println("schema1: Average Usage: " + avgusage);	    	
-	    }catch(Exception e){
-	    	e.printStackTrace();
-	    }catch(Throwable e){
-	    	e.printStackTrace();
-	    } 		
-			
+		}	
 
 		try {
 			BixiClient client = new BixiClient(conf);
@@ -75,7 +64,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		System.out.println("callAvailBikesFromAPoint");
 		try {
 			BixiClient client = new BixiClient(conf);
-			Map<String, Double> availBikesFromAPoint = client
+			Map<String, Integer> availBikesFromAPoint = client
 					.getAvailableBikesFromAPoint(latitude, longitude, radius,
 							timestamp);
 			System.out.println("availBikes is: " + availBikesFromAPoint);

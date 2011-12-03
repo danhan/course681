@@ -100,7 +100,7 @@ public class BixiClientTester {
     double lat = Double.parseDouble(s[1]);
     double lon = Double.parseDouble(s[2]);
     double rad = Double.parseDouble(s[3]);
-    Map<String, Double> availBikesFromAPoint = client
+    Map<String, Integer> availBikesFromAPoint = client
         .getAvailableBikesFromAPoint(lat, lon, rad, s[4]);
     System.out.println("availBikes is: " + availBikesFromAPoint);
   }

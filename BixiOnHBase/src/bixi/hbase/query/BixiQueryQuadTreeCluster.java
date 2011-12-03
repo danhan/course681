@@ -61,7 +61,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 		
 		try{
 		    BixiClient client = new BixiClient(conf);
-		    Map<String, Double> availBikesFromAPoint = client
+		    Map<String, Integer> availBikesFromAPoint = client
 		        .getAvailableBikesFromAPoint_Schema2(latitude, longitude, timestamp);
 		    System.out.println("availBikes is: " + availBikesFromAPoint);	    	
 	    }catch(Exception e){

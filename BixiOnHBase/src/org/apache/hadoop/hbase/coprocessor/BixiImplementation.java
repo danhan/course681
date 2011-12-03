@@ -144,13 +144,13 @@ BixiProtocol {
 	 * @throws IOException
 	 */
 	@Override
-	public Map<String, Double> getAvailableBikesFromAPoint(double lat,
+	public Map<String, Integer> getAvailableBikesFromAPoint(double lat,
 			double lon, double radius, Get get) throws IOException {
 		Result r = ((RegionCoprocessorEnvironment) getEnvironment()).getRegion()
 				.get(get, null);
 		log.debug("r is "+r);
 		log.debug(r.getMap().toString());
-		Map<String, Double> result = new HashMap<String, Double>();
+		Map<String, Integer> result = new HashMap<String, Integer>();
 		try {
 			String s = null, latStr = null, lonStr = null;
 			for (KeyValue kv : r.raw()) {
@@ -166,7 +166,7 @@ BixiProtocol {
 						lat, lon)- radius;
 				log.debug("distance is : "+ distance);
 				if ( distance < 0) {// add it
-					result.put(sArr[0], distance);
+					result.put(sArr[0], getFreeBikes(kv));
 				}
 			}
 		} finally {
@@ -233,12 +233,12 @@ BixiProtocol {
 	 * @throws IOException
 	 */
 	@Override
-	public Map<String, Double> getAvailableBikesFromAPoint_Schema2(double lat,
+	public Map<String, Integer> getAvailableBikesFromAPoint_Schema2(double lat,
 			double lon, Scan scan) throws IOException {
 		scan.addFamily(colFamilyStat);
 		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment())
 				.getRegion().getScanner(scan);
-		Map<String, Double> result = new HashMap<String, Double>();
+		Map<String, Integer> result = new HashMap<String, Integer>();
 		boolean hasMoreResult = false;
 		int rowCounter = 0;
 		List<KeyValue> res = new ArrayList<KeyValue>();
@@ -252,7 +252,7 @@ BixiProtocol {
 					System.err.println("stationid: " + stationId);
 					String value = new String(kv.getValue());
 					System.err.println("value: " + value);
-					Double free = Double.parseDouble(value.split(";")[0]);
+					Integer free = Integer.parseInt(value.split(";")[0]);
 					System.err.println("free: " + free);
 
 					if(result.containsKey(stationId)){

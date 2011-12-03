@@ -114,6 +114,7 @@ public class BixiClient {
     }
 
     BixiCallBack callBack = new BixiCallBack();
+    long starttime = System.currentTimeMillis();
     table.coprocessorExec(BixiProtocol.class, scan.getStartRow(), scan
         .getStopRow(), new Batch.Call<BixiProtocol, Map<String, Integer>>() {
       public Map<String, Integer> call(BixiProtocol instance)
@@ -121,7 +122,9 @@ public class BixiClient {
         return instance.giveAverageUsage(stationIds, scan);
       };
     }, callBack);
-
+    long cluster_access = System.currentTimeMillis();
+	System.out.println("cluster access time : "
+			+ (cluster_access - starttime));
     return callBack.getResult();
 
   }
@@ -138,20 +141,20 @@ public class BixiClient {
 * @throws IOException
 * @throws Throwable
 */
-  public Map<String, Double> getAvailableBikesFromAPoint(final double lat,
+  public Map<String, Integer> getAvailableBikesFromAPoint(final double lat,
       final double lon, final double radius, String dateWithHour)
       throws IOException, Throwable {
     final Get get = new Get((dateWithHour + "_00").getBytes());
     log.debug("in getAvgUsageForAHr: " + dateWithHour);
-    class BixiAvailCallBack implements Batch.Callback<Map<String, Double>> {
-      Map<String, Double> res = new HashMap<String, Double>();
+    class BixiAvailCallBack implements Batch.Callback<Map<String, Integer>> {
+      Map<String, Integer> res = new HashMap<String, Integer>();
 
       @Override
-      public void update(byte[] region, byte[] row, Map<String, Double> result) {
+      public void update(byte[] region, byte[] row, Map<String, Integer> result) {
         res = result;
       }
 
-      private Map<String, Double> getResult() {
+      private Map<String, Integer> getResult() {
         return res;
       }
     }
@@ -159,8 +162,8 @@ public class BixiClient {
     BixiAvailCallBack callBack = new BixiAvailCallBack();
     long starttime = System.currentTimeMillis();
     table.coprocessorExec(BixiProtocol.class, get.getRow(), get.getRow(),
-        new Batch.Call<BixiProtocol, Map<String, Double>>() {
-          public Map<String, Double> call(BixiProtocol instance)
+        new Batch.Call<BixiProtocol, Map<String, Integer>>() {
+          public Map<String, Integer> call(BixiProtocol instance)
               throws IOException {
             return instance.getAvailableBikesFromAPoint(lat, lon, radius, get);
           };
@@ -168,7 +171,7 @@ public class BixiClient {
     long cluster_access = System.currentTimeMillis();
 	System.out.println("cluster access time : "
 			+ (cluster_access - starttime));
-	Map<String, Double> res = callBack.getResult();
+	Map<String, Integer> res = callBack.getResult();
 	System.out.println("Number of stations: " + res.size());
     return res;
 
@@ -258,7 +261,7 @@ public class BixiClient {
 	* @throws IOException
 	* @throws Throwable
 	*/
-	  public Map<String, Double> getAvailableBikesFromAPoint_Schema2(final double lat,
+	  public Map<String, Integer> getAvailableBikesFromAPoint_Schema2(final double lat,
 	      final double lon, String dateWithHour)
 	      throws IOException, Throwable {
 		  
@@ -282,15 +285,15 @@ public class BixiClient {
 		    	  scan.setFilter(filter);
 		      }
 		    }
-	    class BixiAvailCallBack implements Batch.Callback<Map<String, Double>> {
-	      Map<String, Double> res = new HashMap<String, Double>();
+	    class BixiAvailCallBack implements Batch.Callback<Map<String, Integer>> {
+	      Map<String, Integer> res = new HashMap<String, Integer>();
 
 	      @Override
-	      public void update(byte[] region, byte[] row, Map<String, Double> result) {
+	      public void update(byte[] region, byte[] row, Map<String, Integer> result) {
 	        res.putAll(result);
 	      }
 
-	      private Map<String, Double> getResult() {
+	      private Map<String, Integer> getResult() {
 	        return res;
 	      }
 	    }
@@ -298,8 +301,8 @@ public class BixiClient {
 	    BixiAvailCallBack callBack = new BixiAvailCallBack();
 	    long starttime = System.currentTimeMillis();
 	    stat_table.coprocessorExec(BixiProtocol.class, scan.getStartRow(), scan.getStopRow(),
-	        new Batch.Call<BixiProtocol, Map<String, Double>>() {
-	          public Map<String, Double> call(BixiProtocol instance)
+	        new Batch.Call<BixiProtocol, Map<String, Integer>>() {
+	          public Map<String, Integer> call(BixiProtocol instance)
 	              throws IOException {
 	            return instance.getAvailableBikesFromAPoint_Schema2(lat, lon, scan);
 	          };
@@ -307,7 +310,7 @@ public class BixiClient {
 	    long cluster_access = System.currentTimeMillis();
 		System.out.println("cluster access time : "
 				+ (cluster_access - starttime));
-		Map<String, Double> res = callBack.getResult();
+		Map<String, Integer> res = callBack.getResult();
 	    return res;
 
 	  }
