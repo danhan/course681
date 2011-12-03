@@ -92,7 +92,8 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 		try {
 			HTable table = new HTable(conf, this.bike_table_name.getBytes());
 			Map<String, Integer> result = new HashMap<String, Integer>();
-
+			
+			
 			Arrays.sort(stations.toCharArray());
 			String min_station = stationIds.get(0);
 			String max_station = stationIds.get(stationIds.size() - 1);

@@ -9,7 +9,7 @@
 	
 	<property name="java.home" value="${env.JAVA_HOME}" />
 	<property name="ant.home" value="${env.ANT_HOME}" />
-	<property name="build.home" value="${bixi.src}/bin" />	
+	<property name="bin.home" value="${bixi.src}/bin" />	
 	<property name="lib.home" value="${bixi.src}/lib" />
 	<property name="src.home" value="${bixi.src}/src" />
 	
@@ -28,26 +28,27 @@
 		</fileset>
 		<fileset dir="${hadoop.home}/lib">
 			<include name="commons-cli-1.2.jar" />
-		</fileset>
+		</fileset>	
+		<fileset dir="${lib.home}">
+			<include name="junit.jar" />
+		</fileset>			
 	</path>
 
 	<target name="compile" depends="clean">
-		<mkdir dir="${build.home}" />
-		<javac srcdir="${src.home}" destdir="${build.home}/">
+		<mkdir dir="${bin.home}" />
+		<javac srcdir="${src.home}" destdir="${bin.home}/">
 			<classpath refid="classpath" />
 		</javac>
 	</target>
 	
 	<!--create bixi.jar -->
-	<target name="main" depends="compile">
-		<mkdir dir="${lib.home}"/>
-		<jar jarfile="${lib.home}/bixi.jar" basedir="${build.home}" />
+	<target name="main" depends="compile">		
+		<jar jarfile="${bin.home}/bixi.jar" basedir="${bin.home}" />
 	</target>
 	
 	<target name="clean">
-		<description>clean the jar file last time</description>
-		<delete dir="${lib.home}" />	
-		<delete dir="${build.home}" />	
+		<description>clean the jar file last time</description>		
+		<delete dir="${bin.home}" />	
 	</target>	
 	
 	
