@@ -197,10 +197,11 @@ public class BixiClient {
 	    	  String regex = "(";
 	    	  boolean start = true;
 	    	  for(String sId : stationIds){
+	    		  String id = Integer.toString(Integer.parseInt(sId));
 	    		  if(!start)
 	    			  regex += "|";
 	    		  start = false;
-	    		  regex += "-" + sId;
+	    		  regex += "-" + id;
 	    	  }
 	    	  regex += ")$";
 	    	  Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regex));
