@@ -99,7 +99,18 @@ public class HBaseClient {
 				}catch(Exception e){
 					e.printStackTrace();
 				}
+			}else if("1000".equals(args[0])){
+				tablename = "test1001";
+				String[] metrics = {"station"}; 
+				System.out.println("start to create table");
+				hbase.createTable(tablename, metrics);
+			}else if("1001".equals(args[0])){
+				tablename = "test1002";
+				String[] metrics = {"s"}; 
+				System.out.println("start to create table");
+				hbase.createTable(tablename, metrics);
 			}
+			
 		}
 		
 	}

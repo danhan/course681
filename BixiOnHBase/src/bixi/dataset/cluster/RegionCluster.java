@@ -10,9 +10,9 @@ import org.apache.hadoop.hbase.mapreduce.*;
 import org.apache.hadoop.io.*;
 import java.io.*;
 import java.util.*;
-import java.lang.*;
 import org.apache.hadoop.hbase.io.*;
 import org.apache.hadoop.mapreduce.lib.output.*;
+
 
 /*
  * Region cluster class
@@ -21,12 +21,15 @@ import org.apache.hadoop.mapreduce.lib.output.*;
 public class RegionCluster
 {
 	
-	private static String srcTable = "rowData";
-	private static String dstTable = "clusterID";
+	private static String srcTable = "test1001";
+	private static String dstTable = "test1002";
 	
 
-	private static int latitudeSplitNum = 4;
-	private static int langitudeSplitNum = 4;
+	private static int latitudeSplitNum = 6;
+	private static int longitudeSplitNum = 6;
+	
+	//new feature
+	//private static int thre = 5;
 
 	
 	//non-arg constructor
@@ -36,7 +39,7 @@ public class RegionCluster
 		this.srcTable = srcTable;
 		
 		this.latitudeSplitNum = latitudeSplitNum;
-		this.langitudeSplitNum = langitudeSplitNum;
+		this.longitudeSplitNum = langitudeSplitNum;
 	}
 	
 	//create and configure a new mapreduce job
@@ -45,7 +48,7 @@ public class RegionCluster
 		Job job = new Job(config,"station cluster");
 		
 		//make it rowSplitNum * columnSplitNum
-		job.setNumReduceTasks(latitudeSplitNum * langitudeSplitNum);
+		job.setNumReduceTasks(latitudeSplitNum * longitudeSplitNum);
 			        
 		Scan scan = new Scan();
 		//make it 10
@@ -118,7 +121,9 @@ public class RegionCluster
 		
 		
 		//========================================== divide the region latitude-wisely
+		//new feature
 		double numStationsPerBucket = (double)numStations/(double)numLatitudeSplit;
+		//double numStationsPerBucket = thre;
 		int numStationsUntilNow = 0;
 		
 		double currentPos = latitudeLow;
@@ -148,7 +153,10 @@ public class RegionCluster
 		latitudeSplitLength.add(currentPos - previousPos);
 		
 		//========================================== divide the region longitude-wisely
+		//new feature
 		numStationsPerBucket = (double)numStations/(double)numLongitudeSplit;
+		//numStationsPerBucket = thre;
+		
 		numStationsUntilNow = 0;
 		
 		currentPos = longitudeLow;
@@ -218,8 +226,30 @@ public class RegionCluster
 	
 	public static void main(String[] args) throws Exception 
 	{
-		//must call this function first to get the station distribution information
-		DistributionInfo.computDistributionInfo(srcTable, 4, 5);
+		String filename = null;
+		
+		if (args.length >= 0 )
+		{
+			filename = args[0];
+			
+			srcTable = args[1];
+			
+			dstTable = args[2];
+			
+			latitudeSplitNum = Integer.valueOf(args[3]);
+			
+			longitudeSplitNum = Integer.valueOf(args[4]);
+			
+			//new feature
+			//thre = Bytes.toInt(args[6].getBytes());
+			
+		}
+		
+		//must call this function first to load the station info
+		//BixiReaderToTable.parseXML(filename, srcTable);
+		
+		//must call this function second to get the station distribution information
+		DistributionInfo.computDistributionInfo(srcTable, latitudeSplitNum*128, longitudeSplitNum*128);
 		
 		//now we have latitude-wisely and longitude-wisely distribution information
 		ArrayList<Integer> latitudeDistribution = DistributionInfo.getLatitudeDistribution();
@@ -260,7 +290,8 @@ public class RegionCluster
 		*/
 		
 		//divide the whole region into pieces, in which each sub-region has roughly the same amount of stations
-		divideRegion(numStations, 4, latitudeDistribution, 5, longitudeDistribution, latitudeLow, latitudeHigh, longitudeLow, longitudeHigh);
+		divideRegion(numStations, latitudeSplitNum, latitudeDistribution, longitudeSplitNum, longitudeDistribution, 
+				latitudeLow, latitudeHigh, longitudeLow, longitudeHigh);
 		
 		
 		//now we can go on to the mapreduce job to cluster the stations
@@ -340,9 +371,13 @@ class ClusterMapper extends TableMapper<Text, Text>
 			System.out.printf("%s\t%s\t%s\n",sid, latitude, longitude);
 			*/
    			
+   			String metadata = new String(value.getValue(Bytes.toBytes("station"), Bytes.toBytes("metadata")));
+   			   			
+   			String metadataPP = sid + ";" + metadata ;
+
 			String cid = getClusterId(sid, latitude, longitude);
    			
-   			context.write(new Text(cid), new Text(sid));
+   			context.write(new Text(cid), new Text(metadataPP));
    		}
 		
 		//given the latitude and longitude, this function finds the cluster id for the station
@@ -551,18 +586,26 @@ class ClusterReducer extends TableReducer<Text, Text, Text>
 		System.out.println();
 		*/
 		
-		
-		String cidSet = new String("");
-		for (Text cid: values)
+		int station_number = 0;
+		String ids = "";
+		for (Text data: values)
 		{
-			cidSet += cid.toString();
-		}
-		
-		Put put = new Put(Bytes.toBytes(key.toString()));
-		put.add(Bytes.toBytes("station"), Bytes.toBytes("cid"), Bytes.toBytes(cidSet));
-		put.add(Bytes.toBytes("station"), Bytes.toBytes("sid"), Bytes.toBytes(key.toString()));
+			Put put = new Put(Bytes.toBytes(key.toString()));
+			
+			String metadataPP = data.toString();
+					
+			int index = metadataPP.indexOf(';');
+			
+			String sid = metadataPP.substring(0, index);
+			String metadata = metadataPP.substring(index + 1, metadataPP.length());
 
-		context.write(null, put);
+			put.add(Bytes.toBytes("s"), sid.getBytes(), metadata.getBytes());
+		
+			context.write(null, put);
+			station_number++;
+			ids+=sid+";";
+		}
+		System.out.println(key.toString()+" num=> "+station_number+";[ "+ids+" ]");
 		
 	}
 }
