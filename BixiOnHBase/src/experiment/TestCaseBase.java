@@ -18,45 +18,73 @@ public abstract class TestCaseBase {
 		return a;
 	}
 	
-	private static final String[] stationTests = {"1day","10day","20day","40day","60day"};
-	private static final String[] shortTests = {"1hour","6hour","12hour","18hour"};
+	private static String[] shortTestByTime  = {"1hour","6hour","12hour","18hour"};
+	private static String[] shortTestByStation  = {"1station","5station","10station","20station"};
+	private static String[] longTestByTime  = {"1day","5day","10day","15day","20day"};
+	private static String[] longTestByStation  = {"50station","100station","200station","300station","400station"};
+	
+	
 	private static final String[] pointTests = {"location"};
 
 
-	public TestCaseBase() {
+	public TestCaseBase() {		
 		bixiQuery = getBixiQuery();
 		tests = new Properties();
 		try {
 		    tests.load(new FileInputStream("tests.properties"));
 		} catch (IOException e) {
 			e.printStackTrace();
-		}
+		}				
 	}
 	
 	public void runTests(){
-		System.out.println("RUNNING SCAN query_by_time_4_stations TESTS");
-		for(String test : shortTests){
-			System.out.println("RUNNING TEST: "+test);
+		System.out.println("********Short Analysis********callTimeSlot4StationsScan**************");
+		for(String test : shortTestByTime){
+			System.out.println("====Start========="+test+"==============");
 			callTimeSlot4StationsScan(test);
+			System.out.println("====End========="+test+"==============");
 		}
 		
-//		System.out.println("RUNNING COPROCESSOR query_by_time_4_stations TESTS");
-//		for(String test : shortTests){
-//			System.out.println("RUNNING TEST: "+test);
+		System.out.println("*******Short Analysis***********callTimeSlot4Stations******************");
+		for(String test : shortTestByTime){
+			System.out.println("====Start========="+test+"==============");
+			callTimeSlot4Stations(test);
+			System.out.println("====End========="+test+"==============");
+		}
+		
+//		System.out.println("**********Long Analysis******callTimeSlot4StationsScan******************");
+//		for(String test : longTestByTime){
+//			System.out.println("====Start========="+test+"==============");
+//			callTimeSlot4StationsScan(test);
+//			System.out.println("====End========="+test+"==============");
+//		}
+//		
+//		System.out.println("***********Long Analysis*******callTimeSlot4Stations**********************");
+//		for(String test : longTestByTime){
+//			System.out.println("====Start========="+test+"==============");
 //			callTimeSlot4Stations(test);
-//		}
-//		
-//		System.out.println("RUNNING SCAN query_4_location TESTS");
-//		for(String test : pointTests){
-//			System.out.println("RUNNING TEST: "+test);
-//			callTimeStamp4PointScan(test);
-//		}
-//		
-//		System.out.println("RUNNING COPROCESSOR query_4_location TESTS");
-//		for(String test : pointTests){
-//			System.out.println("RUNNING TEST: "+test);
-//			callTimeStamp4Point(test);
-//		}
+//			System.out.println("====End========="+test+"==============");
+//		}		
+		
+		System.out.println("****************callTimeStamp4PointScan*******************************");
+		for(String test : pointTests){
+			System.out.println("====Start========="+test+"==============");
+			callTimeStamp4PointScan(test);
+			System.out.println("====End========="+test+"==============");
+		}
+		
+		System.out.println("******************callTimeStamp4Point**********************************");
+		for(String test : pointTests){
+			System.out.println("====Start========="+test+"==============");
+			callTimeStamp4Point(test);
+			System.out.println("====End========="+test+"==============");
+		}
+		
+		
+		
+		
+		
+		
 	}
 	
 	/* Private Methods */
