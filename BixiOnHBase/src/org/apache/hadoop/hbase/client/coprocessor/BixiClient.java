@@ -16,6 +16,7 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.coprocessor.BixiProtocol;
+import org.apache.hadoop.hbase.coprocessor.TotalNum;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.RegexStringComparator;
 import org.apache.hadoop.hbase.filter.RowFilter;
@@ -86,21 +87,17 @@ public class BixiClient {
       scan.setStartRow((startDate + "_00").getBytes());
       scan.setStopRow((endDate + "_59").getBytes());
     }
-    DateFormat formatter = new SimpleDateFormat("dd_MM_yyyy__HHmm");
-    Date start = formatter.parse(startDate+"00");
-    Date end = formatter.parse(endDate+"59");
-    long comp = (end.getTime()/60000)-(start.getTime()/60000)+1;
-    final double count = comp;
-    class BixiCallBack implements Batch.Callback<Map<String, Long>> {
-      Map<String, Long> res = new HashMap<String, Long>();
+    class BixiCallBack implements Batch.Callback<Map<String, TotalNum>> {
+      Map<String, TotalNum> res = new HashMap<String, TotalNum>();
 
       @Override
-      public void update(byte[] region, byte[] row, Map<String, Long> result) {
-        for (Map.Entry<String, Long> e : result.entrySet()) {
+      public void update(byte[] region, byte[] row, Map<String, TotalNum> result) {
+        for (Map.Entry<String, TotalNum> e : result.entrySet()) {
           if (res.containsKey(e.getKey())) { // add the val
-            long t = e.getValue();
-            t += res.get(e.getKey());
-            res.put(e.getKey(), t);
+            TotalNum tnnew = e.getValue();
+            TotalNum restn = res.get(e.getKey());
+            restn.merge(tnnew);
+            res.put(e.getKey(), restn);
           } else {
             res.put(e.getKey(), e.getValue());
           }
@@ -109,8 +106,9 @@ public class BixiClient {
 
       private Map<String, Double> getResult() {
     	Map<String, Double> ret = new HashMap<String, Double>();
-        for (Map.Entry<String, Long> e : res.entrySet()) {
-          double i = e.getValue() / count;
+        for (Map.Entry<String, TotalNum> e : res.entrySet()) {
+          TotalNum tn = e.getValue();
+          double i = tn.total / (double)tn.num;
           ret.put(e.getKey(), i);
         }
         return ret;
@@ -120,8 +118,8 @@ public class BixiClient {
     BixiCallBack callBack = new BixiCallBack();
     long starttime = System.currentTimeMillis();
     table.coprocessorExec(BixiProtocol.class, scan.getStartRow(), scan
-        .getStopRow(), new Batch.Call<BixiProtocol, Map<String, Long>>() {
-      public Map<String, Long> call(BixiProtocol instance)
+        .getStopRow(), new Batch.Call<BixiProtocol, Map<String, TotalNum>>() {
+      public Map<String, TotalNum> call(BixiProtocol instance)
           throws IOException {
         return instance.giveTotalUsage(stationIds, scan);
       };
@@ -208,42 +206,39 @@ public class BixiClient {
 	    	  scan.setFilter(filter);
 	      }
 	    }
-	    DateFormat formatter = new SimpleDateFormat("yyyyMMddHHmm");
-	    Date start = formatter.parse(startDateWithHour+"00");
-	    Date end = formatter.parse(endDateWithHour+"59");
-	    long comp = (end.getTime()/60000)-(start.getTime()/60000)+1;
-	    final long numHours = comp;
-	    class BixiCallBack implements Batch.Callback<Map<String, Long>> {
-	      Map<String, Double> res = new HashMap<String, Double>();
+	    class BixiCallBack implements Batch.Callback<Map<String, TotalNum>> {
+	      Map<String, TotalNum> res = new HashMap<String, TotalNum>();
 
 	      @Override
-	      public void update(byte[] region, byte[] row, Map<String, Long> result) {
-	        for (Map.Entry<String, Long> e : result.entrySet()) {
-	          if (res.containsKey(e.getKey())) { // add the val
-	            long t = e.getValue();
-	            t += res.get(e.getKey());
-	            res.put(e.getKey(), (double)t);
-	          } else {
-	            res.put(e.getKey(), (double)e.getValue());
-	          }
-	        }
+	      public void update(byte[] region, byte[] row, Map<String, TotalNum> result) {
+	    	  for (Map.Entry<String, TotalNum> e : result.entrySet()) {
+	    		  if (res.containsKey(e.getKey())) { // add the val
+	    			  TotalNum tnnew = e.getValue();
+	    			  TotalNum restn = res.get(e.getKey());
+	    			  restn.merge(tnnew);
+	    			  res.put(e.getKey(), restn);
+	    		  } else {
+	    			  res.put(e.getKey(), e.getValue());
+	    		  }
+	    	  }
 	      }
 
 	      private Map<String, Double> getResult() {
-	    	  System.out.println("numMins: " + numHours);
-	        for (Map.Entry<String, Double> e : res.entrySet()) {
-	          double i = e.getValue() / (double)numHours;
-	          res.put(e.getKey(), i);
-	        }
-	        return res;
+	    	  Map<String, Double> ret = new HashMap<String, Double>();
+	          for (Map.Entry<String, TotalNum> e : res.entrySet()) {
+	            TotalNum tn = e.getValue();
+	            double i = tn.total / (double)tn.num;
+	            ret.put(e.getKey(), i);
+	          }
+	          return ret;
 	      }
 	    }
 
 	    BixiCallBack callBack = new BixiCallBack();
 	    long starttime = System.currentTimeMillis();
 	    stat_table.coprocessorExec(BixiProtocol.class, scan.getStartRow(), scan
-	        .getStopRow(), new Batch.Call<BixiProtocol, Map<String, Long>>() {
-	      public Map<String, Long> call(BixiProtocol instance)
+	        .getStopRow(), new Batch.Call<BixiProtocol, Map<String, TotalNum>>() {
+	      public Map<String, TotalNum> call(BixiProtocol instance)
 	          throws IOException {
 	        return instance.getTotalUsage_Schema2(scan);
 	      };

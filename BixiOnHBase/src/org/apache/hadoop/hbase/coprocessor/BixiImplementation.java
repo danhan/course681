@@ -88,7 +88,7 @@ BixiProtocol {
 	}
 
 	@Override
-	public Map<String, Long> giveTotalUsage(List<String> stationIds,
+	public Map<String, TotalNum> giveTotalUsage(List<String> stationIds,
 			Scan scan) throws IOException {
 		for (String qualifier : stationIds) {
 			log.debug("adding qualifier: " + qualifier);
@@ -97,31 +97,25 @@ BixiProtocol {
 		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment())
 				.getRegion().getScanner(scan);
 		List<KeyValue> res = new ArrayList<KeyValue>();
-		Map<String, Long> result = new HashMap<String, Long>();
+		Map<String, TotalNum> result = new HashMap<String, TotalNum>();
 		boolean hasMoreResult = false;
-		int rowCounter = 0;
 		try {
 			do {
-				rowCounter++;
 				hasMoreResult = scanner.next(res);
 				for (KeyValue kv : res) {
 					//log.debug("got a kv: " + kv);
 					long emptyDocks = getEmptyDocks(kv);
 					String id = Bytes.toString(kv.getQualifier());
-					Long prevVal = result.get(id);
-					emptyDocks = emptyDocks + (prevVal != null ? prevVal.intValue() : 0);
+					TotalNum tn = result.get(id);
+					tn.add(emptyDocks);
+					//emptyDocks = emptyDocks + (prevVal != null ? prevVal.intValue() : 0);
 					//log.debug("result to be added is: " + emptyDocks + " id: " + id);
-					result.put(id, emptyDocks);
+					result.put(id, tn);
 				}
 				res.clear();
 			} while (hasMoreResult);
 		} finally {
 			scanner.close();
-		}
-		for (Map.Entry<String, Long> e : result.entrySet()) {
-			log.debug("counter and value is" + rowCounter + "," + e.getValue());
-			long i = e.getValue() / rowCounter;
-			result.put(e.getKey(), i);
 		}
 		return result;
 	}
@@ -190,7 +184,7 @@ BixiProtocol {
 	private static byte[] colFamilyStat = BixiConstant.SCHEMA2_BIKE_FAMILY_NAME.getBytes();
 
 	@Override
-	public Map<String, Long> getTotalUsage_Schema2(Scan scan) throws IOException {
+	public Map<String, TotalNum> getTotalUsage_Schema2(Scan scan) throws IOException {
 
 		//System.err.println("scanning");
 		scan.addFamily(colFamilyStat);
@@ -198,7 +192,7 @@ BixiProtocol {
 		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment())
 				.getRegion().getScanner(scan);
 		List<KeyValue> res = new ArrayList<KeyValue>();
-		Map<String, Long> result = new HashMap<String, Long>();
+		Map<String, TotalNum> result = new HashMap<String, TotalNum>();
 		boolean hasMoreResult = false;
 		try {
 			do {
@@ -208,9 +202,13 @@ BixiProtocol {
 					String value = new String(kv.getValue());
 					Long usage = Long.parseLong(value.split(";")[1]);
 					if(result.containsKey(stationId)){
-						result.put(stationId, usage + result.get(stationId));
+						TotalNum tn = result.get(stationId);
+						tn.add(usage);
+						result.put(stationId, tn);
 					}else{
-						result.put(stationId, usage);
+						TotalNum tn = new TotalNum();
+						tn.add(usage);
+						result.put(stationId, tn);
 					}
 				}
 				res.clear();
