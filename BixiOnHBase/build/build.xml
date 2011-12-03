@@ -28,9 +28,6 @@
 		</fileset>
 		<fileset dir="${hadoop.home}/lib">
 			<include name="commons-cli-1.2.jar" />
-		</fileset>	
-		<fileset dir="${lib.home}">
-			<include name="junit.jar" />
 		</fileset>			
 	</path>
 

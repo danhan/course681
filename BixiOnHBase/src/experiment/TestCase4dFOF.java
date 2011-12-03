@@ -2,7 +2,6 @@ package experiment;
 
 import bixi.hbase.query.BixiQueryAbstraction;
 import bixi.hbase.query.BixiQuerydFOFCluster;
-import junit.framework.TestCase;
 
 /*
  * This is for a sample , we need more test cases
