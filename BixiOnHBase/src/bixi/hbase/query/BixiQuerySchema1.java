@@ -88,7 +88,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		
 		List<String> stationIds = new ArrayList<String>();
 
-		if (!("All").equals(stations)) {
+		if (!("All").equals(stations)) {			
 			String[] idStr = stations.split(BixiConstant.ID_DELIMITER);
 			for (String id : idStr) {
 				stationIds.add(id);
@@ -99,19 +99,19 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		//System.out.println(sDateWithHour + "_00" + "; " + eDateWithHour + "_59");
 		if (sDateWithHour != null && eDateWithHour != null) {
 			scan.setStartRow((sDateWithHour + "_00").getBytes());
-			scan.setStopRow((eDateWithHour + "_59").getBytes());
+			scan.setStopRow((eDateWithHour + "_59"+"01").getBytes());
 		}
-
+	
+		for (String qualifier : stationIds) {
+			scan.addColumn(BixiConstant.SCHEMA1_FAMILY_NAME.getBytes(), qualifier.getBytes());
+		}
+		
 		String regex = getFilterRegex(sDateWithHour,eDateWithHour);
+		System.out.println(regex);
 		
 		Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL,
 				new RegexStringComparator(regex));
 		scan.setFilter(filter);			
-		
-		
-		for (String qualifier : stationIds) {
-			scan.addColumn(BixiConstant.SCHEMA1_FAMILY_NAME.getBytes(), qualifier.getBytes());
-		}
 
 		Map<String, Integer> result = new HashMap<String, Integer>();
 
@@ -126,6 +126,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 			for (Result r : scanner) {
 				// System.out.println("Row number:"+counter);
 				for (KeyValue kv : r.raw()) {
+					//System.out.println(Bytes.toString(kv.getRow()));
 					int emptyDocks = getEmptyDocks(kv);
 					String id = Bytes.toString(kv.getQualifier());
 					Integer prevVal = result.get(id);
@@ -253,19 +254,18 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		String regex = "";
 		if(start !=null && end != null){
 			StringTokenizer start_tokens = new StringTokenizer(start,"_");
-			int s_day = Integer.valueOf(start_tokens.nextToken());
-			int s_month = Integer.valueOf(start_tokens.nextToken());
+			String s_day = start_tokens.nextToken();
+			String s_month = start_tokens.nextToken();
 			//int s_year = Integer.valueOf(start_tokens.nextToken());
 			
 			StringTokenizer end_tokens = new StringTokenizer(end,"_");
-			int e_day = Integer.valueOf(end_tokens.nextToken());
-			int e_month = Integer.valueOf(end_tokens.nextToken());
-			int e_year = Integer.valueOf(end_tokens.nextToken());		
+			String e_day = end_tokens.nextToken();
+			String e_month = end_tokens.nextToken();
+			String e_year = end_tokens.nextToken();		
 			
 			if(e_month == s_month){
 				boolean first = true;
-				for(int i=s_day;i<=e_day;i++){
-					
+				for(int i=Integer.valueOf(s_day);i<=Integer.valueOf(e_day);i++){					
 					if(first) 
 						regex = "";
 					else 
@@ -283,10 +283,10 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 					
 				}
 			}else {				
-				if(s_month == 10){					
-					if(e_month == 11){		
+				if(s_month == "9"){	
+					if(e_month == "10"){		
 						boolean first = true;
-						for(int i=s_day;i<=31;i++){
+						for(int i=Integer.valueOf(s_day);i<=30;i++){
 							if(first) 
 								regex = "";
 							else 
@@ -300,7 +300,31 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							regex += "_"+e_year+"__";
 							regex += "|";							
 						}
-						for(int i=1;i<=e_day;i++){
+						for(int i=1;i<=Integer.valueOf(e_day);i++){
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;														
+							regex += "_";
+							regex += e_month;
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}												
+					}else if(e_month == "11"){		
+						boolean first = true;
+						for(int i=Integer.valueOf(s_day);i<=31;i++){
+							if(first) 
+								regex = "";
+							else 
+								regex += "|";
+							first = false;
+							
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;
+							regex += "_";
+							regex += s_month;
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}
+						for(int i=1;i<=Integer.valueOf(e_day);i++){
 							if (i<10) regex +="^0"+i;
 							else  regex +="^"+i;														
 							regex += "_";
@@ -309,9 +333,9 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							regex += "|";							
 						}						
 						
-					}else if(e_month == 12){
+					}else if(e_month == "12"){
 						boolean first = true;
-						for(int i=s_day;i<=31;i++){ // October
+						for(int i=Integer.valueOf(s_day);i<=31;i++){ // October
 							
 							if(first) 
 								regex = "";
@@ -335,7 +359,68 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							regex += "_"+e_year+"__";
 							regex += "|";							
 						}						
-						for(int i=1;i<=e_day;i++){ // 
+						for(int i=1;i<=Integer.valueOf(e_day);i++){ // 
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;
+							regex += "_";
+							regex += e_month;
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}						
+					}		
+				}else if(s_month == "10"){					
+					if(e_month == "11"){		
+						boolean first = true;
+						for(int i=Integer.valueOf(s_day);i<=31;i++){
+							if(first) 
+								regex = "";
+							else 
+								regex += "|";
+							first = false;
+							
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;
+							regex += "_";
+							regex += s_month;
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}
+						for(int i=1;i<=Integer.valueOf(e_day);i++){
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;														
+							regex += "_";
+							regex += e_month;
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}						
+						
+					}else if(e_month == "12"){
+						boolean first = true;
+						for(int i=Integer.valueOf(s_day);i<=31;i++){ // October
+							
+							if(first) 
+								regex = "";
+							else 
+								regex += "|";
+							first = false;
+														
+							
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;														
+							regex += "_";
+							regex += s_month;
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}
+						for(int i=1;i<=31;i++){ // November
+							if (i<10) regex +="^0"+i;
+							else  regex +="^"+i;
+							regex += "_";
+							regex += (s_month+1);
+							regex += "_"+e_year+"__";
+							regex += "|";							
+						}						
+						for(int i=1;i<=Integer.valueOf(e_day);i++){ // 
 							if (i<10) regex +="^0"+i;
 							else  regex +="^"+i;
 							regex += "_";
@@ -345,9 +430,9 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 						}						
 					}
 				
-				}else if(s_month == 11){
+				}else if(s_month == "11"){
 					boolean first = true;
-					if(e_month == 12){
+					if(e_month == "12"){
 						
 						if(first) 
 							regex = "";
@@ -355,7 +440,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							regex += "|";
 						first = false;						
 						
-						for(int i=s_day;i<=31;i++){ // November
+						for(int i=Integer.valueOf(s_day);i<=31;i++){ // November
 							if (i<10) regex +="^0"+i;
 							else  regex +="^"+i;
 							regex += "_";
@@ -363,7 +448,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							regex += "_"+e_year+"__";
 							regex += "|";							
 						}						
-						for(int i=1;i<=e_day;i++){ // 
+						for(int i=1;i<=Integer.valueOf(e_day);i++){ // 
 							if (i<10) regex +="^0"+i;
 							else  regex +="^"+i;
 							regex += "_";
@@ -376,8 +461,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 				}
 				
 				
-			}
-		//	System.out.println("regex is : "+regex);
+			}		
 					
 		}
 		
@@ -385,23 +469,5 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 	}
 	
 	
-	public static void  main(String args[]){
-		String s = "";
-		for(int i=1;i<=400;i++){			
-			if (i<10) 
-				s += "0"+i+"#";
-			else
-				s +=i+"#";
-		}
-		System.out.println(s);
-		
-		
-		String start = "01_10_2010__00";
-		String end = "10_11_2010__00";
-		BixiQuerySchema1.getFilterRegex(start,end);
-		start = "01_10_2010__00";
-		end = "30_11_2010__00";
-		BixiQuerySchema1.getFilterRegex(start,end);
-	}
 
 }

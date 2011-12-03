@@ -24,7 +24,7 @@ public class TestCase4QuadTree extends TestCaseBase{
 	public static void main(String[] args){
 		TestCase4QuadTree tests = new TestCase4QuadTree();
 		tests.runTests();
-		tests.queryAvailableByClusters();
+		//tests.queryAvailableByClusters();
 	}
 	
 	

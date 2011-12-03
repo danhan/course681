@@ -93,23 +93,24 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 			
 			Arrays.sort(stations.toCharArray());
 			String min_station = stationIds.get(0);
-			String max_station = stationIds.get(stationIds.size() - 1);
+			String max_station = stationIds.get(stationIds.size() - 1);			
 			if (start != null && end != null) {
 				scan.setStartRow((start + "-" + min_station).getBytes());
-				scan.setStopRow((end + "-" + max_station).getBytes());
+				scan.setStopRow((end + "-" + max_station+"01").getBytes());
 			}
 
 			//System.out.println((start + "-" + min_station) + ";  "+ (end + "-" + max_station));
 
 			if (stations != null && stationIds.size() > 0) {
-				String regex = "";
+				String regex = "(";
 				boolean first = true;
 				for (String sId : stationIds) {
 					if (!first)
 						regex += "|";
 					first = false;
-					regex += "-" + sId + "$";
-				}				
+					regex += "-" + sId;
+				}	
+				regex += ")$";
 				Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL,
 						new RegexStringComparator(regex));
 				scan.setFilter(filter);
@@ -140,7 +141,8 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 					int counter = 0;
 					int usage = 0;
 					String row = Bytes.toString(r.getRow());
-					String station_id = row.substring(11, row.length());					
+					String station_id = row.substring(11, row.length());
+					//System.out.println("debug:   "+row);
 					row_num++;
 					for (int m = 0; m < columns.length; m++) {
 						byte[] metrics = r.getValue(
