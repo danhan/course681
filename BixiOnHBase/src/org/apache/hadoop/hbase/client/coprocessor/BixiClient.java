@@ -119,11 +119,15 @@ public class BixiClient {
 	  Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regex));
 	  scan.setFilter(filter);
     }
+    final long starttime = System.currentTimeMillis();
     class BixiCallBack implements Batch.Callback<Map<String, TotalNum>> {
       Map<String, TotalNum> res = new HashMap<String, TotalNum>();
 
       @Override
       public void update(byte[] region, byte[] row, Map<String, TotalNum> result) {
+    	  long node_access = System.currentTimeMillis();
+  		  System.out.println("node return time : "
+  				+ (node_access - starttime));
         for (Map.Entry<String, TotalNum> e : result.entrySet()) {
           if (res.containsKey(e.getKey())) { // add the val
             TotalNum tnnew = e.getValue();
@@ -148,7 +152,6 @@ public class BixiClient {
     }
 
     BixiCallBack callBack = new BixiCallBack();
-    long starttime = System.currentTimeMillis();
     table.coprocessorExec(BixiProtocol.class, scan.getStartRow(), scan
         .getStopRow(), new Batch.Call<BixiProtocol, Map<String, TotalNum>>() {
       public Map<String, TotalNum> call(BixiProtocol instance)
@@ -157,7 +160,7 @@ public class BixiClient {
       };
     }, callBack);
     long cluster_access = System.currentTimeMillis();
-	System.out.println("cluster access time : "
+	System.out.println("total execution time : "
 			+ (cluster_access - starttime));
     return callBack.getResult();
 
@@ -203,7 +206,7 @@ public class BixiClient {
           };
         }, callBack);
     long cluster_access = System.currentTimeMillis();
-	System.out.println("cluster access time : "
+	System.out.println("total execution time : "
 			+ (cluster_access - starttime));
 	Map<String, Integer> res = callBack.getResult();
 	System.out.println("Number of stations: " + res.size());
@@ -239,11 +242,15 @@ public class BixiClient {
 	    	  scan.setFilter(filter);
 	      }
 	    }
+	    final long starttime = System.currentTimeMillis();
 	    class BixiCallBack implements Batch.Callback<Map<String, TotalNum>> {
 	      Map<String, TotalNum> res = new HashMap<String, TotalNum>();
 
 	      @Override
 	      public void update(byte[] region, byte[] row, Map<String, TotalNum> result) {
+	    	  long node_access = System.currentTimeMillis();
+	  		  System.out.println("node return time : "
+	  				+ (node_access - starttime));
 	    	  for (Map.Entry<String, TotalNum> e : result.entrySet()) {
 	    		  if (res.containsKey(e.getKey())) { // add the val
 	    			  TotalNum tnnew = e.getValue();
@@ -268,7 +275,6 @@ public class BixiClient {
 	    }
 
 	    BixiCallBack callBack = new BixiCallBack();
-	    long starttime = System.currentTimeMillis();
 	    stat_table.coprocessorExec(BixiProtocol.class, scan.getStartRow(), scan
 	        .getStopRow(), new Batch.Call<BixiProtocol, Map<String, TotalNum>>() {
 	      public Map<String, TotalNum> call(BixiProtocol instance)
@@ -277,7 +283,7 @@ public class BixiClient {
 	      };
 	    }, callBack);
 	    long cluster_access = System.currentTimeMillis();
-		System.out.println("cluster access time : "
+		System.out.println("execution time : "
 				+ (cluster_access - starttime));
 	    return callBack.getResult();
 
@@ -298,7 +304,7 @@ public class BixiClient {
 	  public Map<String, Integer> getAvailableBikesFromAPoint_Schema2(final double lat,
 	      final double lon, String dateWithHour)
 	      throws IOException, Throwable {
-		  
+		  long totalstarttime = System.currentTimeMillis();
 		  List<String> stationIds = this.getStationsNearPoint(lat, lon);
 		  if(stationIds==null || stationIds.size()<=0){
 			  System.out.println("NO STATIONS FOUND.");
@@ -344,8 +350,11 @@ public class BixiClient {
 	          };
 	        }, callBack);
 	    long cluster_access = System.currentTimeMillis();
-		System.out.println("cluster access time : "
+		System.out.println("statistics table access time : "
 				+ (cluster_access - starttime));
+		long totalaccess = System.currentTimeMillis();
+		System.out.println("Total execution time : "
+				+ (totalaccess - totalstarttime));
 		Map<String, Integer> res = callBack.getResult();
 	    return res;
 
@@ -376,7 +385,7 @@ public class BixiClient {
 		          };
 		        }, callBack);
 		    long cluster_access = System.currentTimeMillis();
-			System.out.println("get stations in cluster access time : "
+			System.out.println("cluster table access time : "
 					+ (cluster_access - starttime));
 			List<String> res = callBack.getResult();
 			System.out.println("got " + res.size() + " stations");

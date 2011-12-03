@@ -261,6 +261,7 @@ BixiProtocol {
 				.getRegion().getScanner(scan);
 		boolean hasMoreResult = false;
 		List<KeyValue> res = new ArrayList<KeyValue>();
+		List<String> result = new ArrayList<String>();
 		try {
 			do {
 				hasMoreResult = scanner.next(res);
@@ -279,7 +280,7 @@ BixiProtocol {
 					double disty = lon-cLon;
 					if(distx >= 0 && distx <= dx && disty >= 0 && disty <= dy){
 						//get stations in cluster
-						return Arrays.asList(Bytes.toString(kv.getValue()).split(","));
+						result.addAll(Arrays.asList(Bytes.toString(kv.getValue()).split(",")));
 					}
 				}
 				res.clear();
@@ -287,7 +288,7 @@ BixiProtocol {
 		} finally {
 			scanner.close();
 		}
-		return new ArrayList<String>();
+		return result;
 	}
 
 }
