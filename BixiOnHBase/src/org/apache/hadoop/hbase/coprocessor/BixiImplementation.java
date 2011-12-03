@@ -240,12 +240,12 @@ BixiProtocol {
 					String stationId = Bytes.toString(kv.getRow()).split("-")[1];
 					String value = new String(kv.getValue());
 					Integer free = Integer.parseInt(value.split(";")[0]);
-
-					if(result.containsKey(stationId)){
+					result.put(stationId, free);
+					/*if(result.containsKey(stationId)){
 						result.put(stationId, free + result.get(stationId));
 					}else{
 						result.put(stationId, free);
-					}
+					}*/
 				}
 				res.clear();
 			} while (hasMoreResult);
@@ -257,18 +257,16 @@ BixiProtocol {
 
 	public List<String> getStationsNearPoint_Schema2(double lat, double lon) throws IOException {
 		Scan scan = new Scan();
+		scan.addFamily(BixiConstant.SCHEMA2_CLUSTER_FAMILY_NAME.getBytes());
 		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment())
 				.getRegion().getScanner(scan);
 		boolean hasMoreResult = false;
 		List<KeyValue> res = new ArrayList<KeyValue>();
+		List<String> result = new ArrayList<String>();
 		try {
 			do {
 				hasMoreResult = scanner.next(res);
 				for (KeyValue kv : res) {
-					if(!Bytes.toString(kv.getQualifier()).equalsIgnoreCase("ids")){
-						//only look at stationid column
-						continue;
-					}
 					String clusterId = Bytes.toString(kv.getRow());
 					String[] parts = clusterId.split(":");
 					double cLat = Double.parseDouble(parts[0]);
@@ -279,7 +277,7 @@ BixiProtocol {
 					double disty = lon-cLon;
 					if(distx >= 0 && distx <= dx && disty >= 0 && disty <= dy){
 						//get stations in cluster
-						return Arrays.asList(Bytes.toString(kv.getValue()).split(","));
+						result.add(Bytes.toString(kv.getQualifier()));
 					}
 				}
 				res.clear();
@@ -287,7 +285,7 @@ BixiProtocol {
 		} finally {
 			scanner.close();
 		}
-		return new ArrayList<String>();
+		return result;
 	}
 
 }
