@@ -240,12 +240,12 @@ BixiProtocol {
 					String stationId = Bytes.toString(kv.getRow()).split("-")[1];
 					String value = new String(kv.getValue());
 					Integer free = Integer.parseInt(value.split(";")[0]);
-
-					if(result.containsKey(stationId)){
+					result.put(stationId, free);
+					/*if(result.containsKey(stationId)){
 						result.put(stationId, free + result.get(stationId));
 					}else{
 						result.put(stationId, free);
-					}
+					}*/
 				}
 				res.clear();
 			} while (hasMoreResult);
