@@ -92,7 +92,8 @@ BixiProtocol {
 			Scan scan) throws IOException {
 		for (String qualifier : stationIds) {
 			log.debug("adding qualifier: " + qualifier);
-			scan.addColumn(colFamily, qualifier.getBytes());
+			String colName = Integer.toString(Integer.parseInt(qualifier));
+			scan.addColumn(colFamily, colName.getBytes());
 		}
 		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment())
 				.getRegion().getScanner(scan);
