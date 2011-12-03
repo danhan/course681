@@ -103,13 +103,16 @@ public class BixiClient {
       Date endD = format.parse(endDate);
       Calendar c = Calendar.getInstance();
       c.setTime(startD);
+
+      DateFormat filterFormat = new SimpleDateFormat("dd_MM_yyyy__");
       
       String regex = "^(";
 	  boolean start = true;
 	  while(c.getTime().before(endD)){
 		  if(!start)
 			  regex += "|";
-		  regex += format.format(c.getTime());
+	 	  start = false;
+		  regex += filterFormat.format(c.getTime());
 		  c.add(Calendar.DATE, 1);
 	  }
 	  regex += ")";
