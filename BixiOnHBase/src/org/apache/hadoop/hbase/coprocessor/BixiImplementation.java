@@ -190,8 +190,7 @@ BixiProtocol {
 	private static byte[] colFamilyStat = BixiConstant.SCHEMA2_BIKE_FAMILY_NAME.getBytes();
 
 	@Override
-	public Map<String, Integer> getTotalUsage_Schema2(List<String> stationIds,
-			Scan scan) throws IOException {
+	public Map<String, Integer> getTotalUsage_Schema2(Scan scan) throws IOException {
 
 		//System.err.println("scanning");
 		scan.addFamily(colFamilyStat);
@@ -222,24 +221,16 @@ BixiProtocol {
 		return result;
 	}
 
-	/**
-	 * make a general method that takes a pair of lat/lon and a radius and give a
-	 * boolean whether it was in or out.
-	 * @throws IOException
-	 */
 	@Override
-	public Map<String, Integer> getAvailableBikesFromAPoint_Schema2(double lat,
-			double lon, Scan scan) throws IOException {
+	public Map<String, Integer> getAvailableBikesFromAPoint_Schema2(Scan scan) throws IOException {
 		scan.addFamily(colFamilyStat);
 		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment())
 				.getRegion().getScanner(scan);
 		Map<String, Integer> result = new HashMap<String, Integer>();
 		boolean hasMoreResult = false;
-		int rowCounter = 0;
 		List<KeyValue> res = new ArrayList<KeyValue>();
 		try {
 			do {
-				rowCounter++;
 				hasMoreResult = scanner.next(res);
 				for (KeyValue kv : res) {
 					String stationId = Bytes.toString(kv.getRow()).split("-")[1];
@@ -265,11 +256,9 @@ BixiProtocol {
 		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment())
 				.getRegion().getScanner(scan);
 		boolean hasMoreResult = false;
-		int rowCounter = 0;
 		List<KeyValue> res = new ArrayList<KeyValue>();
 		try {
 			do {
-				rowCounter++;
 				hasMoreResult = scanner.next(res);
 				for (KeyValue kv : res) {
 					if(!Bytes.toString(kv.getQualifier()).equalsIgnoreCase("ids")){
