@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
 
@@ -116,13 +117,31 @@ public class TableInsertStatistics {
 				fileHash.put(toHours, file_list);
 			}
 		}
-
+		
+		 HashMap<String,HashMap<String,Integer>> file_stat = new HashMap<String,HashMap<String,Integer>>();
+		 
 		 TreeMap<String,List<String>> sorted = new TreeMap<String,List<String>>(fileHash);
 		 Iterator<String> keys = sorted.keySet().iterator(); 
 		 int counter = 0;
 		 int row = 0;
 		 while(keys.hasNext()){ 
 			 String prefix = keys.next(); 
+			 String month = prefix.substring(3, 5);
+			 String day = prefix.substring(0,2);
+			 
+			 if(file_stat.containsKey(month)){
+				 HashMap<String,Integer> days = file_stat.get(month);
+				 if(days.containsKey(day)){
+					 days.put(day, ((Integer)days.get(day)).intValue()+1);
+				 }else{
+					 days.put(day, 1);
+				 }
+			 }else {
+				 HashMap<String,Integer> days = new HashMap<String,Integer>();
+				 days.put(day, 1);
+				 file_stat.put(month, days);
+			 }
+			 
 			 System.out.print((counter++)+"  == "+prefix+" : ( ");
 			 Iterator<String> stamps = sorted.get(prefix).iterator();
 			 int index = 0;
@@ -135,7 +154,24 @@ public class TableInsertStatistics {
 					System.out.print("*");
 			 } 
 		   System.out.println(")=="+index+"; "+row); 
-		 }		 
+		 }	
+		 
+		 
+		 for(Map.Entry<String, HashMap<String,Integer>> e: file_stat.entrySet()){
+			 String month = e.getKey();
+			 HashMap<String,Integer> day_hour = e.getValue();
+			 TreeMap<String,Integer> sorted_day_hour = new TreeMap<String,Integer>(day_hour);			 
+			 System.out.println("month: "+month+":");
+			 for(Map.Entry<String, Integer> days: sorted_day_hour.entrySet()){
+				 int hours = days.getValue();
+				 String result = "OK";
+				 if (hours<24) result = "NO";
+				 System.out.println(days.getKey()+"=>"+days.getValue()+"="+result+";");
+			 }
+			 System.out.println("==============");
+		 }
+		 
+		 
 		 
 		 
 	}

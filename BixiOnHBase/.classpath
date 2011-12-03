@@ -7,6 +7,5 @@
 	<classpathentry kind="lib" path="/opt/hbaseMT/hbase-0.93-SNAPSHOT/lib/zookeeper-3.3.3.jar"/>
 	<classpathentry kind="lib" path="/opt/hbaseMT/hbase-0.93-SNAPSHOT/lib/log4j-1.2.16.jar"/>
 	<classpathentry kind="lib" path="/opt/hbaseMT/hbase-0.93-SNAPSHOT/lib/hadoop-core-0.20-append-r1057313.jar"/>
-	<classpathentry kind="lib" path="lib/junit.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

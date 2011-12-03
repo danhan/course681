@@ -386,8 +386,18 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 	
 	
 	public static void  main(String args[]){
-		String start = "31_10_2010__00";
-		String end = "01_11_2010__00";
+		String s = "";
+		for(int i=1;i<=100;i++){
+			s +=i+"#";
+		}
+		System.out.println(s);
+		
+		
+		String start = "01_10_2010__00";
+		String end = "10_11_2010__00";
+		BixiQuerySchema1.getFilterRegex(start,end);
+		start = "01_10_2010__00";
+		end = "30_11_2010__00";
 		BixiQuerySchema1.getFilterRegex(start,end);
 	}
 

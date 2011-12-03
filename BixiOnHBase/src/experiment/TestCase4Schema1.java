@@ -1,13 +1,11 @@
 package experiment;
 
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import bixi.hbase.query.BixiQueryAbstraction;
 import bixi.hbase.query.BixiQuerySchema1;
-import junit.framework.TestCase;
 
 public class TestCase4Schema1 extends TestCaseBase{
 
