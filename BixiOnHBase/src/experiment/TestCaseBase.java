@@ -24,8 +24,8 @@ public abstract class TestCaseBase {
 	private static String[] longTestByStation  = {"50station","100station","200station","300station","400station"};
 	
 	
-	private static final String[] pointTests = {"location"};
-
+	protected static final String[] pointTests = {"location"};
+	protected static final String singleTimeStamp = "singleTimestamp";
 
 	public TestCaseBase() {		
 		bixiQuery = getBixiQuery();
@@ -38,33 +38,63 @@ public abstract class TestCaseBase {
 	}
 	
 	public void runTests(){
-		System.out.println("********Short Analysis********callTimeSlot4StationsScan**************");
+		System.out.println("********Short Analysis**by time******callTimeSlot4StationsScan**************");
 		for(String test : shortTestByTime){
 			System.out.println("====Start========="+test+"==============");
 			callTimeSlot4StationsScan(test);
 			System.out.println("====End========="+test+"==============");
 		}
 		
-		System.out.println("*******Short Analysis***********callTimeSlot4Stations******************");
+		System.out.println("*******Short Analysis***by time********callTimeSlot4Stations******************");
 		for(String test : shortTestByTime){
 			System.out.println("====Start========="+test+"==============");
 			callTimeSlot4Stations(test);
 			System.out.println("====End========="+test+"==============");
 		}
 		
-//		System.out.println("**********Long Analysis******callTimeSlot4StationsScan******************");
+		System.out.println("********Short Analysis by station***callTimeSlot4StationsScan**************");
+		for(String test : shortTestByStation){
+			System.out.println("====Start========="+test+"==============");
+			callTimeSlot4StationsScan(test);
+			System.out.println("====End========="+test+"==============");
+		}
+		
+		System.out.println("*******Short Analysis*** by station**callTimeSlot4Stations******************");
+		for(String test : shortTestByStation){
+			System.out.println("====Start========="+test+"==============");
+			callTimeSlot4Stations(test);
+			System.out.println("====End========="+test+"==============");
+		}		
+	
+//		System.out.println("**********Long Analysis*by time*****callTimeSlot4StationsScan******************");
 //		for(String test : longTestByTime){
 //			System.out.println("====Start========="+test+"==============");
 //			callTimeSlot4StationsScan(test);
 //			System.out.println("====End========="+test+"==============");
 //		}
 //		
-//		System.out.println("***********Long Analysis*******callTimeSlot4Stations**********************");
+//		System.out.println("***********Long Analysis*by time****callTimeSlot4Stations**********************");
 //		for(String test : longTestByTime){
 //			System.out.println("====Start========="+test+"==============");
 //			callTimeSlot4Stations(test);
 //			System.out.println("====End========="+test+"==============");
+//		}	
+//		
+//		System.out.println("**********Long Analysis by station******callTimeSlot4StationsScan******************");
+//		for(String test : longTestByStation){
+//			System.out.println("====Start========="+test+"==============");
+//			callTimeSlot4StationsScan(test);
+//			System.out.println("====End========="+test+"==============");
+//		}
+//		
+//		System.out.println("***********Long Analysis by station******callTimeSlot4Stations**********************");
+//		for(String test : longTestByStation){
+//			System.out.println("====Start========="+test+"==============");
+//			callTimeSlot4Stations(test);
+//			System.out.println("====End========="+test+"==============");
 //		}		
+	
+		
 		
 		System.out.println("****************callTimeStamp4PointScan*******************************");
 		for(String test : pointTests){
@@ -79,11 +109,7 @@ public abstract class TestCaseBase {
 			callTimeStamp4Point(test);
 			System.out.println("====End========="+test+"==============");
 		}
-		
-		
-		
-		
-		
+	
 		
 	}
 	
@@ -94,7 +120,7 @@ public abstract class TestCaseBase {
 		String[] args = property.split(" ");
 		String start = convertDate(args[0]);
 		String end = convertDate(args[1]);
-		String stations = args[2];;
+		String stations = args[2];
 		bixiQuery.queryAvgUsageByTimeSlot4Stations(start, end, stations);
 	}
 	private void callTimeSlot4StationsScan(String propertyName){

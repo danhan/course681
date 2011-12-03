@@ -244,7 +244,7 @@ public class BixiClientTester {
     }
 
     for (String qualifier : stationIds) {
-      scan.addColumn(BixiConstant.FAMILY, qualifier.getBytes());
+      scan.addColumn(BixiConstant.SCHEMA1_FAMILY_NAME.getBytes(), qualifier.getBytes());
     }
     HTable table = new HTable(conf, "BixiData".getBytes());
     Map<String, Integer> result = new HashMap<String, Integer>();

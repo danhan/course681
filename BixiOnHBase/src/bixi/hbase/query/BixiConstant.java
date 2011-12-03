@@ -13,8 +13,7 @@ public class BixiConstant {
    * 
    */
   public final static double MONTREAL_LON = -73.554094d;
-      
-  public final static byte[] FAMILY = "Data".getBytes();
+        
   
 	public static String SCHEMA1_TABLE_NAME = "BixiData";
 	public static String SCHEMA1_FAMILY_NAME = "Data";  

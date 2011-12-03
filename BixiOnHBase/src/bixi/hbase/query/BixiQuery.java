@@ -882,7 +882,7 @@ public class BixiQuery {
 		}
 
 		for (String qualifier : stationIds) {
-			scan.addColumn(BixiConstant.FAMILY, qualifier.getBytes());
+			scan.addColumn(BixiConstant.SCHEMA1_FAMILY_NAME.getBytes(), qualifier.getBytes());
 		}
 		HTable table = new HTable(conf, schema1_bixidata.getBytes());
 		Map<String, Integer> result = new HashMap<String, Integer>();

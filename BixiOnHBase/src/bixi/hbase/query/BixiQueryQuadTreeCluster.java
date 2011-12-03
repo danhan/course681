@@ -24,12 +24,9 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 
-	int cacheSize = 5000;
-	String cluster_table_name = BixiConstant.SCHEMA2_CLUSTER_TABLE_NAME;
-	String cluster_family_name = BixiConstant.SCHEMA2_CLUSTER_FAMILY_NAME;
-	String bike_table_name = BixiConstant.SCHEMA2_BIKE_TABLE_NAME;
-	String bike_family_name = BixiConstant.SCHEMA2_BIKE_FAMILY_NAME;
-
+	public BixiQueryQuadTreeCluster(int type){
+		super(type);
+	}
 	@Override
 	public void queryAvgUsageByTimeSlot4Stations(String start, String end,
 			String stations) {
@@ -71,7 +68,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 	    }
 		
 	}	
-
+	
 	@Override
 	public void queryAvgUsageByTimeSlot4StationsWithScan(String start,
 			String end, String stations) {
@@ -102,8 +99,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 				scan.setStopRow((end + "-" + max_station).getBytes());
 			}
 
-			System.out.println((start + "-" + min_station) + ";  "
-					+ (end + "-" + max_station));
+			//System.out.println((start + "-" + min_station) + ";  "+ (end + "-" + max_station));
 
 			if (stations != null && stationIds.size() > 0) {
 				String regex = "";
@@ -117,7 +113,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 				Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL,
 						new RegexStringComparator(regex));
 				scan.setFilter(filter);
-				System.out.println(regex);
+				//System.out.println(regex);
 			}
 
 			String[] columns = new String[60];
@@ -144,8 +140,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 					int counter = 0;
 					int usage = 0;
 					String row = Bytes.toString(r.getRow());
-					String station_id = row.substring(11, row.length());
-					System.out.println(row);
+					String station_id = row.substring(11, row.length());					
 					row_num++;
 					for (int m = 0; m < columns.length; m++) {
 						byte[] metrics = r.getValue(
@@ -183,6 +178,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 
 	}
 
+	
 	@Override
 	public void queryAvailableByTimeStamp4PointWithScan(String timestamp,
 			double latitude, double longitude, double radius) {

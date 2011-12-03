@@ -25,9 +25,10 @@ import org.apache.hadoop.hbase.util.Bytes;
 
 public class BixiQuerySchema1 extends BixiQueryAbstraction {
 
-	String table_name = BixiConstant.SCHEMA1_TABLE_NAME;
-	String family_name = BixiConstant.SCHEMA1_FAMILY_NAME;
-
+	public BixiQuerySchema1(int type){
+		super(1);
+	}
+	
 	/******************************************************
 	 * ********************************Coprocessor*********
 	 ******************************************************/
@@ -109,7 +110,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		
 		
 		for (String qualifier : stationIds) {
-			scan.addColumn(BixiConstant.FAMILY, qualifier.getBytes());
+			scan.addColumn(BixiConstant.SCHEMA1_FAMILY_NAME.getBytes(), qualifier.getBytes());
 		}
 
 		Map<String, Integer> result = new HashMap<String, Integer>();
@@ -119,7 +120,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		int counter = 0;
 		ResultScanner scanner = null;
 		try {
-			HTable table = new HTable(conf, table_name.getBytes());
+			HTable table = new HTable(conf, this.bike_table_name.getBytes());
 			scanner = table.getScanner(scan);
 
 			for (Result r : scanner) {
@@ -176,7 +177,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		try {
 			long starttime = System.currentTimeMillis();
 			Get g = new Get(Bytes.toBytes(dateWithHr + "_00"));
-			HTable table = new HTable(conf, this.table_name.getBytes());
+			HTable table = new HTable(conf, this.bike_table_name.getBytes());
 			Result r = table.get(g);
 			Map<String, Double> result = new HashMap<String, Double>();
 			// this r contains the entire row for the hr+00 min. Now compute the
