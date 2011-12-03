@@ -161,6 +161,7 @@ public class BixiClient {
     }
 
     BixiAvailCallBack callBack = new BixiAvailCallBack();
+    long starttime = System.currentTimeMillis();
     table.coprocessorExec(BixiProtocol.class, get.getRow(), get.getRow(),
         new Batch.Call<BixiProtocol, Map<String, Double>>() {
           public Map<String, Double> call(BixiProtocol instance)
@@ -168,8 +169,12 @@ public class BixiClient {
             return instance.getAvailableBikesFromAPoint(lat, lon, radius, get);
           };
         }, callBack);
-
-    return callBack.getResult();
+    long cluster_access = System.currentTimeMillis();
+	System.out.println("cluster access time : "
+			+ (cluster_access - starttime));
+	Map<String, Double> res = callBack.getResult();
+	System.out.println("Number of stations: " + res.size());
+    return res;
 
   }
   
@@ -232,6 +237,7 @@ public class BixiClient {
 	    }
 
 	    BixiCallBack callBack = new BixiCallBack();
+	    long starttime = System.currentTimeMillis();
 	    stat_table.coprocessorExec(BixiProtocol.class, scan.getStartRow(), scan
 	        .getStopRow(), new Batch.Call<BixiProtocol, Map<String, Integer>>() {
 	      public Map<String, Integer> call(BixiProtocol instance)
@@ -239,7 +245,9 @@ public class BixiClient {
 	        return instance.getTotalUsage_Schema2(stationIds, scan);
 	      };
 	    }, callBack);
-
+	    long cluster_access = System.currentTimeMillis();
+		System.out.println("cluster access time : "
+				+ (cluster_access - starttime));
 	    return callBack.getResult();
 
 	  }
@@ -294,6 +302,7 @@ public class BixiClient {
 	    }
 
 	    BixiAvailCallBack callBack = new BixiAvailCallBack();
+	    long starttime = System.currentTimeMillis();
 	    stat_table.coprocessorExec(BixiProtocol.class, scan.getStartRow(), scan.getStopRow(),
 	        new Batch.Call<BixiProtocol, Map<String, Double>>() {
 	          public Map<String, Double> call(BixiProtocol instance)
@@ -301,13 +310,16 @@ public class BixiClient {
 	            return instance.getAvailableBikesFromAPoint_Schema2(lat, lon, scan);
 	          };
 	        }, callBack);
-
-	    return callBack.getResult();
+	    long cluster_access = System.currentTimeMillis();
+		System.out.println("cluster access time : "
+				+ (cluster_access - starttime));
+		Map<String, Double> res = callBack.getResult();
+	    return res;
 
 	  }
 	  
 	  public List<String> getStationsNearPoint(final double lat, final double lon) throws IOException, Throwable{
-		  
+		  System.out.println("Getting stations in cluster");
 		  class BixiAvailCallBack implements Batch.Callback<List<String>> {
 		      List<String> res = new ArrayList<String>();
 
@@ -322,6 +334,7 @@ public class BixiClient {
 		    }
 
 		    BixiAvailCallBack callBack = new BixiAvailCallBack();
+		    long starttime = System.currentTimeMillis();
 		    cluster_table.coprocessorExec(BixiProtocol.class, null, null,
 		        new Batch.Call<BixiProtocol, List<String>>() {
 		          public List<String> call(BixiProtocol instance)
@@ -329,8 +342,12 @@ public class BixiClient {
 		            return instance.getStationsNearPoint_Schema2(lat, lon);
 		          };
 		        }, callBack);
-
-		    return callBack.getResult();
+		    long cluster_access = System.currentTimeMillis();
+			System.out.println("get stations in cluster access time : "
+					+ (cluster_access - starttime));
+			List<String> res = callBack.getResult();
+			System.out.println("got " + res.size() + " stations");
+		    return res;
 	  }
   
 }
