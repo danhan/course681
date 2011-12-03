@@ -86,7 +86,7 @@ public class BixiClient {
       scan.setStartRow((startDate + "_00").getBytes());
       scan.setStopRow((endDate + "_59").getBytes());
     }
-    DateFormat formatter = new SimpleDateFormat("yyyyMMddHH");
+    DateFormat formatter = new SimpleDateFormat("dd_MM_yyyy__HH");
     Date start = formatter.parse(startDate);
     Date end = formatter.parse(endDate);
     long comp = (end.getTime()/60000)-(start.getTime()/60000)+1;
