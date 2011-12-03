@@ -23,13 +23,13 @@ public interface BixiProtocol extends CoprocessorProtocol {
   Map<String, Integer> giveAvailableBikes(long milliseconds,
       List<String> stationIds, Scan scan) throws IOException;
 
-  Map<String, Integer> giveAverageUsage(List<String> stationIds, Scan scan)
+  Map<String, TotalNum> giveTotalUsage(List<String> stationIds, Scan scan)
       throws IOException;
 
   Map<String, Integer> getAvailableBikesFromAPoint(double lat, double lon,
       double radius, Get get) throws IOException;
   
-  Map<String, Integer> getTotalUsage_Schema2(Scan scan)
+  Map<String, TotalNum> getTotalUsage_Schema2(Scan scan)
   throws IOException;
 
   Map<String, Integer> getAvailableBikesFromAPoint_Schema2(Scan scan) throws IOException;

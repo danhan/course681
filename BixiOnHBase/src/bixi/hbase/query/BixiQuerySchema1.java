@@ -48,7 +48,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 
 		try {
 			BixiClient client = new BixiClient(conf);
-			Map<String, Integer> avgusage = client.getAvgUsageForPeriod(
+			Map<String, Double> avgusage = client.getAvgUsageForPeriod(
 					stationIds, start, end);
 			System.out.println("Average Usage: " + avgusage);
 		} catch (Exception e) {
