@@ -227,13 +227,14 @@ public class BixiClient {
 	    	  String regex = "(";
 	    	  boolean start = true;
 	    	  for(String sId : stationIds){
-	    		  String id = Integer.toString(Integer.parseInt(sId));
+	    		  //String id = Integer.toString(Integer.parseInt(sId));
 	    		  if(!start)
 	    			  regex += "|";
 	    		  start = false;
-	    		  regex += "-" + id;
+	    		  regex += "-" + sId;
 	    	  }
 	    	  regex += ")$";
+		  System.out.println("REGEX: " + regex);
 	    	  Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regex));
 	    	  scan.setFilter(filter);
 	      }
