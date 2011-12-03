@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -56,7 +57,7 @@ public class BixiClient {
     log.debug("in getAvailBikes: " + dateWithHour);
     if (dateWithHour != null) {
       scan.setStartRow((dateWithHour + "_00").getBytes());
-      scan.setStopRow((dateWithHour + "_59").getBytes());
+      scan.setStopRow((dateWithHour + "_60").getBytes());
     }
     class BixiCallBack implements Batch.Callback<Map<String, Integer>> {
       Map<String, Integer> res = new HashMap<String, Integer>();
@@ -84,8 +85,36 @@ public class BixiClient {
     if(endDate == null)
     	endDate = startDate;
     if (startDate != null) {
-      scan.setStartRow((startDate + "_00").getBytes());
-      scan.setStopRow((endDate + "_59").getBytes());
+      String startRow;
+      String endRow;
+      if(startDate.compareTo(endDate)<0){
+    	  startRow = startDate;
+    	  endRow = endDate;
+      }else{
+    	  startRow = endDate;
+    	  endRow = startDate;
+      }
+      
+      scan.setStartRow((startRow + "_00").getBytes());
+      scan.setStopRow((endRow + "_60").getBytes());
+      
+      DateFormat format = new SimpleDateFormat("dd_MM_yyyy__HH");
+      Date startD = format.parse(startDate);
+      Date endD = format.parse(endDate);
+      Calendar c = Calendar.getInstance();
+      c.setTime(startD);
+      
+      String regex = "^(";
+	  boolean start = true;
+	  while(c.getTime().before(endD)){
+		  if(!start)
+			  regex += "|";
+		  regex += format.format(c.getTime());
+		  c.add(Calendar.DATE, 1);
+	  }
+	  regex += ")";
+	  Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regex));
+	  scan.setFilter(filter);
     }
     class BixiCallBack implements Batch.Callback<Map<String, TotalNum>> {
       Map<String, TotalNum> res = new HashMap<String, TotalNum>();
@@ -190,7 +219,7 @@ public class BixiClient {
 	    }
 	    if (startDateWithHour != null) {
 	      scan.setStartRow((startDateWithHour + "-1").getBytes());
-	      scan.setStopRow((endDateWithHour + "-407").getBytes());
+	      scan.setStopRow((endDateWithHour + "-408").getBytes());
 	      if(stationIds!=null && stationIds.size()>0){
 	    	  String regex = "(";
 	    	  boolean start = true;
@@ -271,7 +300,7 @@ public class BixiClient {
 		  final Scan scan = new Scan();
 		  if (dateWithHour != null) {
 		      scan.setStartRow((dateWithHour + "-1").getBytes());
-		      scan.setStopRow((dateWithHour + "-407").getBytes());
+		      scan.setStopRow((dateWithHour + "-408").getBytes());
 		      if(stationIds!=null && stationIds.size()>0){
 		    	  String regex = "(";
 		    	  boolean start = true;
