@@ -137,8 +137,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 			int row_size = 0;
 			try {
 				scanner = table.getScanner(scan);				
-				System.out.println("schema2 : scan execution time: "+ (System.currentTimeMillis() - starttime));
-				starttime = System.currentTimeMillis();				
+				System.out.println("schema2 : scan execution time: "+ (System.currentTimeMillis() - starttime));						
 				for (Result r : scanner) {
 					int counter = 0;
 					int usage = 0;				
@@ -163,7 +162,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 					result.put(station_id, (int) (usage / (counter * 1.0)));
 
 				}
-				System.out.println("schema 2: row size =>"+row_size+"; get data execution time => " + (System.currentTimeMillis() - starttime));
+				System.out.println("schema 2: row size =>"+row_size+";total execution time => " + (System.currentTimeMillis() - starttime));
 						
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -248,7 +247,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 				System.out.println("there is no cluster it belongs to");
 			}
 
-			System.out.println("execution time : "
+			System.out.println("total execution time : "
 					+ (System.currentTimeMillis() - starttime));
 
 			System.out.print("schema2: queryAvailableByTimeStamp4Point: "
@@ -323,7 +322,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 					System.out.println("there is no cluster it belongs to");
 				}
 
-				System.out.print("execution time : "
+				System.out.print("total execution time : "
 						+ (System.currentTimeMillis() - starttime)
 						+ "; schema2: queryAvailableByTimeStamp4Point: "
 						+ station_avail.size() + " available( ");

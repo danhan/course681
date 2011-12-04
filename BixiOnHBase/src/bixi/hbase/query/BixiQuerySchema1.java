@@ -132,8 +132,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		try {
 			HTable table = new HTable(conf, this.bike_table_name.getBytes());
 			scanner = table.getScanner(scan);
-			System.out.println("schema1 scan execution time: "+ (System.currentTimeMillis() - starttime));
-			 starttime = System.currentTimeMillis();
+			System.out.println("schema1 scan execution time: "+ (System.currentTimeMillis() - starttime));			 
 			for (Result r : scanner) {
 				// System.out.println("Row number:"+counter);				
 				
@@ -151,7 +150,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 				}
 				counter++;
 			}
-			System.out.println("schema1: row_size=>"+row_size+"; get data execution time: "+ (System.currentTimeMillis() - starttime));
+			System.out.println("schema1: row_size=>"+row_size+"; total execution time: "+ (System.currentTimeMillis() - starttime));
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -215,7 +214,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 				}
 			}
 
-			System.out.println("schema1 execution time: "
+			System.out.println("schema1 total execution time: "
 					+ (System.currentTimeMillis() - starttime)
 					+ "  schema1 availBikes is with Scan: " + result.size());
 			// + ":" + result);
