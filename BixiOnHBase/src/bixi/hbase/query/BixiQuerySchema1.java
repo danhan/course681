@@ -100,11 +100,25 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		// because the rowkey , it is sored in the bigtable. So need to treat with it in this way.
 		String start_point = sDateWithHour;
 		String end_point = eDateWithHour;
-		if(start_point.compareTo(end_point) > 0){
-			start_point = eDateWithHour;
-			end_point = sDateWithHour;
-		}		
 		
+		boolean in_one_month = ( Integer.valueOf(start_point.substring(3,5)) > Integer.valueOf(start_point.substring(3,5)));
+		if(in_one_month){
+			if(start_point.compareTo(end_point) > 0){
+				start_point = eDateWithHour;
+				end_point = sDateWithHour;
+			}				
+		}else{
+			if(Integer.valueOf(start_point.substring(0,2)) > Integer.valueOf(end_point.substring(0,2))){
+				start_point = eDateWithHour.replace(eDateWithHour.substring(0, 2),"01");
+				
+				if(start_point.compareTo(end_point) > 0){
+					end_point = sDateWithHour.substring(0,sDateWithHour.length()-2)+"23";
+				}else{
+					end_point = eDateWithHour.substring(0,eDateWithHour.length()-2)+"23";
+				}
+			}
+		}
+			
 		if (sDateWithHour != null && eDateWithHour != null) {
 			scan.setStartRow((start_point + "_00").getBytes());
 			scan.setStopRow((end_point + "_59"+"1").getBytes());
@@ -261,6 +275,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 	 */
 	
 	public static String getFilterRegex(String start,String end){
+		System.out.println(start +";" +end);
 		String regex = "";
 		if(start !=null && end != null){
 			StringTokenizer start_tokens = new StringTokenizer(start,"_");
@@ -273,6 +288,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 			String e_month = end_tokens.nextToken();
 			String e_year = end_tokens.nextToken();		
 			
+			System.out.println(s_month+"; "+e_month);
 			if(e_month.equals(s_month)){
 				boolean first = true;
 				for(int i=Integer.valueOf(s_day);i<=Integer.valueOf(e_day);i++){					
@@ -307,7 +323,8 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							regex += "_";
 							regex += s_month;
 							regex += "_"+e_year+"__";													
-						}						
+						}	
+						regex += "|";
 						for(int i=1;i<=Integer.valueOf(e_day);i++){
 							if (i<10) regex +="^0"+i;
 							else  regex +="^"+i;														
@@ -315,7 +332,8 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							regex += e_month;
 							regex += "_"+e_year+"__";
 							regex += "|";							
-						}												
+						}
+						System.out.println("10,.."+regex);
 					}else if(e_month.equals("11")){		
 						boolean first = true;
 						for(int i=Integer.valueOf(s_day);i<=31;i++){
@@ -440,8 +458,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 				
 				}else if(s_month.equals("11")){
 					boolean first = true;
-					if(e_month == "12"){
-						
+					if(e_month == "12"){						
 						if(first) 
 							regex = "";
 						else 
@@ -471,7 +488,8 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 				
 			}		
 					
-		}		
+		}	
+		System.out.println(regex);
 		if(regex.lastIndexOf('|') == regex.length()-1)
 			regex = regex.substring(0,regex.length()-2);
 		//System.out.println(regex);
@@ -481,10 +499,34 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 	public static void main(String[] args){
 		String s = "25_09_2010__00";
 		String e = "04_10_2010__23";
-		if(s.compareTo(e)> 0){
-			s = e;
+		String reg = getFilterRegex(s,e);
+		System.out.println(reg);
+		
+		String start_point = s;
+		String end_point = e;
+		boolean in_one_month = ( Integer.valueOf(start_point.substring(3,5)) > Integer.valueOf(start_point.substring(3,5)));
+		if(in_one_month){
+			System.out.println("in one month");
+			if(start_point.compareTo(end_point) > 0){
+				start_point = e;
+				end_point = s;
+			}				
+		}else{
+			if(Integer.valueOf(start_point.substring(0,2)) > Integer.valueOf(end_point.substring(0,2))){
+				start_point = e.replace(e.substring(0, 2),"01");
+				
+				if(start_point.compareTo(end_point) > 0){
+					end_point = s.substring(0,s.length()-2)+"23";
+				}else{
+					end_point = s.substring(0,s.length()-2)+"23";
+				}
+			}
 		}
-		System.out.println(s);
+		
+		
+		System.out.println("tart: "+start_point + "; "+end_point);
+		
+
 	}
 	
 

@@ -120,38 +120,35 @@ public abstract class TestCaseBase {
 		String end = convertDate(args[1]);
 		String stations = args[2];
 		for(int i=0;i<times;i++){
-			System.out.println("#####################"+i+" Time #########################");
+			//System.out.println("#####################"+i+" Time #########################");
 			bixiQuery.queryAvgUsageByTimeSlot4Stations(start, end, stations);			
 		}
-		System.out.println("########################################################");	
+		//System.out.println("########################################################");	
 	}
 	private void callTimeSlot4StationsScan(String propertyName){
 		String property = tests.getProperty(propertyName);		
 		String[] args = property.split(" ");
 		String start = convertDate(args[0]);
 		String end = convertDate(args[1]);
-		String stations = args[2];
-		System.out.println(start + "; "+end + ";" + stations);
+		String stations = args[2];		
 		for(int i=0;i<times;i++){
-			System.out.println("#####################"+i+" Time #########################");
+			//System.out.println("#####################"+i+" Time #########################");
 			bixiQuery.queryAvgUsageByTimeSlot4StationsWithScan(start, end, stations);
 			
 		}
-		System.out.println("########################################################");
+		//System.out.println("########################################################");
 	}
 	private void callTimeStamp4Point(String propertyName){
 		String property = tests.getProperty(propertyName);
 		String[] args = property.split(" ");
 		String timestamp = convertDate(args[0]);
 		Double latitude = Double.parseDouble(args[1]);
-		Double longitude = Double.parseDouble(args[2]);
-		
+		Double longitude = Double.parseDouble(args[2]);		
 		for(int i=0;i<times;i++){
-			System.out.println("#####################"+i+" Time #########################");
-			bixiQuery.queryAvailableByTimeStamp4Point(timestamp, latitude, longitude, RADIUS);
-			
+			//System.out.println("#####################"+i+" Time #########################");
+			bixiQuery.queryAvailableByTimeStamp4Point(timestamp, latitude, longitude, RADIUS);			
 		}	
-		System.out.println("########################################################");
+		//System.out.println("########################################################");
 	}
 	private void callTimeStamp4PointScan(String propertyName){
 		String property = tests.getProperty(propertyName);
@@ -160,11 +157,35 @@ public abstract class TestCaseBase {
 		Double latitude = Double.parseDouble(args[1]);
 		Double longitude = Double.parseDouble(args[2]);
 		for(int i=0;i<times;i++){
-			System.out.println("#####################"+i+" Time #########################");
+			//System.out.println("#####################"+i+" Time #########################");
 			bixiQuery.queryAvailableByTimeStamp4PointWithScan(timestamp, latitude, longitude, RADIUS);			
 		}		
-		System.out.println("########################################################");
+		//System.out.println("########################################################");
 	}
+	
+	/***********************************************************************************
+	 * ***********Because execution time of scan descrease much when it run in program
+	 * **************So need to provide the batch run**********************************
+	 ***********************************************************************************/
+	public void runScanByBatch(String propertyName){
+		this.times = 1;
+		callTimeSlot4StationsScan(propertyName);
+	}
+	
+	public void runScan4PointByBatch(String propertyName){
+		this.times = 1;
+		callTimeStamp4PointScan(propertyName);
+	}
+	
+	public void runCoprocessor4StationByBatch(String propertyName){
+		this.times = 1;
+		callTimeSlot4Stations(propertyName);
+	}
+	public void runCoprocessor4PointByBatch(String propertyName){
+		this.times = 1;
+		callTimeStamp4Point(propertyName);
+	}
+	
 	
 }
 

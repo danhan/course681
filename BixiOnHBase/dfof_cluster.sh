@@ -35,7 +35,8 @@ fi
 COMMONLIB=${HBASE_HOME}/lib/log4j-1.2.16.jar:\
 ${HBASE_HOME}/lib/commons-logging-1.1.1.jar:\
 ${HBASE_HOME}/lib/commons-cli-1.2.jar:\
-${HBASE_HOME}/lib/zookeeper-3.3.3.jar:
+${HBASE_HOME}/lib/zookeeper-3.3.3.jar:\
+${HBASE_HOME}/lib/commons-httpclient-3.1.jar
 
 
 MYLIB=${PWD}/bin/bixi.jar
@@ -54,7 +55,13 @@ echo "Bixi Example starts to run"
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 
 echo ${COMMONLIB}:${HBASELIB}:${HBASECONF}:${HADOOPLIB}:${HADOOPCONF}:${MYLIB}:${MYCONF}
-${JAVA_HOME}/bin/java -Xmx1500m -classpath ${COMMONLIB}:${HBASELIB}:${HBASECONF}:${HADOOPLIB}:${HADOOPCONF}:${MYLIB}:${MYCONF} experiment.TestCase4QuadTree
+
+${JAVA_HOME}/bin/java -Xmx1500m -classpath ${COMMONLIB}:${HBASELIB}:${HBASECONF}:${HADOOPLIB}:${HADOOPCONF}:${MYLIB}:${MYCONF} bixi.hbase.upload.HBaseClient 41 dfof
+
+${JAVA_HOME}/bin/java -Xmx1500m -classpath ${COMMONLIB}:${HBASELIB}:${HBASECONF}:${HADOOPLIB}:${HADOOPCONF}:${MYLIB}:${MYCONF} bixi.dataset.cluster.BixiReaderToTable
+
+${JAVA_HOME}/bin/java -Xmx1500m -classpath ${COMMONLIB}:${HBASELIB}:${HBASECONF}:${HADOOPLIB}:${HADOOPCONF}:${MYLIB}:${MYCONF} bixi.dataset.cluster.RegionCluster 6 6
+
 
 echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
 echo "Bixi Example stopped"
