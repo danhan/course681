@@ -255,8 +255,9 @@ public class TableInsertStatistics {
 
 	/*
 	 * rowkey is changed to stationid-timestamp
+	 * file name : 01_10_2011,
 	 */
-	public void batchInsertRow4schema3(String fileDir) {
+	public void batchInsertRow4OneDay(String fileDir) {
 
 		File dir = new File(fileDir);
 		if (!dir.isDirectory()) {
@@ -288,9 +289,6 @@ public class TableInsertStatistics {
 				fileHash.put(timestampes[0], file_list);
 			}
 		}
-
-		// TreeMap<String,List<String>> sorted = new
-		// TreeMap<String,List<String>>(fileHash);
 
 		Iterator<String> keys = fileHash.keySet().iterator();
 
@@ -417,6 +415,30 @@ public class TableInsertStatistics {
 		}
 		return oneHourFiles;
 	}
+	
+	/*
+	 * List of map<stationId-minute, metrics> There are 407 members because
+	 * there are 407 stations
+	 */
+
+	private List<HashMap<String, String>> parseOneDayForAll(
+			List<String> file_list, String directory) {
+		//TODO parse file and timestamp
+		List<HashMap<String, String>> oneDayFiles = new LinkedList<HashMap<String, String>>();
+		try {
+			for (String fileName : file_list) {
+				// parse one file and get all key value for all stations in one
+				// timestamp
+				HashMap<String, String> oneFile = parseOneFile(directory + "/"
+						+ fileName);
+				oneDayFiles.add(oneFile);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return oneDayFiles;
+	}	
 
 	/*
 	 * filename with full path hashmap: (stationId-Minutes,metrics value) e.g.

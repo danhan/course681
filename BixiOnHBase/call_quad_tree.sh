@@ -48,7 +48,7 @@ HADOOPLIB=${HADOOP_HOME}/hadoop-0.20.2-core.jar
 HADOOPCONF=${HADOOP_HOME}/conf
 
 #echo ${MYLIB}
-
+echo "er........."
 #echo ${COMMONLIB}:${HBASELIB}:${HBASECONF}:${HADOOPLIB}:${HADOOPCONF}:${MYLIB}:${MYCONF}
 ${JAVA_HOME}/bin/java -Xmx1500m -classpath ${COMMONLIB}:${HBASELIB}:${HBASECONF}:${HADOOPLIB}:${HADOOPCONF}:${MYLIB}:${MYCONF} experiment.TestCase4QuadTree $*
 

@@ -275,7 +275,7 @@ BixiProtocol {
 					double dy = Double.parseDouble(parts[3]);
 					double distx = lat-cLat;
 					double disty = lon-cLon;
-					if(distx >= 0 && distx <= dx && disty >= 0 && disty <= dy){
+					if(distx >= 0 && distx <= dx && disty <= 0 && disty <= dy){
 						//get stations in cluster
 						result.add(Bytes.toString(kv.getQualifier()));
 					}

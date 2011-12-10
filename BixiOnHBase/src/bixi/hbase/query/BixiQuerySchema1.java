@@ -204,6 +204,8 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 			Get g = new Get(Bytes.toBytes(dateWithHr + "_00"));
 			HTable table = new HTable(conf, this.bike_table_name.getBytes());
 			Result r = table.get(g);
+			System.out.println("random get time: "+(System.currentTimeMillis() - starttime));			
+			
 			Map<String, Double> result = new HashMap<String, Double>();
 			// this r contains the entire row for the hr+00 min. Now compute the
 			// distance and do the stuff.
@@ -230,8 +232,8 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 
 			System.out.println("schema1 total execution time: "
 					+ (System.currentTimeMillis() - starttime)
-					+ "  schema1 availBikes is with Scan: " + result.size());
-			// + ":" + result);
+					+ "  schema1 availBikes is with Scan: " + result.size()
+			 + ":" + result);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -274,8 +276,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 	 * end:    10_10_2010__23
 	 */
 	
-	public static String getFilterRegex(String start,String end){
-		System.out.println(start +";" +end);
+	public static String getFilterRegex(String start,String end){		
 		String regex = "";
 		if(start !=null && end != null){
 			StringTokenizer start_tokens = new StringTokenizer(start,"_");
@@ -287,8 +288,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 			String e_day = end_tokens.nextToken();
 			String e_month = end_tokens.nextToken();
 			String e_year = end_tokens.nextToken();		
-			
-			System.out.println(s_month+"; "+e_month);
+						
 			if(e_month.equals(s_month)){
 				boolean first = true;
 				for(int i=Integer.valueOf(s_day);i<=Integer.valueOf(e_day);i++){					
@@ -332,8 +332,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 							regex += e_month;
 							regex += "_"+e_year+"__";
 							regex += "|";							
-						}
-						System.out.println("10,.."+regex);
+						}						
 					}else if(e_month.equals("11")){		
 						boolean first = true;
 						for(int i=Integer.valueOf(s_day);i<=31;i++){
@@ -488,8 +487,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 				
 			}		
 					
-		}	
-		System.out.println(regex);
+		}			
 		if(regex.lastIndexOf('|') == regex.length()-1)
 			regex = regex.substring(0,regex.length()-2);
 		//System.out.println(regex);

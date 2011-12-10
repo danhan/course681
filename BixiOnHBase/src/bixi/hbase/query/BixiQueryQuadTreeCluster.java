@@ -91,12 +91,12 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 			Map<String, Integer> result = new HashMap<String, Integer>();
 			
 			
-			Arrays.sort(stations.toCharArray());
-			String min_station = stationIds.get(0);
-			String max_station = stationIds.get(stationIds.size() - 1);			
+			///Arrays.sort(stationIds.toArray());
+			//String min_station = stationIds.get(0);
+			//String max_station = stationIds.get(stationIds.size() - 1);				
 			if (start != null && end != null) {
-				scan.setStartRow((start + "-" + min_station).getBytes());
-				scan.setStopRow((end + "-" + max_station+"1").getBytes());
+				scan.setStartRow((start + "-00").getBytes());
+				scan.setStopRow((end + "-999").getBytes());
 			}
 
 			//System.out.println((start + "-" + min_station) + ";  "+ (end + "-" + max_station));
@@ -114,7 +114,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 				Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL,
 						new RegexStringComparator(regex));
 				scan.setFilter(filter);
-				//System.out.println(regex);
+				System.out.println(regex);
 			}
 
 			String[] columns = new String[60];
@@ -143,7 +143,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 					int usage = 0;				
 					String row = Bytes.toString(r.getRow());
 					String station_id = row.substring(11, row.length());
-					//System.out.println("debug:   "+row);
+					System.out.println("rownumber: "+row_num+"--debug:   "+row);
 					row_num++;
 					for (int m = 0; m < columns.length; m++) {
 						byte[] metrics = r.getValue(
@@ -327,8 +327,8 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 						+ "; schema2: queryAvailableByTimeStamp4Point: "
 						+ station_avail.size() + " available( ");
 				for (Map.Entry<String, Integer> e : station_avail.entrySet()) {
-					// System.out.print("(" + e.getKey() + "," + e.getValue()
-					// + ");");
+					 System.out.print("(" + e.getKey() + "," + e.getValue()
+					 + ");");
 				}
 				System.out.println();
 			}
@@ -408,21 +408,29 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 					double dy = Double.valueOf(tokenizer.nextToken())
 							.doubleValue();
 
-					double xb = xl + dx;
-					double yb = yl - dy;
-
-					if ((x < xl) || (x > xb) || (y < yl) || (y > yb)) {
-						double tmp = this.distance(x, y, (xl + xb) / 2.0,
-								(yl + yb) / 2.0);
-						if (tmp < distance) {
-							distance = tmp;
-							result = cluster;
-						}
-						continue;
-					} else {
+					//double xb = xl + dx;
+					//double yb = yl - dy;
+					double distx = x-xl;
+					double disty = y-yl;
+					if(distx >= 0 && distx <= dx && disty <= 0 && disty <= dy){
+						//get stations in cluster
+						//result.add(Bytes.toString(kv.getQualifier()));
 						result = cluster;
 						break;
-					}
+					}					
+
+//					if ((x < xl) || (x > xb) || (y < yl) || (y > yb)) {
+//						double tmp = this.distance(x, y, (xl + xb) / 2.0,
+//								(yl + yb) / 2.0);
+//						if (tmp < distance) {
+//							distance = tmp;
+//							result = cluster;
+//						}
+//						continue;
+//					} else {
+//						result = cluster;
+//						break;
+//					}
 				}
 			}
 
