@@ -1,5 +1,6 @@
 package experiment;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
@@ -33,7 +34,12 @@ public abstract class TestCaseBase {
 		
 		tests = new Properties();
 		try {
-		    tests.load(new FileInputStream("tests.properties"));
+			if(!new File("tests.properties").exists()){
+				tests.load(new FileInputStream("./command/tests.properties"));
+			}else{
+				 tests.load(new FileInputStream("tests.properties"));
+			}
+		   
 		} catch (IOException e) {
 			e.printStackTrace();
 		}				

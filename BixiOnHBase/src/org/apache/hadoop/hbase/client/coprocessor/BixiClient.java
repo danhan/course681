@@ -1,12 +1,16 @@
 package org.apache.hadoop.hbase.client.coprocessor;
 
+import hbase.service.HBaseUtil;
+
 import java.io.IOException;
 import java.text.DateFormat;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -16,9 +20,9 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Scan;
-import org.apache.hadoop.hbase.coprocessor.BixiProtocol;
-import org.apache.hadoop.hbase.coprocessor.TotalNum;
+import bixi.query.coprocessor.*;
 import org.apache.hadoop.hbase.filter.Filter;
+import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.RegexStringComparator;
 import org.apache.hadoop.hbase.filter.RowFilter;
 import org.apache.hadoop.hbase.filter.CompareFilter;
@@ -34,15 +38,138 @@ public class BixiClient {
   private static final byte[] TABLE_NAME = Bytes.toBytes(BixiConstant.SCHEMA1_TABLE_NAME);
   private static final byte[] STATION_TABLE_NAME = Bytes.toBytes(BixiConstant.SCHEMA2_BIKE_TABLE_NAME);
   private static final byte[] STATION_CLUSTER_TABLE_NAME = Bytes.toBytes(BixiConstant.SCHEMA2_CLUSTER_TABLE_NAME);
+  
+  HBaseUtil hbaseUtil = null;
+  final int cacheSize = 5000;
+  
+  DecimalFormat sidFomatter = new DecimalFormat("000");
 
-  public BixiClient(Configuration conf) throws IOException {
-    this.conf = conf;
-    this.table = new HTable(conf, TABLE_NAME);
-    this.stat_table = new HTable(conf, STATION_TABLE_NAME);
-    this.cluster_table = new HTable(conf, STATION_CLUSTER_TABLE_NAME);
+  public BixiClient(Configuration conf,int schema) throws IOException {
+
     log.debug("in constructor of BixiClient");
+    
+    try{
+    	if(schema == 1 || schema == 2){
+    		 this.conf = conf;
+    	    this.table = new HTable(conf, TABLE_NAME);
+    	    this.stat_table = new HTable(conf, STATION_TABLE_NAME);
+    	    this.cluster_table = new HTable(conf, STATION_CLUSTER_TABLE_NAME);
+    	    log.debug("in constructor of BixiClient");   		
+    	}else if(schema == 3){
+    		hbaseUtil = new HBaseUtil(null);
+    		hbaseUtil.getTableHandler(BixiConstant.TABLE_NAME_3);
+    		hbaseUtil.setScanConfig(cacheSize, true);  		
+    	}else if(schema == 4){
+    		hbaseUtil = new HBaseUtil(null);
+    		hbaseUtil.getTableHandler(BixiConstant.TABLE_NAME_4);
+    		hbaseUtil.setScanConfig(cacheSize, true);  		
+    	}
+    }catch(Exception e){
+    	e.printStackTrace();
+    }
+
+    
   }
 
+  /************************For Schema3*****************************/
+    
+  public Map<String, Double> copGetAvgUsageForPeriod4S3(final List<String> stationIds,
+	      String startDateWithHour, String endDateWithHour,int num_of_timestamp) throws IOException, Throwable {
+	  log.info("in getAvgUsageForPeriod: start from " + startDateWithHour+" to "+endDateWithHour +"; for stations: "+stationIds.toString());
+	  try{
+		    final long s_time = System.currentTimeMillis();
+		    
+		    class BixiCallBack implements Batch.Callback<Map<String, TotalNum>> {
+			      Map<String, TotalNum> res = new HashMap<String, TotalNum>();
+			      int count = 0;
+
+			      @Override
+			      public void update(byte[] region, byte[] row, Map<String, TotalNum> result) {
+			    	  long node_access = System.currentTimeMillis();
+			    	  System.out.println((count++)+": come back region: "+Bytes.toString(region)+"; result: "+result.size());
+			  		  System.out.println("node return time : " + (node_access - s_time));
+			    	  for (Map.Entry<String, TotalNum> e : result.entrySet()) {
+			    		  if (res.containsKey(e.getKey())) { // add the val
+			    			  TotalNum tnnew = e.getValue();
+			    			  TotalNum restn = res.get(e.getKey());
+			    			  restn.merge(tnnew);
+			    			  res.put(e.getKey(), restn);
+			    		  } else {
+			    			  res.put(e.getKey(), e.getValue());
+			    		  }
+			    	  }
+			      }
+
+			      private Map<String, Double> getResult() {
+			    	  Map<String, Double> ret = new HashMap<String, Double>();
+			          for (Map.Entry<String, TotalNum> e : res.entrySet()) {
+			            TotalNum tn = e.getValue();
+			            double i = tn.total / (double)tn.num;
+			            ret.put(e.getKey(), i);
+			          }
+			          return ret;
+			      }
+			    }	
+		    
+		    BixiCallBack callBack = new BixiCallBack();
+		    	    			   
+		    FilterList fList = new FilterList(FilterList.Operator.MUST_PASS_ALL);			
+		    List<Long> timestamps = new LinkedList<Long>();
+		    for(int i=0;i<num_of_timestamp;i++){
+		    	timestamps.add((long)i);	
+		    }		    
+		    Filter timeStampFilter = hbaseUtil.getTimeStampFilter(timestamps);
+		    fList.addFilter(timeStampFilter);
+		    
+		    String regex  = "";
+		    if(stationIds!=null && stationIds.size()>0){
+		    	regex = "(";
+		    	boolean start = true;
+		    	for(String sId : stationIds){
+		    		//String id = Integer.toString(Integer.parseInt(sId));
+		    		if(!start)
+		    			regex += "|";
+		    		start = false;
+		    		regex += "-" + sidFomatter.format(Integer.valueOf(sId)); // format the station id
+		    	}
+		    	regex += ")$";
+		    }
+		    System.out.println("REGEX: " + regex);		    	   
+		    Filter rowFilter = hbaseUtil.getRegrexRowFilter("=", regex);	
+		   // Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regex));
+		    fList.addFilter(rowFilter);		
+
+		    String[] rowRanges = new String[]{(startDateWithHour + "-001"),(endDateWithHour + "-433")};
+		      		    		    
+		    
+		   final Scan scan = hbaseUtil.generateScan(rowRanges,fList, new String[]{BixiConstant.FAMILY_NAME_DYNAMIC}, new String[]{BixiConstant.d_metrics[0]},BixiConstant.FAMILY_NAME_3_DYNAMIC_VERSION);	
+		    
+		    System.out.println("start to send the query to coprocessor.....");
+		    	   		    
+		    this.hbaseUtil.getHTable().coprocessorExec(BixiProtocol.class, scan.getStartRow(), scan
+			        .getStopRow(), new Batch.Call<BixiProtocol, Map<String, TotalNum>>() {
+			      public Map<String, TotalNum> call(BixiProtocol instance)
+			          throws IOException {
+			    	  System.out.println("caller......");
+			        return instance.copGetTotalUsage4S3(scan);
+			      };
+			    }, callBack);
+		    
+		    long e_time = System.currentTimeMillis();
+			long exe_time = e_time - s_time;
+			
+			System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.size());		
+				
+				return callBack.getResult();
+	  }catch(Exception e){
+		  e.printStackTrace();
+	  }
+    
+	  return null;
+  }
+  
+
+  
   /**
 * @param stationIds
 * @param dateWithHour
@@ -213,6 +340,7 @@ public class BixiClient {
     return res;
 
   }
+  
   
   /* Schema 2 implementation */
   

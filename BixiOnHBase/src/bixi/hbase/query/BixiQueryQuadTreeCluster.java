@@ -40,7 +40,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 			}
 		}
 		try{
-		    BixiClient client = new BixiClient(conf);
+		    BixiClient client = new BixiClient(conf,2);
 		    Map<String, Double> avgusage = client
 		        .getAvgUsageForPeriod_Schema2(stationIds, start, end);
 		    System.out.println("Average Usage: " + avgusage);	    	
@@ -57,7 +57,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 			double latitude, double longitude, double radius) {
 		
 		try{
-		    BixiClient client = new BixiClient(conf);
+		    BixiClient client = new BixiClient(conf,2);
 		    Map<String, Integer> availBikesFromAPoint = client
 		        .getAvailableBikesFromAPoint_Schema2(latitude, longitude, timestamp);
 		    System.out.println("availBikes is: " + availBikesFromAPoint);	    	
@@ -143,7 +143,7 @@ public class BixiQueryQuadTreeCluster extends BixiQueryAbstraction {
 					int usage = 0;				
 					String row = Bytes.toString(r.getRow());
 					String station_id = row.substring(11, row.length());
-					System.out.println("rownumber: "+row_num+"--debug:   "+row);
+					//System.out.println("rownumber: "+row_num+"--debug:   "+row);
 					row_num++;
 					for (int m = 0; m < columns.length; m++) {
 						byte[] metrics = r.getValue(

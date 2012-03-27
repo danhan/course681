@@ -1,6 +1,6 @@
 package bixi.hbase.upload;
 
-import hbase.service.HBaseUtil;
+import hbase.service.HBaseUtil_Original;
 
 import java.io.IOException;
 
@@ -17,7 +17,7 @@ public class HBaseClient {
 		
 		//conf.addResource("/opt/hbaseMT/hbase-0.93-SNAPSHOT/hbase-site.xml");
 		
-		HBaseUtil hbase  = new HBaseUtil(conf);		
+		HBaseUtil_Original hbase  = new HBaseUtil_Original(conf);		
 		
 		String tablename = null;		
 		if (args.length > 1) {	

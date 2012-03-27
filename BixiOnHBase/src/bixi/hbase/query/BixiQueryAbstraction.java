@@ -24,11 +24,17 @@ public abstract class BixiQueryAbstraction {
 			this.cluster_family_name = BixiConstant.SCHEMA2_CLUSTER_FAMILY_NAME;
 			this.bike_table_name = BixiConstant.SCHEMA2_BIKE_TABLE_NAME;
 			this.bike_family_name = BixiConstant.SCHEMA2_BIKE_FAMILY_NAME;			
-		}else if(type ==3){
+		}else if(type == 22){ 
 			this.cluster_table_name = BixiConstant.SCHEMA2_dFOF_CLUSTER_TABLE_NAME;
 			this.cluster_family_name = BixiConstant.SCHEMA2_dFOF_CLUSTER_FAMILY_NAME;
 			this.bike_table_name = BixiConstant.SCHEMA2_BIKE_TABLE_NAME;
 			this.bike_family_name = BixiConstant.SCHEMA2_BIKE_FAMILY_NAME;			
+		}else if(type == 3){ 
+			this.bike_table_name = BixiConstant.TABLE_NAME_3;
+			this.bike_family_name = BixiConstant.FAMILY_NAME_DYNAMIC;			
+		}else if(type == 4){ 
+			this.bike_table_name = BixiConstant.TABLE_NAME_4;
+			this.bike_family_name = BixiConstant.FAMILY_NAME_DYNAMIC;			
 		}
 	}
 	

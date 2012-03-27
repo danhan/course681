@@ -20,8 +20,6 @@ import org.apache.hadoop.hbase.filter.RegexStringComparator;
 import org.apache.hadoop.hbase.filter.RowFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 
-// TODO we need get breakdown time
-
 
 public class BixiQuerySchema1 extends BixiQueryAbstraction {
 
@@ -47,7 +45,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 		}	
 
 		try {
-			BixiClient client = new BixiClient(conf);
+			BixiClient client = new BixiClient(conf,1);
 			Map<String, Double> avgusage = client.getAvgUsageForPeriod(
 					stationIds, start, end);
 			System.out.println("Average Usage: " + avgusage);
@@ -64,7 +62,7 @@ public class BixiQuerySchema1 extends BixiQueryAbstraction {
 			double latitude, double longitude, double radius) {
 		System.out.println("callAvailBikesFromAPoint");
 		try {
-			BixiClient client = new BixiClient(conf);
+			BixiClient client = new BixiClient(conf,1);
 			Map<String, Integer> availBikesFromAPoint = client
 					.getAvailableBikesFromAPoint(latitude, longitude, radius,
 							timestamp);

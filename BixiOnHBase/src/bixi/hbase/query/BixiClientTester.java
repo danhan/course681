@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.HConstants;
 import org.apache.hadoop.hbase.KeyValue;
 
 import org.apache.hadoop.hbase.client.Get;
@@ -17,8 +16,6 @@ import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.coprocessor.BixiClient;
-import org.apache.hadoop.hbase.coprocessor.BixiImplementation;
-import org.apache.hadoop.hbase.regionserver.InternalScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 
 /**
@@ -90,7 +87,7 @@ public class BixiClientTester {
     // System.out.println("availBikes: " + availBikesFromAPoint);
   }
 
-  BixiClient client = new BixiClient(conf);
+  BixiClient client = new BixiClient(conf,1);
 
   private void callAvailBikesFromAPoint(String[] s) throws IOException,
       Throwable {

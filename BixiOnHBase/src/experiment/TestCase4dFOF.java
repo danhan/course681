@@ -11,7 +11,7 @@ public class TestCase4dFOF extends TestCaseBase{
 
 	@Override
 	BixiQueryAbstraction getBixiQuery(){
-		return new BixiQueryQuadTreeCluster(3);
+		return new BixiQueryQuadTreeCluster(22);
 	}
 	
 	public void queryAvailableByClusters(){
@@ -20,7 +20,7 @@ public class TestCase4dFOF extends TestCaseBase{
 		timestamp = convertDate(timestamp);		
 		System.out.println("******************Start at ******"+timestamp+"****************************");
 		
-		new BixiQueryQuadTreeCluster(3).queryAvailableByClusters(timestamp);	
+		new BixiQueryQuadTreeCluster(22).queryAvailableByClusters(timestamp);	
 		System.out.println("******************End ******"+timestamp+"****************************");
 	}	
 	
