@@ -39,93 +39,95 @@ public class TableInsertSchema3 {
 	  }
 
 	  public void insertXmlData(int schema,int batchRow,String fileDir) throws ParserConfigurationException {
-	    
-			File dir = new File(fileDir);
-			if (!dir.isDirectory()) {
-				System.out.println(" dir is: " + dir.getAbsolutePath());
-				System.exit(1);
-			}
-			String[] fileNames = dir.list();
-			Arrays.sort(fileNames);
-			// put filename into a hash, timstamp, and filename...
-			// for each timestamp,read all the file in the value ,and parse the
-			// value of metrics
-			HashMap<String, List<String>> fileHash = new HashMap<String, List<String>>();
-
-			for (String fileName : fileNames) {
-				if (fileName.indexOf(".xml") < 0)
-					continue;
-				File f = new File(dir.getAbsoluteFile() + "/" + fileName);
-				if (f.length() < 1024 * 5) { // < 5k
-					System.err.println("File is corrupt!" + f.getAbsolutePath());
-					continue;// erroreneous file
+	   
+		  try{
+				File dir = new File(fileDir);
+				if (!dir.isDirectory()) {
+					System.out.println(" dir is: " + dir.getAbsolutePath());
+					System.exit(1);
 				}
+				String[] fileNames = dir.list();
+				Arrays.sort(fileNames);
+				// put filename into a hash, timstamp, and filename...
+				// for each timestamp,read all the file in the value ,and parse the
+				// value of metrics
+				HashMap<String, List<String>> fileHash = new HashMap<String, List<String>>();
 
-				String[] timestampes = this.parseTimeStamp(fileName); // hour,minute
-				if (fileHash.containsKey(timestampes[0])) {
-					fileHash.get(timestampes[0]).add(fileName);
-				} else {
-					List<String> file_list = new LinkedList<String>();
-					file_list.add(fileName);
-					fileHash.put(timestampes[0], file_list);
-				}
-			}
+				for (String fileName : fileNames) {
+					if (fileName.indexOf(".xml") < 0)
+						continue;
+					File f = new File(dir.getAbsoluteFile() + "/" + fileName);
+					if (f.length() < 1024 * 5) { // < 5k
+						System.err.println("File is corrupt!" + f.getAbsolutePath());
+						continue;// erroreneous file
+					}
 
-			Iterator<String> keys = fileHash.keySet().iterator();
-
-			int counter = 0;
-			//int row_counter = 0;
-			ArrayList<Put> putList = new ArrayList<Put>();
-			while (keys.hasNext()) {
-				String prefix = keys.next();
-				counter++;
-				// System.out.print(counter+" detail to hour:  "+prefix);
-				List<HashMap<String, String>> oneHourMetrics = this
-						.parseOneHourForAll(fileHash.get(prefix), fileDir);
-				HashMap<String, HashMap<String, String>> station_list = this
-						.getMetricsForOneStation(oneHourMetrics);
-
-				Iterator<String> station_iterator = station_list.keySet()
-						.iterator();
-				
-				while (station_iterator.hasNext()) {
-					String station_id = station_iterator.next();
-					// System.out.println(counter+"||"+(row_counter++)+" station: "+station_id+"=> ");
-
-					HashMap<String, String> minutes_map = station_list
-							.get(station_id);
-					Iterator<String> minutes = minutes_map.keySet().iterator();
-					try {
-						while (minutes.hasNext()) {
-							String oneMinute = minutes.next();
-							String value = minutes_map.get(oneMinute);
-							//System.out.println("("+oneMinute+":"+value+");");
-							Put put = this.hbase.constructRow((prefix + "-" + station_id), 
-									new String[]{BixiConstant.FAMILY_NAME_DYNAMIC,BixiConstant.FAMILY_NAME_DYNAMIC},
-									BixiConstant.d_metrics, Integer.valueOf(oneMinute), value.split(";"));
-							putList.add(put);							
-						}
-					} catch (Exception e) {
-						e.printStackTrace();
-					}				
-
-				}
-				// flush the timestamp files
-				try{
-					this.hbase.flushBufferedRow(putList);					
-					putList.clear();
-	
-				}catch(Exception e){
-					e.printStackTrace();
+					String[] timestampes = this.parseTimeStamp(fileName); // hour,minute
+					if (fileHash.containsKey(timestampes[0])) {
+						fileHash.get(timestampes[0]).add(fileName);
+					} else {
+						List<String> file_list = new LinkedList<String>();
+						file_list.add(fileName);
+						fileHash.put(timestampes[0], file_list);
+					}
 				}
 				
-			} // end of while(keys)
-			
-			this.hbase.closeTableHandler();
-			
-			System.out.println("the row number " + counter);
-			
-		
+				for(String timestamp:fileHash.keySet()){
+					System.out.println(timestamp+";file=>"+fileHash.get(timestamp).size());
+				}
+
+				Iterator<String> timeList = fileHash.keySet().iterator();
+				int progress = fileHash.keySet().size();
+				int counter = 0;
+				int stations = 0;
+				int file_num = 0;
+			//	ArrayList<Put> putList = new ArrayList<Put>();
+				while (timeList.hasNext()) {
+					String prefix = timeList.next();
+					progress--;
+					counter++;
+					// System.out.print(counter+" detail to hour:  "+prefix);
+					List<HashMap<String, String>> oneHourMetrics = this
+							.parseOneHourForAll(fileHash.get(prefix), fileDir);
+					HashMap<String, HashMap<String, String>> station_list = this
+							.getMetricsForOneStation(oneHourMetrics);
+
+					Iterator<String> station_iterator = station_list.keySet()
+							.iterator();
+					
+					while (station_iterator.hasNext()) {
+						String station_id = station_iterator.next();
+						stations++;
+						// System.out.println(counter+"||"+(row_counter++)+" station: "+station_id+"=> ");
+
+						HashMap<String, String> minutes_map = station_list
+								.get(station_id);
+						Iterator<String> minutes = minutes_map.keySet().iterator();
+						try {
+							while (minutes.hasNext()) {
+								String oneMinute = minutes.next();
+								String value = minutes_map.get(oneMinute);
+								//System.out.println("("+oneMinute+":"+value+");");
+								Put put = this.hbase.constructRow((prefix + "-" + station_id), 
+										new String[]{BixiConstant.FAMILY_NAME_DYNAMIC,BixiConstant.FAMILY_NAME_DYNAMIC},
+										BixiConstant.d_metrics, Integer.valueOf(oneMinute), value.split(";"));
+								this.hbase.getHTable().put(put);								
+							}
+						} catch (Exception e) {
+							e.printStackTrace();
+						}				
+					}
+					System.out.println("time_hour=>"+prefix+";file_num=>"+fileHash.get(prefix).size()+";stations=>"+station_list.size()+";values=>"+counter+";progress=>"+progress);
+					file_num+= fileHash.get(prefix).size();
+					
+				} // end of while(keys)
+				System.out.println("finish upload file number:" + file_num);
+		  }catch(Exception e){
+			  e.printStackTrace();
+		  }finally{
+				this.hbase.closeTableHandler();
+		  }
+
 	  }
 
 	  private String[] parseTimeStamp(String filename) {

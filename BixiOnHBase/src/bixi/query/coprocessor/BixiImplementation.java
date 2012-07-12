@@ -42,17 +42,18 @@ BixiProtocol {
 		List<KeyValue> keyvalues = new ArrayList<KeyValue>();
 		Map<String, TotalNum> result = new HashMap<String, TotalNum>();
 		boolean hasMoreResult = false;
-		int count = 0;
+		
 		try {
 			do {
 				hasMoreResult = scanner.next(keyvalues);
 				if(keyvalues != null && keyvalues.size() > 0){	
 					String stationId = Bytes.toString(keyvalues.get(0).getRow()).split("-")[1];
 					// all the key value is about the qualifier you defined in scan. So this only return number of empty docks.
+					int count = 0;
 					for(int i=0;i<keyvalues.size();i++){						
-						long timestamp = keyvalues.get(i).getTimestamp();						
+						//long timestamp = keyvalues.get(i).getTimestamp();						
 						long value = Long.valueOf(Bytes.toString(keyvalues.get(i).getValue()));	
-						System.out.println("DEBUG: timestamp=>"+timestamp+";value=>"+value);
+						//System.out.println("DEBUG: timestamp=>"+timestamp+";value=>"+value);
 						if(result.containsKey(stationId)){
 							TotalNum tn = result.get(stationId);
 							tn.add(value);
@@ -64,6 +65,7 @@ BixiProtocol {
 						}
 						count++;
 					}
+					System.out.println("station=>"+stationId+";timestamps=>"+count);
 				}				
 				keyvalues.clear();
 			} while (hasMoreResult);
@@ -71,7 +73,7 @@ BixiProtocol {
 			scanner.close();
 		}
 		
-		System.out.println("exe_time=>"+(System.currentTimeMillis()-start)+";count=>"+count+";result=>"+result.size());		
+		System.out.println("exe_time=>"+(System.currentTimeMillis()-start)+";result=>"+result.size());		
 		
 		return result;		
 	}

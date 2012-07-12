@@ -75,44 +75,9 @@ public class BixiClient {
     
   public Map<String, Double> copGetAvgUsageForPeriod4S3(final List<String> stationIds,
 	      String startDateWithHour, String endDateWithHour,int num_of_timestamp) throws IOException, Throwable {
-	  log.info("in getAvgUsageForPeriod: start from " + startDateWithHour+" to "+endDateWithHour +"; for stations: "+stationIds.toString());
+	  log.info("in getAvgUsageForPeriod: start from " + startDateWithHour+" to "+endDateWithHour +"; for stations: "+stationIds.size()+";timestamp=>"+num_of_timestamp);
 	  try{
-		    final long s_time = System.currentTimeMillis();
-		    
-		    class BixiCallBack implements Batch.Callback<Map<String, TotalNum>> {
-			      Map<String, TotalNum> res = new HashMap<String, TotalNum>();
-			      int count = 0;
-
-			      @Override
-			      public void update(byte[] region, byte[] row, Map<String, TotalNum> result) {
-			    	  long node_access = System.currentTimeMillis();
-			    	  System.out.println((count++)+": come back region: "+Bytes.toString(region)+"; result: "+result.size());
-			  		  System.out.println("node return time : " + (node_access - s_time));
-			    	  for (Map.Entry<String, TotalNum> e : result.entrySet()) {
-			    		  if (res.containsKey(e.getKey())) { // add the val
-			    			  TotalNum tnnew = e.getValue();
-			    			  TotalNum restn = res.get(e.getKey());
-			    			  restn.merge(tnnew);
-			    			  res.put(e.getKey(), restn);
-			    		  } else {
-			    			  res.put(e.getKey(), e.getValue());
-			    		  }
-			    	  }
-			      }
-
-			      private Map<String, Double> getResult() {
-			    	  Map<String, Double> ret = new HashMap<String, Double>();
-			          for (Map.Entry<String, TotalNum> e : res.entrySet()) {
-			            TotalNum tn = e.getValue();
-			            double i = tn.total / (double)tn.num;
-			            ret.put(e.getKey(), i);
-			          }
-			          return ret;
-			      }
-			    }	
-		    
-		    BixiCallBack callBack = new BixiCallBack();
-		    	    			   
+		  
 		    FilterList fList = new FilterList(FilterList.Operator.MUST_PASS_ALL);			
 		    List<Long> timestamps = new LinkedList<Long>();
 		    for(int i=0;i<num_of_timestamp;i++){
@@ -136,21 +101,54 @@ public class BixiClient {
 		    }
 		    System.out.println("REGEX: " + regex);		    	   
 		    Filter rowFilter = hbaseUtil.getRegrexRowFilter("=", regex);	
-		   // Filter filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new RegexStringComparator(regex));
 		    fList.addFilter(rowFilter);		
 
 		    String[] rowRanges = new String[]{(startDateWithHour + "-001"),(endDateWithHour + "-433")};
 		      		    		    
 		    
-		   final Scan scan = hbaseUtil.generateScan(rowRanges,fList, new String[]{BixiConstant.FAMILY_NAME_DYNAMIC}, new String[]{BixiConstant.d_metrics[0]},BixiConstant.FAMILY_NAME_3_DYNAMIC_VERSION);	
+		   final Scan scan = hbaseUtil.generateScan(rowRanges,fList, new String[]{BixiConstant.FAMILY_NAME_DYNAMIC}, new String[]{BixiConstant.d_metrics[0]},num_of_timestamp);			  
+		  
+		   
+		    final long s_time = System.currentTimeMillis();		    
+		    class BixiCallBack implements Batch.Callback<Map<String, TotalNum>> {
+			      Map<String, TotalNum> res = new HashMap<String, TotalNum>();
+			      int count = 0;
+
+			      @Override
+			      public void update(byte[] region, byte[] row, Map<String, TotalNum> result) {
+			    	  long node_access = System.currentTimeMillis();
+			    	  System.out.println((count++)+": come back region: "+Bytes.toString(region)+"; result: "+result.size());
+			  		  System.out.println("node return time : " + (node_access - s_time));
+			    	  for (Map.Entry<String, TotalNum> e : result.entrySet()) {
+			    		  if (res.containsKey(e.getKey())) { // add the val
+			    			  TotalNum tnnew = e.getValue();
+			    			  TotalNum restn = res.get(e.getKey());
+			    			  restn.merge(tnnew);
+			    			  res.put(e.getKey(), restn);
+			    		  } else {
+			    			  res.put(e.getKey(), e.getValue());
+			    		  }
+			    	  }
+			      }			      
+
+			      private Map<String, Double> getResult() {
+			    	  Map<String, Double> ret = new HashMap<String, Double>();
+			          for (Map.Entry<String, TotalNum> e : res.entrySet()) {
+			            TotalNum tn = e.getValue();
+			            double i = tn.total / (double)tn.num;
+			            ret.put(e.getKey(), i);
+			          }
+			          return ret;
+			      }
+			    }	
 		    
+		    BixiCallBack callBack = new BixiCallBack();		    
 		    System.out.println("start to send the query to coprocessor.....");
 		    	   		    
 		    this.hbaseUtil.getHTable().coprocessorExec(BixiProtocol.class, scan.getStartRow(), scan
 			        .getStopRow(), new Batch.Call<BixiProtocol, Map<String, TotalNum>>() {
 			      public Map<String, TotalNum> call(BixiProtocol instance)
-			          throws IOException {
-			    	  System.out.println("caller......");
+			          throws IOException {			    	  
 			        return instance.copGetTotalUsage4S3(scan);
 			      };
 			    }, callBack);
