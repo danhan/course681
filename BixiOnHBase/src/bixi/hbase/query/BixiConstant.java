@@ -1,7 +1,7 @@
 package bixi.hbase.query;
 /**
  * A class containing constants for client side Bixi.
- * @author hv
+ * @author DH
  */
 public class BixiConstant {
   /**
@@ -13,8 +13,32 @@ public class BixiConstant {
    * 
    */
   public final static double MONTREAL_LON = -73.554094d;
-        
   
+  /*
+   * The Montreal station space: ( 45.415714,-73.526967) x distance: 0.15011499999999955, y distance: 0.1639420000000058; 
+   */
+  
+  public final static double MONTREAL_TOP_LEFT_X = 45.415714;
+  
+  public final static double MONTREAL_TOP_LEFT_Y = 73.526967;
+  
+  public final static double MONTREAL_AREA_WIDTH = 0.16;
+  
+  public final static double MONTREAL_AREA_HEIGHT = 0.17;
+  
+  public final static double MIN_SIZE_OF_SUBSPACE = 0.01;
+  /**
+   * static metrics in data
+   */
+	public static String s_metrics[] = { "name", "terminalName", "lat", "long", "installed", "locked", "installedDate", "temporary",  };
+/**
+ * dynamic metrics in data
+ */
+	public static String d_metrics[] = {"nab","ned"};
+  
+	/**
+	 *
+	 */
 	public static String SCHEMA1_TABLE_NAME = "BixiData";
 	public static String SCHEMA1_FAMILY_NAME = "Data";  
 	
@@ -28,7 +52,7 @@ public class BixiConstant {
 	
 	public static String ID_DELIMITER = "#";
 	
-	/***********************add for schema3 to verify the version*********************/
+	/***********************add for schema3 & schema4 to verify the version*********************/
 	public static String TABLE_NAME_3 = "bixi.3";
 	public static String FAMILY_NAME_STATIC = "s";
 	public static String FAMILY_NAME_DYNAMIC = "d";
@@ -38,8 +62,10 @@ public class BixiConstant {
 	public static String TABLE_NAME_4 = "bixi.4";
 	public static int FAMILY_NAME_4_DYNAMIC_VERSION = 1440; //   detail to day: 24*60 = 1440
 	
-	public static String s_metrics[] = { "name", "terminalName", "lat", "long", "installed", "locked", "installedDate", "temporary",  };
-	public static String d_metrics[] = {"nab","ned"};
+	/********************For Location Schema1 and Schema2*************************************/
+	public static String LOCATION_TABLE_NAME_1 = "bixi.location.1";
+	public static String LOCATION_FAMILY_NAME = "f";	
+	public static String LOCATION_TABLE_NAME_2 = "bixi.location.2";
 	
 
   

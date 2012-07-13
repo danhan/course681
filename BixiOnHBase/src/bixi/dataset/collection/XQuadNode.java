@@ -1,8 +1,5 @@
 package bixi.dataset.collection;
 
-import java.util.List;
-
-
 
 public class XQuadNode {
 

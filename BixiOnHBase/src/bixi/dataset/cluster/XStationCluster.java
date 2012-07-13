@@ -5,7 +5,8 @@ import java.util.List;
 
 import bixi.dataset.collection.XStation;
 
-
+//deprecated
+// till now, there is no reference on this
 public class XStationCluster {
 
 	private String cluster_id = null;

@@ -21,6 +21,7 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
 /**
+ * @deprecated
  * Takes the raw xmls and insert it into HBase. Currently there are files
  * already in the fs, so upload them first.
  */

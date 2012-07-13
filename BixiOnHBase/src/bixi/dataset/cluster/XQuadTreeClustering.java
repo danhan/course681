@@ -14,6 +14,9 @@ import bixi.dataset.collection.XQuadNode;
 import bixi.dataset.collection.XQuadSpace;
 import bixi.dataset.collection.XStation;
 
+/*
+ * It is used to generate the key which is designed with the QuadTree index
+ */
 public class XQuadTreeClustering {
 	
 	private static int MAX_DEPTH = 2;
@@ -76,6 +79,9 @@ public class XQuadTreeClustering {
 		return space;
 	}
 	
+	/*
+	 * generate cluster id for stations
+	 */
 	private void getClusterIds(){
 			
 		for(int i=0;i<stations.size();i++){
@@ -183,7 +189,7 @@ public class XQuadTreeClustering {
 	public static void main(String[] args){
 		
 		XQuadTreeClustering clustering = new XQuadTreeClustering();
-		File dir = new File("data2");
+		File dir = new File("data2/sub");
 		String filename = dir.getAbsolutePath()+"/01_10_2010__00_00_01.xml";
 		clustering.doClustering(filename);
 		clustering.aggreateCluster();

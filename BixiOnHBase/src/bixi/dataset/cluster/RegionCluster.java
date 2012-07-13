@@ -17,6 +17,7 @@ import bixi.hbase.query.BixiConstant;
 
 
 /*
+ * This is from Wei
  * Region cluster class
  * cluster the stations according to its physical location
  */

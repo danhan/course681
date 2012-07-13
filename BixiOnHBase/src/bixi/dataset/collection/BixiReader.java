@@ -76,7 +76,7 @@ public class BixiReader {
 
 	}
 
-	private XStation getStation(Element item) {
+	public XStation getStation(Element item) {
 		Field[] fields = XStation.class.getDeclaredFields();		
 		XStation station = new XStation();			
 		for (int i=0;i<fields.length;i++) {				

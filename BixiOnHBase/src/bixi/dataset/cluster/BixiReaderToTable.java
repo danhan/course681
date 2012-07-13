@@ -21,7 +21,9 @@ import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.HTable;
 
-
+/*
+ * This is from Wei
+ */
 public class BixiReaderToTable 
 {
 	//added by Wei
