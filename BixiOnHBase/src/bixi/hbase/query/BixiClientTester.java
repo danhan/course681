@@ -19,6 +19,7 @@ import org.apache.hadoop.hbase.client.coprocessor.BixiClient;
 import org.apache.hadoop.hbase.util.Bytes;
 
 /**
+ * @deprecated
  * A bixi client tester class. It will invoke the BixiClient class present in
  * the hbase package. 01_10_2010__00
  */

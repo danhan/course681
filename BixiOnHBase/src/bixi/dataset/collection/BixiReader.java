@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -125,5 +126,50 @@ public class BixiReader {
 		return station;
 
 	}
+	
+	/**
+	 * extract the station from a json string
+	 * @param stationJson
+	 * @return
+	 */
+	public XStation getStationFromJson(String stationJson) {			
+		XStation station = new XStation();	
+		StringTokenizer tokenizer = new StringTokenizer(stationJson,";");
+		while (tokenizer.hasMoreTokens()){
+			String item = tokenizer.nextToken();			
+			String[] keyvalue = item.split("=");	
+			String key = keyvalue[0];
+			String value = keyvalue[1];
+			if(key.equals("id")){
+				station.setId(value);
+			}else if(key.equals("name")){
+				station.setName(value);
+			} else if (key.contains("latitude")) {
+				station.setLatitude(Double.valueOf(value).doubleValue());
+			} else if (key.contains("longitude")) {
+				station.setlongitude(Double.valueOf(value).doubleValue());
+			} else if (key.contains("terminalName")) {
+				station.setTerminalName(value);
+			} else if (key.contains("installed")) {
+				station.setInstalled(Boolean.valueOf(value).booleanValue());
+			} else if (key.contains("locked")) {
+				station.setLocked(Boolean.valueOf(value).booleanValue());
+			} else if (key.contains("temporary")) {
+				station.setTemporary(Boolean.valueOf(value).booleanValue());
+			} else if (key.contains("nbBikes")) {
+				station.setNbBikes(Integer.valueOf(value).intValue());
+			} else if (key.contains("nbEmptyDocks")) {
+				station.setNbEmptyDocks(Integer.valueOf(value).intValue());
+			} else if (key.contains("installDate")) {
+				station.setInstallDate(Long.valueOf(value).longValue());
+			} else if (key.contains("removeDate")) {
+				station.setRemoveDate(Long.valueOf(value).longValue());
+			}			
+		}	
+		
+		return station;
+
+	}	
+	
 
 }

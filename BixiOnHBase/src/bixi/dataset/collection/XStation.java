@@ -58,7 +58,23 @@ public class XStation {
 		
 		return result;		
 	}
-
+	
+	public String getFullMetadata(){
+		
+		String result = "";
+		result += "id="+this.id+";";
+		result += "name="+this.name+";";
+		result += "terminalName="+this.terminalName+";";
+		result += "latitude="+this.latitude+";";
+		result += "longitude="+this.longitude+";";
+		result += "installed="+this.installed+";";
+		result += "locked="+this.locked+";";
+		result += "installDate="+this.installDate+";";
+		result += "removeDate="+this.removeDate+";";
+		result += "temporary="+this.temporary+";";
+		
+		return result;		
+	}
 	
 	
 	public String getId() {

@@ -15,9 +15,9 @@ import java.util.List;
 public class XQuadTree {
 	
     // min width of subspace;
-    private float min_size_of_subspace = 1;
+    private double min_size_of_subspace = 1;
     
-    private Rectangle2D.Float m_rect;            // The area this QuadTree represents
+    private Rectangle2D.Double m_rect;            // The area this QuadTree represents
     private String index = "";    
 
     private XQuadTree m_tl_child = null;   // Top Left Child
@@ -31,13 +31,13 @@ public class XQuadTree {
 	    
     private boolean hasChild = true;
        
-    public XQuadTree(Rectangle2D.Float rect,float min_size_of_subspace){
+    public XQuadTree(Rectangle2D.Double rect,double min_size_of_subspace){
     	this.m_rect = rect;    	
     	this.min_size_of_subspace = min_size_of_subspace;
     }
     
     public void buildTree(){
-    	this.splitSpace(this.m_rect, (float)this.m_rect.getWidth(), 0);
+    	this.splitSpace(this.m_rect, this.m_rect.getWidth(), 0);
     }
     /**
      * Evenly split the space    
@@ -45,31 +45,31 @@ public class XQuadTree {
      * @param size_of_subSpace
      * @param depth
      */
-    public void splitSpace(Rectangle2D.Float rect,float size_of_subSpace, int depth){        
+    public void splitSpace(Rectangle2D.Double rect,double size_of_subSpace, int depth){        
 
     	this.m_rect = rect;        
         this.depth = depth;
         if (this.m_rect.getWidth() > 2*this.min_size_of_subspace) {                    
         	
-            float bi_width = m_rect.width / 2;
-            float bi_height = m_rect.height / 2;
+            double bi_width = m_rect.width / 2;
+            double bi_height = m_rect.height / 2;
             
-            Point2D.Float mid = new Point2D.Float(m_rect.x + bi_width, m_rect.y + bi_height);
+            Point2D.Double mid = new Point2D.Double(m_rect.x + bi_width, m_rect.y + bi_height);
             
-            m_tl_child = new XQuadTree(new Rectangle2D.Float(m_rect.x, m_rect.y, bi_width, bi_height),min_size_of_subspace);
-            m_tr_child = new XQuadTree(new Rectangle2D.Float(mid.x, m_rect.y,bi_width, bi_height),min_size_of_subspace);
-            m_bl_child = new XQuadTree(new Rectangle2D.Float(m_rect.x, mid.y, bi_width, bi_height),min_size_of_subspace);
-            m_br_child = new XQuadTree(new Rectangle2D.Float(mid.x, mid.y,bi_width, bi_height),min_size_of_subspace);
+            m_tl_child = new XQuadTree(new Rectangle2D.Double(m_rect.x, m_rect.y, bi_width, bi_height),min_size_of_subspace);
+            m_tr_child = new XQuadTree(new Rectangle2D.Double(mid.x, m_rect.y,bi_width, bi_height),min_size_of_subspace);
+            m_bl_child = new XQuadTree(new Rectangle2D.Double(m_rect.x, mid.y, bi_width, bi_height),min_size_of_subspace);
+            m_br_child = new XQuadTree(new Rectangle2D.Double(mid.x, mid.y,bi_width, bi_height),min_size_of_subspace);
                            
             this.m_tl_child.index = this.index+"00";
             this.m_tr_child.index = this.index+"01";
             this.m_bl_child.index = this.index+"10";
             this.m_br_child.index = this.index+"11";            	
                         
-            this.m_tl_child.splitSpace(new Rectangle2D.Float(m_rect.x, m_rect.y, bi_width, bi_height),bi_width,this.depth+1);            
-            this.m_tr_child.splitSpace(new Rectangle2D.Float(mid.x, m_rect.y,bi_width, bi_height),bi_width,this.depth+1);
-            this.m_bl_child.splitSpace(new Rectangle2D.Float(m_rect.x, mid.y, bi_width, bi_height),bi_width,this.depth+1);
-            this.m_br_child.splitSpace(new Rectangle2D.Float(mid.x, mid.y,bi_width, bi_height),bi_width,this.depth+1);                         
+            this.m_tl_child.splitSpace(new Rectangle2D.Double(m_rect.x, m_rect.y, bi_width, bi_height),bi_width,this.depth+1);            
+            this.m_tr_child.splitSpace(new Rectangle2D.Double(mid.x, m_rect.y,bi_width, bi_height),bi_width,this.depth+1);
+            this.m_bl_child.splitSpace(new Rectangle2D.Double(m_rect.x, mid.y, bi_width, bi_height),bi_width,this.depth+1);
+            this.m_br_child.splitSpace(new Rectangle2D.Double(mid.x, mid.y,bi_width, bi_height),bi_width,this.depth+1);                         
            
             this.hasChild = true;            
         }
@@ -112,7 +112,7 @@ public class XQuadTree {
      * @param y
      * @return
      */  
-    public XQuadTree locate(float x, float y) {
+    public XQuadTree locate(double x, double y) {
         if (this.hasChild) {
             // check children
             if (this.m_tl_child.isInside(x,y)) {            	
@@ -140,10 +140,10 @@ public class XQuadTree {
      * @param item
      * @return the index(es) of subspaces
      */
-    public String[] match(Rectangle2D.Float rect){
+    public String[] match(Rectangle2D.Double rect){
         // If this quad doesn't intersect the items rectangle, do nothing
         if (!m_rect.intersects(rect)
-        		&& !m_rect.contains(new Point2D.Float((float)rect.getX(),(float)rect.getY()))){           	
+        		&& !m_rect.contains(new Point2D.Double((double)rect.getX(),(double)rect.getY()))){           	
         	return null;
         } 
         
@@ -175,7 +175,7 @@ public class XQuadTree {
      * 				 if the rectangle crosses two trees, index is the string combined wit 
      * @return
      */
-    private List<XQuadTree> getDestinationTree(XQuadTree destTree,Rectangle2D.Float item)
+    private List<XQuadTree> getDestinationTree(XQuadTree destTree,Rectangle2D.Double item)
     {
         // If a child can't contain an object, it will live in this Quad
         //XQuadTree destTree = this;    	
@@ -273,11 +273,11 @@ public class XQuadTree {
 		this.hasChild = hasChild;
 	}
 
-	public Rectangle2D.Float getM_rect() {
+	public Rectangle2D.Double getM_rect() {
 		return m_rect;
 	}
 
-	public void setM_rect(Rectangle2D.Float m_rect) {
+	public void setM_rect(Rectangle2D.Double m_rect) {
 		this.m_rect = m_rect;
 	}
 
@@ -332,7 +332,7 @@ public class XQuadTree {
 
  
 	
-//  public XQuadTree locate_debug(float x, float y) {
+//  public XQuadTree locate_debug(double x, double y) {
 //  boolean isThere = false;
 //  XQuadTree node = this;
 //

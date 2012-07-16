@@ -46,7 +46,7 @@ public class CreateTableSchema {
 				
 			}else if(args[0].equals("l2")){
 				String families[] = {BixiConstant.LOCATION_FAMILY_NAME};
-				int versions[] = {1};
+				int versions[] = {10};
 				hbaseUtil.createTable(BixiConstant.LOCATION_TABLE_NAME_2, families,versions);
 				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_2);				
 			}

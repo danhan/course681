@@ -1,6 +1,5 @@
 package bixi.hbase.upload;
 
-import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
 
@@ -27,39 +26,41 @@ import bixi.hbase.query.BixiConstant;
  * 
  */
 public class TableInsertLocationS1 extends TableInsertAbstraction {
-
-	String tableName = BixiConstant.LOCATION_TABLE_NAME_1;
-	String familyName = BixiConstant.LOCATION_FAMILY_NAME;
+		
 	XQuadTree quadTree = null;
+	/**
+	 * This should be known before indexing with QuadTree.
+	 */
+	double min_size_of_subspace = BixiConstant.MIN_SIZE_OF_SUBSPACE;
+	
 
 	public TableInsertLocationS1() throws IOException {		
 		super();
-		hbase.getTableHandler(tableName);
-		// This should be known before indexing with QuadTree.
-		Rectangle2D.Float space = new Rectangle2D.Float(
-				(float) BixiConstant.MONTREAL_TOP_LEFT_X,
-				(float) BixiConstant.MONTREAL_TOP_LEFT_Y,
-				(float) BixiConstant.MONTREAL_AREA_WIDTH,
-				(float) BixiConstant.MONTREAL_AREA_HEIGHT);
-		// The min size of subspace, this is based on the queries
-		float min_size_of_subspace = (float) BixiConstant.MIN_SIZE_OF_SUBSPACE;
+		tableName = BixiConstant.LOCATION_TABLE_NAME_1;
+		familyName = BixiConstant.LOCATION_FAMILY_NAME;
+		try{
+			this.setHBase();	
+		}catch(Exception e){
+			e.printStackTrace();
+		}
+				
 		// build up a quadtree.
 		quadTree = new XQuadTree(space, min_size_of_subspace);
 		quadTree.buildTree();
 	}
 
 	@Override
-	public void insert() {
-		int batchNum = 100;
-		File dir = new File("data2/sub");
-		String fileName = dir.getAbsolutePath() + "/01_10_2010__00_00_01.xml";
-		insert(fileName, batchNum);
+	public void insert(String filename, int batchNum) {		
+		insert(filename);
 	}
 
 	public static void main(String[] args) throws ParserConfigurationException,
 			IOException {
 		TableInsertLocationS1 inserter = new TableInsertLocationS1();
-		inserter.insert();
+		File dir = new File("data2/sub");
+		int batchNum = 100;
+		String fileName = dir.getAbsolutePath() + "/01_10_2010__00_00_01.xml";
+		inserter.insert(fileName,batchNum);
 	}
 
 	/**
@@ -70,7 +71,7 @@ public class TableInsertLocationS1 extends TableInsertAbstraction {
 	 * @param batchNum
 	 *            how many rows can be written at one go
 	 */
-	public void insert(String filename, int batchNum) {
+	public void insert(String filename) {
 		try {
 			File f = new File(filename);
 			Document dom = null;
@@ -96,9 +97,7 @@ public class TableInsertLocationS1 extends TableInsertAbstraction {
 						// get the location
 						XStation station = reader.getStation(e);
 						// index the location
-						XQuadTree node = quadTree.locate(
-								(float) station.getLatitude(),
-								(float) Math.abs(station.getlongitude()));
+						XQuadTree node = quadTree.locate(station.getLatitude(),Math.abs(station.getlongitude()));
 						//System.out.println(quadTree.getM_rect().toString());
 						//System.out.println((float) station.getLatitude()+" ; "+(float) Math.abs(station.getlongitude()));
 						String key = node.getIndex();

@@ -26,7 +26,11 @@ public class BixiConstant {
   
   public final static double MONTREAL_AREA_HEIGHT = 0.17;
   
-  public final static double MIN_SIZE_OF_SUBSPACE = 0.01;
+  public final static double MIN_SIZE_OF_SUBSPACE = 0.001;    
+  /**
+   * This should be used in Raster indexing
+   */
+  public final static int MAX_NUM_OF_COLUMN = 10;
   /**
    * static metrics in data
    */

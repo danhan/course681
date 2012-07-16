@@ -330,7 +330,7 @@ public class HBaseUtil {
 			
 			if(columns != null){
 				for(int i=0;i<columns.length;i++){
-					scan.addColumn(family[i].getBytes(),columns[i].getBytes());	
+					scan.addColumn(family[0].getBytes(),columns[i].getBytes());	
 				}	
 			}			
 

@@ -3,27 +3,38 @@ package util.quadtree.based.trie;
 
 import java.awt.geom.Rectangle2D;
 
+import bixi.hbase.query.BixiConstant;
+
 
 public class TestXQuadTree {
 
     public static void main(String args[]){
     	
-    	Rectangle2D.Float rect = new Rectangle2D.Float((float)45.415714,
-    							(float)73.526967,
-    							(float)0.15011499999999955,
-    							(float)0.1639420000000058);
-    	XQuadTree tree = new XQuadTree(rect,(float)0.002);
+    	Rectangle2D.Double rect = new Rectangle2D.Double(
+    			 BixiConstant.MONTREAL_TOP_LEFT_X,
+    			 BixiConstant.MONTREAL_TOP_LEFT_Y,
+    			 BixiConstant.MONTREAL_AREA_WIDTH,
+    			 BixiConstant.MONTREAL_AREA_HEIGHT);
+    	
+    	XQuadTree tree = new XQuadTree(rect,BixiConstant.MIN_SIZE_OF_SUBSPACE);
     	tree.buildTree();
     	tree.print();
     	
     	// get one point's index
-    	XQuadTree subspace = tree.locate((float)45.52830025,(float)73.608938);
+    	XQuadTree subspace = tree.locate(45.52830025,73.608938);
     	System.out.println("============");
     	subspace.print();
     	
-    	String[] spaces=tree.match(new Rectangle2D.Float(5,5,1,1));
+    	String[] spaces=tree.match(new Rectangle2D.Double(45.51038,73.55653,0.02,0.02));
+    	System.out.println("match========="+spaces.length); //0100,0110
     	for(String s:spaces){
-    		System.out.println(s);
+    		if(s!=null)
+    			System.out.println(s);
     	}
+    	
+    	//Test for the query neighbor
+       	subspace = tree.locate(45.49520,73.56328);
+    	System.out.println("============");
+    	subspace.print();
     }
 }
