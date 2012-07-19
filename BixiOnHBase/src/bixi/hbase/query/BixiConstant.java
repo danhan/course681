@@ -18,19 +18,19 @@ public class BixiConstant {
    * The Montreal station space: ( 45.415714,-73.526967) x distance: 0.15011499999999955, y distance: 0.1639420000000058; 
    */
   
-  public final static double MONTREAL_TOP_LEFT_X = 45.415714;
+  public final static double MONTREAL_TOP_LEFT_X = 0;//45.415714;
   
-  public final static double MONTREAL_TOP_LEFT_Y = 73.526967;
+  public final static double MONTREAL_TOP_LEFT_Y = 0;//73.526967;
   
-  public final static double MONTREAL_AREA_WIDTH = 0.16;
+  public final static double MONTREAL_AREA_WIDTH = 100;//0.16;
   
-  public final static double MONTREAL_AREA_HEIGHT = 0.17;
+  public final static double MONTREAL_AREA_HEIGHT = 100;//0.17;
   
-  public final static double MIN_SIZE_OF_SUBSPACE = 0.001;    
+  public final static double MIN_SIZE_OF_SUBSPACE = 5;//0.001;    
   /**
    * This should be used in Raster indexing
    */
-  public final static int MAX_NUM_OF_COLUMN = 10;
+  public final static int MAX_NUM_OF_COLUMN = 1000;
   /**
    * static metrics in data
    */

@@ -2,6 +2,7 @@ package bixi.hbase.query;
 
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
+import java.util.List;
 
 import hbase.service.HBaseUtil;
 
@@ -51,7 +52,7 @@ public abstract class QueryAbstraction {
 	 * @param longitude
 	 * @param radius
 	 */
-	public abstract void copQueryAvailableNear(String timestamp,
+	public abstract List<String> copQueryAvailableNear(String timestamp,
 			double latitude, double longitude,double radius);
 	
 	

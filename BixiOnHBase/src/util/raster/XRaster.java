@@ -29,6 +29,8 @@ public class XRaster {
     private DecimalFormat IndexColumnFormatter = null;
     
     public XRaster(Rectangle2D.Double rect, double min_size_of_height,int columnNum){
+    	rect.x = Math.abs(rect.x);
+    	rect.y = Math.abs(rect.y);
     	this.m_rect = rect;
     	this.min_size_of_height = min_size_of_height;
     	this.min_size_of_width = m_rect.getWidth() / columnNum;    	
@@ -48,6 +50,8 @@ public class XRaster {
      * @return Box, it indicates the row and column this point belongs to and the number of objects the box has already
      */  
     public XBox locate(double x, double y) {
+    	x = Math.abs(x);
+    	y = Math.abs(y);
     	int row = (int) ((y-this.m_rect.getY()) / this.min_size_of_height );   	
     	int column = (int)((x - this.m_rect.getX()) / this.min_size_of_width );  		
     		
@@ -71,7 +75,8 @@ public class XRaster {
     }
     
     public XBox[] match(double x, double y,double radius){
-   	
+    	x = Math.abs(x);
+    	y = Math.abs(y);
     	double minX = (m_rect.getMinX()<(x-radius))? (x-radius):m_rect.getMinX(); 
     	double minY = (m_rect.getMinY()<(y-radius))? (y-radius):m_rect.getMinY(); 
     	double maxX = (m_rect.getMaxX()>(x+radius))? (x+radius):m_rect.getMaxX();
@@ -135,7 +140,7 @@ public class XRaster {
     				  ";br_x=>"+br_x+
     				  ";br_y=>"+br_y;
     	for(XBox box:m_boxes){
-    		msg += box.toString()+"\n";
+    		//msg += box.toString()+"\n";
     	}
     	System.out.println(msg);				
 	}

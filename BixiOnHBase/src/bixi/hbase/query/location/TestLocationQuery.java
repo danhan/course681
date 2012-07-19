@@ -10,28 +10,35 @@ public class TestLocationQuery {
 	public static void main(String args[]){
 		
 		double x = 45.51038;
-		double y = -73.55653;
-		double radius = 0.02;
+		double y = 50.55653;
+		double radius = 0.5;
 		
 		BixiLocationQueryS2 query2=new BixiLocationQueryS2();
 		BixiLocationQueryS1 query1=new BixiLocationQueryS1();
 		
-		int option = 1;
+		int runTime = 4;
+		
+		int option = 0;
 		if(option == 0){ // query neigbours
 			
-			for(int i=0;i<10;i++){
-				query2.scanQueryAvailableNear("",x,y,radius);	
+			for(int i=0;i<runTime;i++){
+				//query2.scanQueryAvailableNear("",x,y,radius);				
+				//query2.copQueryAvailableNear("",x, y,radius);
 			}
-			
 			System.out.println("=========================");
 			
 			
-			for(int i=0;i<10;i++){
+			for(int i=0;i<runTime;i++){
 				query1.scanQueryAvailableNear("",x,y,radius);	
+				//query1.copQueryAvailableNear("",x,y,radius);
+				
 			}
 		}else if(option == 1){ // query point
-			query1.scanQueryPoint(x,Math.abs(y));
-			query2.scanQueryPoint(x,y);
+			for(int i=0;i<runTime;i++)
+				query1.scanQueryPoint(x,y);
+			System.out.println("=========================");
+			for(int i=0;i<runTime;i++)
+				query2.scanQueryPoint(x,y);
 			
 		}else if(option ==2){
 			
@@ -43,8 +50,8 @@ public class TestLocationQuery {
 
 		
 		
-/*		BixiStatistics stat = new BixiStatistics();		
-		HashMap<String,String> stations = stat.QueryNeighbor(x, y, radius);*/
+		//BixiStatistics stat = new BixiStatistics();		
+		//HashMap<String,String> stations = stat.QueryNeighbor(x, y, radius);
 		
 //		TreeMap<String,String> tree = new TreeMap<String,String>(stations);
 //		TreeMap<String,String> result2Tree = new TreeMap<String,String>(result1);

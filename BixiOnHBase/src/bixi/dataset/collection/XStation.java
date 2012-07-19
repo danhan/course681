@@ -1,8 +1,5 @@
 package bixi.dataset.collection;
 
-import java.util.Iterator;
-import java.util.StringTokenizer;
-
 /*
  * It is the data structure for one station
  */
@@ -24,6 +21,7 @@ import java.util.StringTokenizer;
 
 public class XStation {
 
+	
 	private String id;
 	private String name;
 	private String terminalName;

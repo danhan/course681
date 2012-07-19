@@ -1,5 +1,6 @@
 package bixi.query.coprocessor;
 
+import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -17,6 +18,8 @@ import org.apache.hadoop.hbase.coprocessor.RegionCoprocessorEnvironment;
 import org.apache.hadoop.hbase.regionserver.InternalScanner;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import bixi.dataset.collection.BixiReader;
+import bixi.dataset.collection.XStation;
 import bixi.hbase.query.BixiConstant;
 
 /**
@@ -30,9 +33,119 @@ BixiProtocol {
 	private static byte[] colFamily = BixiConstant.SCHEMA1_FAMILY_NAME.getBytes();
 	private final static String BIXI_DELIMITER = "#";
 	private final static int BIXI_DATA_LENGTH = 11;
+	BixiReader reader = new BixiReader();
 
-/***********************For Schema3******************/
+	/******************For Location Schema1*******************************/
+	
+	public List<String> copQueryNeighbor4LS1(Scan scan,double latitude,double longitude,double radius)throws IOException{
+		
+		long sTime = System.currentTimeMillis();
+		System.out.println(sTime+": in the copQueryNeighbor4LS1....");
+		/**Step1: get internalScanner***/
+		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment()).getRegion().getScanner(scan);
+		List<KeyValue> keyvalues = new ArrayList<KeyValue>();
+		List<String> results = new ArrayList<String>();
+		boolean hasMoreResult = false;		
+		Point2D.Double point = new Point2D.Double(latitude,longitude);
+		/**Step2: iterate the result from the scanner**/
+		int count = 0;
+		int accepted = 0;
+		try {
+			do {
+				hasMoreResult = scanner.next(keyvalues);
+				if(keyvalues != null && keyvalues.size() > 0){	
+					for(KeyValue kv:keyvalues){
+						System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
+						count++;
+						// get the distance between this point and the given point
+						XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));
+						station.setId(Bytes.toString(kv.getQualifier()));
+						
+						Point2D.Double resPoint = new Point2D.Double(station.getLatitude(),station.getlongitude());
+						double distance = resPoint.distance(point);
+						/**Step3: filter the false-positive points**/
+						if(distance <= radius){						
+							//System.out.println("row=>"+Bytes.toString(r.getRow()) + ";colum=>"+Bytes.toString(kv.getQualifier())+ ";station=>"+station.getId());
+							results.add(station.getId());
+							accepted++;
+						}
+							
+					}
+				}								
+				keyvalues.clear();
+				
+				
+			} while (hasMoreResult);
+			
+			long eTime = System.currentTimeMillis();
+			
+			System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+results.size()+";count=>"+count+";accepted=>"+accepted);			
+			
+		} finally {
+			scanner.close();
+		}
+						
+		return results;	
+	}
+	
+	
+	/******************For Location Schema2*******************************/
+	
+	public List<String> copQueryNeighbor4LS2(Scan scan,double latitude,double longitude,double radius)throws IOException{
+		
+		long sTime = System.currentTimeMillis();
+		System.out.println(sTime+": in the copQueryNeighbor4LS2....");
+		/**Step1: get internalScanner***/
+		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment()).getRegion().getScanner(scan);
+		List<KeyValue> keyvalues = new ArrayList<KeyValue>();
+		List<String> results = new ArrayList<String>();
+		boolean hasMoreResult = false;		
+		Point2D.Double point = new Point2D.Double(latitude,longitude);
+		
+		/**Step2: iterate the scan result ***/
+		int count = 0;
+		int accepted = 0;
+		try {
+			do {
+				hasMoreResult = scanner.next(keyvalues);
+				if(keyvalues != null && keyvalues.size() > 0){	
+					for(KeyValue kv:keyvalues){
+						System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
+						count++;
+						// get the distance between this point and the given point
+						XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));						
+						
+						Point2D.Double resPoint = new Point2D.Double(station.getLatitude(),station.getlongitude());
+						double distance = resPoint.distance(point);
+						/**Step3: filter the false-positive points**/
+						if(distance <= radius){						
+							System.out.println("row=>"+Bytes.toString(kv.getRow()) + ";colum=>"+Bytes.toString(kv.getQualifier())+ ";station=>"+station.getId());
+							results.add(station.getId());
+							accepted++;
+						}
+							
+					}
+				}								
+				keyvalues.clear();				
+				
+			} while (hasMoreResult);
+			
+			long eTime = System.currentTimeMillis();
+			
+			System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+results.size()+";count=>"+count+";accepted=>"+accepted);			
+			
+		} finally {
+			scanner.close();
+		}
+						
+		return results;	
+				
+	}	
+	
+	
+	/***********************For Schema3******************/
 	@Override	
+
 	public Map<String, TotalNum> copGetTotalUsage4S3(Scan scan) throws IOException{
 		
 		long start = System.currentTimeMillis();
@@ -214,12 +327,12 @@ BixiProtocol {
 				latStr = latStr.substring(latStr.indexOf("=")+1);
 				lonStr = lonStr.substring(lonStr.indexOf("=")+1);
 				log.debug("lon/lat values are: "+lonStr +"; "+latStr);
-				double distance =giveDistance(Double.parseDouble(latStr), Double.parseDouble(lonStr),
-						lat, lon)- radius;
+				double distance =giveDistance(java.lang.Double.parseDouble(latStr), java.lang.Double.parseDouble(lonStr),
+						lat, lon)- radius; 
 				log.debug("distance is : "+ distance);
 				if ( distance < 0) {// add it
 					result.put(sArr[0], getFreeBikes(kv));
-				}
+				}				
 			}
 		} finally {
 		}
@@ -321,10 +434,10 @@ BixiProtocol {
 				for (KeyValue kv : res) {
 					String clusterId = Bytes.toString(kv.getRow());
 					String[] parts = clusterId.split(":");
-					double cLat = Double.parseDouble(parts[0]);
-					double cLon = Double.parseDouble(parts[1]);
-					double dx = Double.parseDouble(parts[2]);
-					double dy = Double.parseDouble(parts[3]);
+					double cLat = java.lang.Double.parseDouble(parts[0]);
+					double cLon = java.lang.Double.parseDouble(parts[1]);
+					double dx = java.lang.Double.parseDouble(parts[2]);
+					double dy = java.lang.Double.parseDouble(parts[3]);
 					double distx = lat-cLat;
 					double disty = lon-cLon;
 					if(distx >= 0 && distx <= dx && disty <= 0 && disty <= dy){

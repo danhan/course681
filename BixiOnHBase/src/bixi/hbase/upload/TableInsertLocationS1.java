@@ -6,12 +6,16 @@ import java.io.IOException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
 
 import org.apache.hadoop.hbase.client.Put;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
+import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
+import org.xml.sax.helpers.DefaultHandler;
 
 import util.quadtree.based.trie.XQuadTree;
 
@@ -51,16 +55,19 @@ public class TableInsertLocationS1 extends TableInsertAbstraction {
 
 	@Override
 	public void insert(String filename, int batchNum) {		
-		insert(filename);
+		//insert(filename);
+		long start = System.currentTimeMillis();
+		insertSAX(filename);
+		System.out.println("time=>"+(System.currentTimeMillis()-start));
 	}
 
 	public static void main(String[] args) throws ParserConfigurationException,
 			IOException {
 		TableInsertLocationS1 inserter = new TableInsertLocationS1();
-		File dir = new File("data2/sub");
+		File dir = new File("data2");
 		int batchNum = 100;
-		String fileName = dir.getAbsolutePath() + "/01_10_2010__00_00_01.xml";
-		inserter.insert(fileName,batchNum);
+		String fileName = dir.getAbsolutePath() +"/"+ args[0];
+		inserter.insert(fileName,batchNum);		
 	}
 
 	/**
@@ -123,4 +130,99 @@ public class TableInsertLocationS1 extends TableInsertAbstraction {
 
 	}
 
+	
+	/**
+	 * Parse the xml file with JAX
+	 * Read the location from file, parse it, index it, and then insert it
+	 * TODO Normalize the point: enlarge the width and height, so all the points are in the scope now.
+	 * @param filename
+	 *            original file including all location information
+	 * @param batchNum
+	 *            how many rows can be written at one go
+	 */
+	public void insertSAX(String filename) {
+		try {
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+			SAXParser saxParser = factory.newSAXParser();
+			 
+			
+			
+			DefaultHandler handler = new DefaultHandler(){
+				boolean bID = false;
+				boolean bName = false;
+				boolean bLat = false;
+				boolean bLong = false;
+				XStation station = new XStation();
+				int count = 0;
+				
+			public void startElement(String uri, String localName, String qName, 
+					Attributes attributes) throws SAXException{
+				
+				//System.out.println("start element: " + qName);
+				if(qName.equalsIgnoreCase("id")){
+					bID = true;
+				}else if(qName.equalsIgnoreCase("terminalName")){
+					bName = true;
+				}else if(qName.equalsIgnoreCase("lat")){
+					bLat = true;
+				}else if(qName.equalsIgnoreCase("long")){
+					bLong = true;
+				}								
+			}
+			
+			public void endElement(String uri, String localName, String qName) throws SAXException{
+				//System.out.println("end Element: "+qName);
+				if(qName.equalsIgnoreCase("station")){
+					// index the location
+					XQuadTree node = quadTree.locate(station.getLatitude(),Math.abs(station.getlongitude()));
+					//System.out.println(quadTree.getM_rect().toString());
+					//System.out.println((float) station.getLatitude()+" ; "+(float) Math.abs(station.getlongitude()));
+					String key = node.getIndex();					
+					// insert it into hbase
+					try{
+						Put put = new Put(key.getBytes());
+						put.add(familyName.getBytes(), station.getId()
+								.getBytes(), station.getMetadata().getBytes());
+						hbase.getHTable().put(put);		
+						count++;
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+
+				}else if (qName.equalsIgnoreCase("stations")){
+					System.out.println("insert number: "+count);
+				}
+			}
+			
+			public void characters(char ch[], int start, int length) throws SAXException{
+				
+				String character = new String(ch, start, length);				
+				if(bID){
+					bID = false;
+					station.setId(character);
+				}else if(bName){
+					bName = false;
+					station.setName(character);
+				}else if(bLat){
+					bLat = false;
+					station.setLatitude(Double.valueOf(character.trim()));
+				}else if(bLong){
+					bLong = false;
+					station.setlongitude(Double.valueOf(character.trim()));
+				}
+			}
+		};	
+			saxParser.parse(filename, handler);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			this.hbase.closeTableHandler();
+			
+		}
+
+	}
+	
+	
+	
 }

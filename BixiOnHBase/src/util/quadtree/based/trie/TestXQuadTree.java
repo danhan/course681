@@ -25,7 +25,7 @@ public class TestXQuadTree {
     	System.out.println("============");
     	subspace.print();
     	
-    	String[] spaces=tree.match(new Rectangle2D.Double(45.51038,73.55653,0.02,0.02));
+    	String[] spaces=tree.match(45.51038,73.55653,0.02,0.02);
     	System.out.println("match========="+spaces.length); //0100,0110
     	for(String s:spaces){
     		if(s!=null)

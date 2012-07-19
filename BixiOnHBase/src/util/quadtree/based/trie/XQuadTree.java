@@ -2,6 +2,7 @@ package util.quadtree.based.trie;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.geom.Rectangle2D.Double;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -113,6 +114,8 @@ public class XQuadTree {
      * @return
      */  
     public XQuadTree locate(double x, double y) {
+    	x = Math.abs(x);
+    	y = Math.abs(y);
         if (this.hasChild) {
             // check children
             if (this.m_tl_child.isInside(x,y)) {            	
@@ -140,7 +143,8 @@ public class XQuadTree {
      * @param item
      * @return the index(es) of subspaces
      */
-    public String[] match(Rectangle2D.Double rect){
+    public String[] match(double x,double y, double w,double h){
+    	Rectangle2D.Double rect = new Rectangle2D.Double(Math.abs(x),Math.abs(y),w,h);
         // If this quad doesn't intersect the items rectangle, do nothing
         if (!m_rect.intersects(rect)
         		&& !m_rect.contains(new Point2D.Double((double)rect.getX(),(double)rect.getY()))){           	

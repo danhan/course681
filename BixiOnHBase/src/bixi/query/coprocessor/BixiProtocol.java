@@ -35,8 +35,15 @@ public interface BixiProtocol extends CoprocessorProtocol {
   
   List<String> getStationsNearPoint_Schema2(double lat, double lon) throws IOException;
   
-  /* *************************for Schema3*************   */
+  /**************************For Time Schema3************************/
 
   Map<String, TotalNum> copGetTotalUsage4S3(Scan scan) throws IOException;
+  
+  /*******************For location Schema1**************************/
+  List<String> copQueryNeighbor4LS1(Scan scan,double latitude,double longitude,double radius)throws IOException;
+  
+  /*******************For location Schema2**************************/
+  List<String> copQueryNeighbor4LS2(Scan scan,double latitude,double longitude,double radius)throws IOException;
+  
   
 }
