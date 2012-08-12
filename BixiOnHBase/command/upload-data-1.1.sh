@@ -10,7 +10,7 @@ pushd .
 
 #source ./bin/envrc
 
-USAGE="USAGE:<3/4> <file directory>"
+USAGE="USAGE:<3/4/11/111/12/121> <file directory> <optional number of files; default value is 10> <batchnumber; default value is 1000>"
 
 if [ -z "$1" ]; then
 	echo "$USAGE"

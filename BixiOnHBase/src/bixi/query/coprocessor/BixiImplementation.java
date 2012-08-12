@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NavigableMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,7 +56,7 @@ BixiProtocol {
 				hasMoreResult = scanner.next(keyvalues);
 				if(keyvalues != null && keyvalues.size() > 0){	
 					for(KeyValue kv:keyvalues){
-						System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
+						//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
 						count++;
 						// get the distance between this point and the given point
 						XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));
@@ -109,9 +110,10 @@ BixiProtocol {
 			do {
 				hasMoreResult = scanner.next(keyvalues);
 				if(keyvalues != null && keyvalues.size() > 0){	
+											
 					for(KeyValue kv:keyvalues){
-						System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
-						count++;
+						//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
+						count++;						
 						// get the distance between this point and the given point
 						XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));						
 						
@@ -119,7 +121,7 @@ BixiProtocol {
 						double distance = resPoint.distance(point);
 						/**Step3: filter the false-positive points**/
 						if(distance <= radius){						
-							System.out.println("row=>"+Bytes.toString(kv.getRow()) + ";colum=>"+Bytes.toString(kv.getQualifier())+ ";station=>"+station.getId());
+							//System.out.println("row=>"+Bytes.toString(kv.getRow()) + ";colum=>"+Bytes.toString(kv.getQualifier())+ ";station=>"+station.getId());
 							results.add(station.getId());
 							accepted++;
 						}

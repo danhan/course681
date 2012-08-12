@@ -25,7 +25,8 @@ public abstract class TableInsertAbstraction {
 	  /**
 	   * @throws IOException
 	   */
-	  public TableInsertAbstraction() throws IOException {	    	
+	  public TableInsertAbstraction() {	
+		
 		this.reader = new BixiReader();
 		// This should be known before indexing with QuadTree.
 		this.space = new Rectangle2D.Double(

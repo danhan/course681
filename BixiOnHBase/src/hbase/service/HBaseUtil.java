@@ -303,7 +303,16 @@ public class HBaseUtil {
 		return new KeyOnlyFilter();
 	}
 	
-	
+	/**
+	 * It should be noticed that the stop row in scan is not included as default
+	 * @param rowRange
+	 * @param filterList
+	 * @param family
+	 * @param columns
+	 * @param maxVersion
+	 * @return
+	 * @throws Exception
+	 */
 	public ResultScanner getResultSet(String[] rowRange,FilterList filterList,String[] family,String[] columns,int maxVersion) throws Exception{
 		if(table == null)
 			throw new Exception("No table handler");
@@ -322,10 +331,11 @@ public class HBaseUtil {
 			if(maxVersion>0)
 				scan.setMaxVersions(maxVersion);
 			
+			// scan exclude the stop row directly, so have to make a little difference of the stop row 
 			if(rowRange != null){
 				scan.setStartRow(rowRange[0].getBytes());
 				if(rowRange.length == 2 && rowRange[1] != null)
-					scan.setStopRow(rowRange[1].getBytes());			
+					scan.setStopRow((rowRange[1]).getBytes());			
 			}	
 			
 			if(columns != null){
@@ -368,8 +378,8 @@ public class HBaseUtil {
 				
 			if(columns != null){
 				for(int i=0;i<columns.length;i++){
-					scan.addColumn(family[i].getBytes(),columns[i].getBytes());	
-					System.out.println(family[i]+";"+columns[i]);
+					scan.addColumn(family[0].getBytes(),columns[i].getBytes());	
+					//System.out.println(family[i]+";"+columns[i]);
 				}	
 			}				
 			System.out.println("finish to get the result scanner...");
@@ -382,103 +392,6 @@ public class HBaseUtil {
 		
 	}	
 
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-//	public ResultScanner getResultSet(byte[][] rowRange,FilterList filterList,String[] family,String[] columns,int maxVersion) throws Exception{
-//		if(table == null)
-//			throw new Exception("No table handler");
-//		if(cacheSize < 0)
-//			throw new Exception("should set cache size before scanning");
-//		
-//		Scan scan = null;
-//		ResultScanner rscanner = null;
-//		
-//		try{
-//			scan = new Scan();
-//			scan.setCaching(this.cacheSize);
-//			scan.setCacheBlocks(blockCached);
-//			scan.setFilter(filterList);
-//			if(maxVersion>0)
-//				scan.setMaxVersions(maxVersion);
-//			if(rowRange != null){
-//				scan.setStartRow(rowRange[0]);
-//				scan.setStopRow(rowRange[1]);				
-//			}
-//
-//				
-//			if(columns != null){
-//				for(int i=0;i<columns.length;i++){
-//					scan.addColumn(family[i].getBytes(),columns[i].getBytes());	
-//				}	
-//			}			
-//			
-//			//TODO set filter for scan
-//			rscanner = this.table.getScanner(scan);
-//			System.out.println("after get the result scanner...");
-//			
-//		}catch(Exception e){
-//			e.printStackTrace();
-//		}
-//		
-//		return rscanner;
-//		
-//	}	
-	
-	
-//	public void getResult(String tableName) {
-//		System.out.println("get Result from table name : " + tableName);
-//		Scan s = new Scan();
-//		ResultScanner ss = null;		
-//		s.setMaxVersions(3);
-//		try {			
-//			HTable table = new HTable(conf, tableName);
-//					
-//			ss = table.getScanner(s);			
-//
-//			System.out.println("Bixidata table description is : "
-//					+ table.getTableDescriptor().toString());
-//			int count = 100;
-//			for (Result r : ss) {
-//				//List<KeyValue> kv = r.getColumn(Bytes.toBytes("cf"), Bytes.toBytes("attr"));  // returns all versions of this column
-//				
-//				for(KeyValue kv: r.getColumn("qq".getBytes(),"pos_x".getBytes())){
-//					System.out.println(new String(kv.getFamily()) + "= "+ new String(kv.getValue())+";"+kv.getTimestamp()+";");
-//				}
-//					
-//				//System.out.print("the row is : " + new String(r.getRow())+": {");
-//				
-////				for (KeyValue kv : r.raw()) {					
-////					System.out.print(new String(kv.getFamily()) + "= "+ new String(kv.getValue())+";"+kv.getTimestamp()+";");
-////					
-////				}
-//				//System.out.println("}");
-//				count --;
-//				if(count<0)
-//					break;
-//			}			
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		} finally {
-//			ss.close();
-//		}
-//
-//	}
 
 	public HBaseAdmin getAdmin() {
 		return admin;

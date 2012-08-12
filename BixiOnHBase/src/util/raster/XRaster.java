@@ -52,6 +52,9 @@ public class XRaster {
     public XBox locate(double x, double y) {
     	x = Math.abs(x);
     	y = Math.abs(y);
+    	if(x>this.m_rect.getMaxX() || x<this.m_rect.getMinX() || y>this.m_rect.getMaxY() || y<this.m_rect.getMinY())
+    		return new XBox(null,null);
+    	
     	int row = (int) ((y-this.m_rect.getY()) / this.min_size_of_height );   	
     	int column = (int)((x - this.m_rect.getX()) / this.min_size_of_width );  		
     		
@@ -94,7 +97,7 @@ public class XRaster {
     	System.out.println(bottom_right.toString());
     	for(int i=Integer.valueOf(top_left.getColumn()); i<= Integer.valueOf(bottom_right.getColumn()); i++){
     		String c = this.IndexColumnFormatter.format(i);
-    		System.out.println("column: "+c);
+    		//System.out.println("column: "+c);
     		columns.add(c);
     	}
 		String[] c = new String[columns.size()];

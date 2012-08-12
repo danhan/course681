@@ -43,7 +43,7 @@ public class TableInsertLocationS2 extends TableInsertAbstraction {
 
 
 
-	private XRaster raster = null;
+	protected XRaster raster = null;
 
 	/**
 	 * This should be known before indexing with Raster
@@ -55,8 +55,8 @@ public class TableInsertLocationS2 extends TableInsertAbstraction {
 	 */
 	int num_of_column = BixiConstant.MAX_NUM_OF_COLUMN;
 
-	public TableInsertLocationS2() throws IOException {
-		super();
+	public TableInsertLocationS2() throws IOException {		
+		
 		this.tableName = BixiConstant.LOCATION_TABLE_NAME_2;
 		this.familyName = BixiConstant.LOCATION_FAMILY_NAME;
 		try{
@@ -84,7 +84,103 @@ public class TableInsertLocationS2 extends TableInsertAbstraction {
 		insertSAX(fileName);
 		System.out.println("time=>"+(System.currentTimeMillis()-start));
 	}
+	/**
+	 * Parse the xml file with JAX
+	 * Read the location from file, parse it, index it, and then insert it
+	 * TODO Normalize the point: enlarge the width and height, so all the points are in the scope now.
+	 * @param filename
+	 *            original file including all location information
+	 * @param batchNum
+	 *            how many rows can be written at one go
+	 */
+	public void insertSAX(String filename) {
+		try {
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+			SAXParser saxParser = factory.newSAXParser();
+		
+			
+			DefaultHandler handler = new DefaultHandler(){
+				boolean bID = false;
+				boolean bName = false;
+				boolean bLat = false;
+				boolean bLong = false;
+				XStation station = new XStation();
+				int count = 0;
+				
+			public void startElement(String uri, String localName, String qName, 
+					Attributes attributes) throws SAXException{
+				
+				//System.out.println("start element: " + qName);
+				if(qName.equalsIgnoreCase("id")){
+					bID = true;
+				}else if(qName.equalsIgnoreCase("terminalName")){
+					bName = true;
+				}else if(qName.equalsIgnoreCase("lat")){
+					bLat = true;
+				}else if(qName.equalsIgnoreCase("long")){
+					bLong = true;
+				}								
+			}
+			
+			public void endElement(String uri, String localName, String qName) throws SAXException{
+				//System.out.println("end Element: "+qName);
+				if(qName.equalsIgnoreCase("station")){
+					// index the location
+					XBox box = raster.addPoint(station.getLatitude(),Math.abs(station.getlongitude()));
 
+					String key = box.getRow();						
+					
+					// insert it into hbase
+					try{
+						// insert it into hbase
+						Put put = new Put(key.getBytes());
+						put.add(familyName.getBytes(), box.getColumn()
+								.getBytes(), box.getObjectCount(), station.getFullMetadata().getBytes());
+						//System.out.println(box.toString()+":=>"+station.getLatitude()+";"+station.getlongitude());
+						hbase.getHTable().put(put);	
+						count++;
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+
+				}else if (qName.equalsIgnoreCase("stations")){
+					System.out.println("insert number: "+count);
+				}
+			}
+			
+			public void characters(char ch[], int start, int length) throws SAXException{
+				
+				String character = new String(ch, start, length);				
+				if(bID){
+					bID = false;
+					station.setId(character);
+				}else if(bName){
+					bName = false;
+					station.setName(character);
+				}else if(bLat){
+					bLat = false;
+					station.setLatitude(Double.valueOf(character.trim()));
+				}else if(bLong){
+					bLong = false;
+					station.setlongitude(Double.valueOf(character.trim()));
+				}
+			}
+		};	
+			saxParser.parse(filename, handler);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			this.hbase.closeTableHandler();
+			
+		}
+	}
+	
+	
+	
+/**
+ * This is never used any more.
+ */
 	@Override
 	public void insert(String fileName, int batchNum) {
 		try {
@@ -139,98 +235,6 @@ public class TableInsertLocationS2 extends TableInsertAbstraction {
 
 	}
 	
-	/**
-	 * Parse the xml file with JAX
-	 * Read the location from file, parse it, index it, and then insert it
-	 * TODO Normalize the point: enlarge the width and height, so all the points are in the scope now.
-	 * @param filename
-	 *            original file including all location information
-	 * @param batchNum
-	 *            how many rows can be written at one go
-	 */
-	public void insertSAX(String filename) {
-		try {
-			SAXParserFactory factory = SAXParserFactory.newInstance();
-			SAXParser saxParser = factory.newSAXParser();
-		
-			
-			DefaultHandler handler = new DefaultHandler(){
-				boolean bID = false;
-				boolean bName = false;
-				boolean bLat = false;
-				boolean bLong = false;
-				XStation station = new XStation();
-				int count = 0;
-				
-			public void startElement(String uri, String localName, String qName, 
-					Attributes attributes) throws SAXException{
-				
-				//System.out.println("start element: " + qName);
-				if(qName.equalsIgnoreCase("id")){
-					bID = true;
-				}else if(qName.equalsIgnoreCase("terminalName")){
-					bName = true;
-				}else if(qName.equalsIgnoreCase("lat")){
-					bLat = true;
-				}else if(qName.equalsIgnoreCase("long")){
-					bLong = true;
-				}								
-			}
-			
-			public void endElement(String uri, String localName, String qName) throws SAXException{
-				//System.out.println("end Element: "+qName);
-				if(qName.equalsIgnoreCase("station")){
-					// index the location
-					XBox box = raster.addPoint((float) station.getLatitude(),
-							(float) Math.abs(station.getlongitude()));
-
-					String key = box.getRow();						
-					
-					// insert it into hbase
-					try{
-						// insert it into hbase
-						Put put = new Put(key.getBytes());
-						put.add(familyName.getBytes(), box.getColumn()
-								.getBytes(), box.getObjectCount(), station.getFullMetadata().getBytes());
-						//System.out.println(box.toString()+":=>"+station.getLatitude()+";"+station.getlongitude());
-						hbase.getHTable().put(put);	
-						count++;
-					}catch(Exception e){
-						e.printStackTrace();
-					}
-
-				}else if (qName.equalsIgnoreCase("stations")){
-					System.out.println("insert number: "+count);
-				}
-			}
-			
-			public void characters(char ch[], int start, int length) throws SAXException{
-				
-				String character = new String(ch, start, length);				
-				if(bID){
-					bID = false;
-					station.setId(character);
-				}else if(bName){
-					bName = false;
-					station.setName(character);
-				}else if(bLat){
-					bLat = false;
-					station.setLatitude(Double.valueOf(character.trim()));
-				}else if(bLong){
-					bLong = false;
-					station.setlongitude(Double.valueOf(character.trim()));
-				}
-			}
-		};	
-			saxParser.parse(filename, handler);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			this.hbase.closeTableHandler();
-			
-		}
-	}
 
 
 }

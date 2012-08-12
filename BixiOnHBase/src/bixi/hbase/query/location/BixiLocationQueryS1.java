@@ -174,10 +174,12 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 				}
 			}
 			long eTime = System.currentTimeMillis();
-			System.out.println("count is : "+count+"; accepted is "+accepted + ";time:"+(eTime-sTime));
+			System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
 			
 		}catch(Exception e){
 			e.printStackTrace();
+		}finally{
+			this.hbaseUtil.closeTableHandler();
 		}
 		return results;
 	}
@@ -185,7 +187,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 
 	@Override
 	public void copQueryPoint(double latitude, double longitude) {
-		// TODO Auto-generated method stub
+
 		
 	}
 
@@ -203,9 +205,10 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			XQuadTree node = quadTree.locate(latitude, longitude);
 			System.out.println(node.getIndex());
 			BixiReader reader = new BixiReader();
-			rScanner = this.hbaseUtil.getResultSet(new String[]{node.getIndex(),node.getIndex()},null, null,null,-1);
+			rScanner = this.hbaseUtil.getResultSet(new String[]{node.getIndex(),node.getIndex()+"0"},null, null,null,-1);
 			int count = 0;
 		
+			String stationName = null;
 			for(Result r: rScanner){
 				//System.out.println(Bytes.toString(r.getRow()) + "=>");
 				List<KeyValue> pairs = r.list();
@@ -213,16 +216,18 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 					//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
 					XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));
 					//station.print();
-					System.out.println(station.getLatitude()+"<>"+latitude);
-					System.out.println(station.getlongitude()+"<>"+longitude);
-					System.out.println(Bytes.toString(kv.getQualifier()));
+					//System.out.println(station.getLatitude()+"<>"+latitude);
+					//System.out.println(station.getlongitude()+"<>"+longitude);
+					//System.out.println(Bytes.toString(kv.getQualifier()));
 					if((station.getLatitude() == latitude && station.getlongitude() == longitude)){
-						
+						stationName = Bytes.toString(kv.getQualifier());
 						System.out.println(Bytes.toString(kv.getQualifier()));
-						//break;
+						break;
 					}
 					count++;
 				}
+				if(stationName != null)
+					break;
 			}	
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>"+count + "; time=>"+(eTime-sTime));
@@ -235,6 +240,75 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 		
 	}
 
+	@Override
+	public List<Point2D.Double> debugColumnVersion(String timestamp,
+			double latitude, double longitude, double radius){
+		long sTime = System.currentTimeMillis();
+		
+		// build up a quadtree.
+		XQuadTree quadTree = new XQuadTree(space, min_size_of_subspace);
+		quadTree.buildTree();
+		longitude = Math.abs(longitude);
+		double x = latitude - radius;
+		double y = longitude - radius;
+		Point2D.Double point = new Point2D.Double(latitude,longitude);
+		ResultScanner rScanner = null;
+		//result container
+		HashMap<String,String> results = new HashMap<String,String>();
+		List<Point2D.Double> returnedPoints = new ArrayList<Point2D.Double>();
+		try{
+			// match rect to find the subspace it belongs to
+			String[] indexes = quadTree.match(x,y,radius,radius);	
+			// prepare filter for scan
+			FilterList fList = new FilterList(FilterList.Operator.MUST_PASS_ONE);
+			for(String s:indexes){
+				System.out.println(s);
+				if(s!=null){
+					Filter rowFilter = hbaseUtil.getPrefixFilter(s);	
+					fList.addFilter(rowFilter);	
+				}				
+			}	
+			
+			rScanner = this.hbaseUtil.getResultSet(null,fList, null,null,-1);
+			BixiReader reader = new BixiReader();
+			int count = 0;
+			int accepted = 0;
+			for(Result r: rScanner){
+				//System.out.println(Bytes.toString(r.getRow()) + "=>");
+				List<KeyValue> pairs = r.list();
+				for(KeyValue kv:pairs){
+					//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
+					count++;
+					// get the distance between this point and the given point
+					XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));
+					station.setId(Bytes.toString(kv.getQualifier()));
+					
+					Point2D.Double resPoint = new Point2D.Double(station.getLatitude(),Math.abs(station.getlongitude()));
+					double distance = resPoint.distance(point);
+					
+					if(distance <= radius){
+						returnedPoints.add(resPoint);
+						//System.out.println("row=>"+Bytes.toString(r.getRow()) + ";colum=>"+Bytes.toString(kv.getQualifier())+ ";station=>"+station.getId());
+						results.put(station.getId(), String.valueOf(distance));
+						accepted++;
+					}
+						
+				}
+			}
+			long eTime = System.currentTimeMillis();
+			System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			this.hbaseUtil.closeTableHandler();
+		}
+		
+		return returnedPoints;
+	}
+	
+	
+	
 	@Override
 	public void copQueryArea(double latitude, double longitude, int area) {
 		// TODO Auto-generated method stub

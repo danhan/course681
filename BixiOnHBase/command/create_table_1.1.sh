@@ -10,7 +10,7 @@ pushd .
 
 #source ./bin/envrc
 
-USAGE="USAGE:<3/4>"
+USAGE="USAGE:<3/4/l1/l11/l2/l21>"
 
 if [ -z "$1" ]; then
 	echo "$USAGE"

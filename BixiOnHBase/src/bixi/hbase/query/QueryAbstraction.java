@@ -1,5 +1,6 @@
 package bixi.hbase.query;
 
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.List;
@@ -118,7 +119,19 @@ public abstract class QueryAbstraction {
 	 */
 	public abstract void scanQueryAvailableKNN(String timestamp,
 			double latitude, double longitude,int n);	
+
+	/**
+	 * For debug
+	 * @param timestamp
+	 * @param latitude
+	 * @param longitude
+	 * @param radius
+	 * @return
+	 */
+	public abstract List<Point2D.Double> debugColumnVersion(String timestamp,
+			double latitude, double longitude, double radius);
 	
+
 	
 }
 

@@ -16,20 +16,20 @@ public class TestXRaster {
     	Rectangle2D.Double space = new Rectangle2D.Double(
     			BixiConstant.MONTREAL_TOP_LEFT_X,
     			BixiConstant.MONTREAL_TOP_LEFT_Y,
-    			BixiConstant.MONTREAL_AREA_WIDTH,
-    			BixiConstant.MONTREAL_AREA_HEIGHT);
+    			1,
+    			1);
     	
-    	XRaster raster = new XRaster(space,	min_size_of_height,max_num_of_column); 
+    	XRaster raster = new XRaster(space,	0.2,10); 
     	
     	raster.print();
     	
     	
     	// get one point's index
-    	XBox box = raster.locate(45.52830025,73.608938);
+    	XBox box = raster.locate(0.1342332,0.2333);
     	System.out.println("============");
     	System.out.println(box.toString());
     	
-    	XBox[] boxes = raster.match(45.52830025,73.608938,0.1);
+    	XBox[] boxes = raster.match(0.10,0.20,0.0023);
     	System.out.println("=============match...");
     	System.out.println(boxes[0].toString());
     	System.out.println(boxes[1].toString());

@@ -42,15 +42,24 @@ public class CreateTableSchema {
 				String families[] = {BixiConstant.LOCATION_FAMILY_NAME};
 				int versions[] = {1};
 				hbaseUtil.createTable(BixiConstant.LOCATION_TABLE_NAME_1, families,versions);
-				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_1);				
+				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_1);								
+			}else if(args[0].equals("l11")){
+				String families[] = {BixiConstant.LOCATION_FAMILY_NAME};
+				int versions[] = {1};
+				hbaseUtil.createTable(BixiConstant.LOCATION_TABLE_NAME_1+"1", families,versions);
+				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_1+"1");				
 				
 			}else if(args[0].equals("l2")){
 				String families[] = {BixiConstant.LOCATION_FAMILY_NAME};
-				int versions[] = {10000};
+				int versions[] = {100000};
 				hbaseUtil.createTable(BixiConstant.LOCATION_TABLE_NAME_2, families,versions);
 				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_2);				
-			}
-			
+			}else if(args[0].equals("l21")){ // debug for l2
+				String families[] = {BixiConstant.LOCATION_FAMILY_NAME};
+				int versions[] = {100000};
+				hbaseUtil.createTable(BixiConstant.LOCATION_TABLE_NAME_2+"1", families,versions);
+				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_2+"1");				
+			}			
 			
 		} catch (Exception e) {
 			e.printStackTrace();	

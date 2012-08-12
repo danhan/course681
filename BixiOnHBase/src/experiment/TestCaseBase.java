@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.Properties;
 
 import bixi.hbase.query.BixiQueryAbstraction;
+import bixi.hbase.query.QueryAbstraction;
+import bixi.hbase.query.location.BixiLocationQueryS1;
 
 public abstract class TestCaseBase {
 	
@@ -17,6 +19,9 @@ public abstract class TestCaseBase {
 	int times = 1;
 	
 	abstract BixiQueryAbstraction getBixiQuery();
+	QueryAbstraction getBixiLocationQuery(){
+		return null;
+	}
 	protected String convertDate(String a){
 		return a;
 	}
@@ -174,7 +179,7 @@ public abstract class TestCaseBase {
 		String timestamp = convertDate(args[0]);
 		Double latitude = Double.parseDouble(args[1]);
 		Double longitude = Double.parseDouble(args[2]);	
-		Double radius = Double.parseDouble(args[3]);
+		Double radius = Double.parseDouble(args[3]);		
 		for(int i=0;i<times;i++){
 			System.out.println("~~~ "+i+" Time ~~");
 			bixiQuery.queryAvailableByTimeStamp4Point(timestamp, latitude, longitude, radius);			
@@ -193,6 +198,56 @@ public abstract class TestCaseBase {
 			bixiQuery.queryAvailableByTimeStamp4PointWithScan(timestamp, latitude, longitude, radius);			
 		}		
 		//System.out.println("########################################################");
+	}
+	
+	/**Location query 1 ***/
+	private void callScanQueryAvailable(String propertyName){
+		String property = tests.getProperty(propertyName);
+		String[] args = property.split(" ");		
+		Double latitude = Double.parseDouble(args[0]);
+		Double longitude = Double.parseDouble(args[1]);
+		Double radius = Double.parseDouble(args[2]);
+		QueryAbstraction locationQuery = this.getBixiLocationQuery();
+		for(int i=0;i<times;i++){
+			System.out.println("~~~ "+i+" Time ~~");
+			locationQuery.scanQueryAvailableNear("", latitude, longitude, radius);			
+		}		
+	}
+	
+	private void callCopQueryAvailable(String propertyName){
+		String property = tests.getProperty(propertyName);
+		String[] args = property.split(" ");		
+		Double latitude = Double.parseDouble(args[0]);
+		Double longitude = Double.parseDouble(args[1]);
+		Double radius = Double.parseDouble(args[2]);
+		QueryAbstraction locationQuery = this.getBixiLocationQuery();
+		for(int i=0;i<times;i++){
+			System.out.println("~~~ "+i+" Time ~~");
+			locationQuery.copQueryAvailableNear("", latitude, longitude, radius);			
+		}		
+	}
+	/**Location query 2 ***/
+	private void callScanQueryPoint(String propertyName){
+		String property = tests.getProperty(propertyName);
+		String[] args = property.split(" ");		
+		Double latitude = Double.parseDouble(args[0]);
+		Double longitude = Double.parseDouble(args[1]);		
+		QueryAbstraction locationQuery = this.getBixiLocationQuery();
+		for(int i=0;i<times;i++){
+			System.out.println("~~~ "+i+" Time ~~");
+			locationQuery.scanQueryPoint(latitude, longitude);			
+		}		
+	}
+	private void callCopQueryPoint(String propertyName){
+		String property = tests.getProperty(propertyName);
+		String[] args = property.split(" ");		
+		Double latitude = Double.parseDouble(args[0]);
+		Double longitude = Double.parseDouble(args[1]);		
+		QueryAbstraction locationQuery = this.getBixiLocationQuery();
+		for(int i=0;i<times;i++){
+			System.out.println("~~~ "+i+" Time ~~");
+			locationQuery.copQueryPoint(latitude, longitude);			
+		}		
 	}
 	
 	/***********************************************************************************
@@ -217,7 +272,28 @@ public abstract class TestCaseBase {
 		this.times = 1;
 		callTimeStamp4Point(propertyName);
 	}
+	/**
+	 * Query location
+	 * @param propertyName
+	 */
+	public void runScanQueryAvailable(String propertyName){
+		this.times = 1;
+		callScanQueryAvailable(propertyName);
+	}
 	
+	public void runCopQueryAvailable(String propertyName){
+		this.times = 1;
+		callCopQueryAvailable(propertyName);
+	}
+	
+	public void runScanQueryPoint(String propertyName){
+		this.times = 1;
+		callScanQueryPoint(propertyName);
+	}
+	public void runCopQueryPoint(String propertyName){
+		this.times = 1;
+		callCopQueryPoint(propertyName);
+	}
 	
 }
 
