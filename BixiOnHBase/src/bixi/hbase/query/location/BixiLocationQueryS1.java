@@ -17,6 +17,7 @@ import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import util.log.XStatLog;
 import util.quadtree.based.trie.XQuadTree;
 import bixi.dataset.collection.BixiReader;
 import bixi.dataset.collection.XStation;
@@ -32,6 +33,7 @@ import bixi.query.coprocessor.BixiProtocol;
 public class BixiLocationQueryS1 extends QueryAbstraction{
 	
 	double min_size_of_subspace = BixiConstant.MIN_SIZE_OF_SUBSPACE;
+	String STAT_FILE_NAME = "BixiLocationQueryS1.stat";
 	
 	public BixiLocationQueryS1(){
 		tableName = BixiConstant.LOCATION_TABLE_NAME_1;
@@ -40,12 +42,13 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			this.setHBase();
 		}catch(Exception e){
 			e.printStackTrace();
-		}	
+		}			
 	}
 		
 	@Override
 	public List<String> copQueryAvailableNear(String timestamp, final double latitude,
 			final double longitude, final double radius) {
+		this.getStatLog(STAT_FILE_NAME);
 		
 		long s_time = System.currentTimeMillis();
 		
@@ -72,7 +75,11 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			double x = latitude - radius;
 			double y = longitude - radius;								   
 			// match rect to find the subspace it belongs to
-			String[] indexes = quadTree.match(x,y,radius,radius);	
+			
+			long match_s = System.currentTimeMillis();
+			List<String> indexes = quadTree.match(x,y,2*radius,2*radius);
+			long match_time = System.currentTimeMillis() - match_s;			
+			
 			// prepare filter for scan
 			FilterList fList = new FilterList(FilterList.Operator.MUST_PASS_ONE);
 			for(String s:indexes){
@@ -98,12 +105,14 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 		        
 		      };
 		    }, callBack);
+		    		    
 		    
-		    long e_time = System.currentTimeMillis();
-		    
-			long exe_time = e_time - s_time;
+			long exe_time = System.currentTimeMillis()- s_time;
 			// TODO store the time into database
-			System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.size());			    	
+			
+			System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.size());		
+			String outStr = "exe_time=>"+exe_time+";result=>"+callBack.res.size()+";match=>"+(match_time)+";subspace=>"+this.min_size_of_subspace;;
+			this.writeStat(outStr);
 			
 		    return callBack.res;
 		    
@@ -113,6 +122,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			ee.printStackTrace();
 		}finally{
 			hbaseUtil.closeTableHandler();
+			this.closeStatLog();
 		}
 		
 		return null;		
@@ -122,7 +132,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 	@Override
 	public HashMap<String,String> scanQueryAvailableNear(String timestamp, double latitude,
 			double longitude, double radius) {
-		
+		this.getStatLog(STAT_FILE_NAME);
 		long sTime = System.currentTimeMillis();
 		
 		// build up a quadtree.
@@ -137,7 +147,9 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 		HashMap<String,String> results = new HashMap<String,String>();
 		try{
 			// match rect to find the subspace it belongs to
-			String[] indexes = quadTree.match(x,y,radius,radius);	
+			long match_s = System.currentTimeMillis();
+			List<String> indexes = quadTree.match(x,y,2*radius,2*radius);
+			long match_time = System.currentTimeMillis() - match_s;
 			// prepare filter for scan
 			FilterList fList = new FilterList(FilterList.Operator.MUST_PASS_ONE);
 			for(String s:indexes){
@@ -173,13 +185,16 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 						
 				}
 			}
-			long eTime = System.currentTimeMillis();
+			long eTime = System.currentTimeMillis();			
 			System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
+			String outStr = "count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";match=>"+match_time+";subspace=>"+this.min_size_of_subspace;;
+			this.writeStat(outStr);
 			
 		}catch(Exception e){
 			e.printStackTrace();
 		}finally{
 			this.hbaseUtil.closeTableHandler();
+			this.closeStatLog();
 		}
 		return results;
 	}
@@ -231,11 +246,14 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			}	
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>"+count + "; time=>"+(eTime-sTime));
+			String outStr = "count=>"+count + "; time=>"+(eTime-sTime);
+			this.writeStat(outStr);
 			
 		}catch(Exception e){
 			e.printStackTrace();
 		}finally{
 			this.hbaseUtil.closeTableHandler();
+			this.closeStatLog();
 		}
 		
 	}
@@ -243,6 +261,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 	@Override
 	public List<Point2D.Double> debugColumnVersion(String timestamp,
 			double latitude, double longitude, double radius){
+		this.getStatLog(this.STAT_FILE_NAME);
 		long sTime = System.currentTimeMillis();
 		
 		// build up a quadtree.
@@ -258,7 +277,9 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 		List<Point2D.Double> returnedPoints = new ArrayList<Point2D.Double>();
 		try{
 			// match rect to find the subspace it belongs to
-			String[] indexes = quadTree.match(x,y,radius,radius);	
+			long match_s = System.currentTimeMillis();
+			List<String> indexes = quadTree.match(x,y,2*radius,2*radius);
+			long match_time = System.currentTimeMillis() - match_s;
 			// prepare filter for scan
 			FilterList fList = new FilterList(FilterList.Operator.MUST_PASS_ONE);
 			for(String s:indexes){
@@ -289,19 +310,24 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 					if(distance <= radius){
 						returnedPoints.add(resPoint);
 						//System.out.println("row=>"+Bytes.toString(r.getRow()) + ";colum=>"+Bytes.toString(kv.getQualifier())+ ";station=>"+station.getId());
-						results.put(station.getId(), String.valueOf(distance));
+						results.put(station.getId(), String.valueOf(distance));						
 						accepted++;
 					}
 						
 				}
-			}
+			}			
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
+			String outStr = "count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";match=>"+(match_time)+";subspace=>"+this.min_size_of_subspace;
+			this.writeStat(outStr);
+			
+			System.out.println(results.toString());
 			
 		}catch(Exception e){
 			e.printStackTrace();
 		}finally{
 			this.hbaseUtil.closeTableHandler();
+			this.closeStatLog();
 		}
 		
 		return returnedPoints;

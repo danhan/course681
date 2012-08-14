@@ -2,9 +2,10 @@ package util.quadtree.based.trie;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
-import java.awt.geom.Rectangle2D.Double;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 /**
  * This QuadTree is a trie-based tree, which means the Quad Tree split the space evenly.
@@ -28,7 +29,6 @@ public class XQuadTree {
 	
 	
 	private int depth = 0;  
-	private XQuadTree parent = null;
 	    
     private boolean hasChild = true;
        
@@ -143,32 +143,30 @@ public class XQuadTree {
      * @param item
      * @return the index(es) of subspaces
      */
-    public String[] match(double x,double y, double w,double h){
+    public List<String> match(double x,double y, double w,double h){
     	Rectangle2D.Double rect = new Rectangle2D.Double(Math.abs(x),Math.abs(y),w,h);
         // If this quad doesn't intersect the items rectangle, do nothing
         if (!m_rect.intersects(rect)
-        		&& !m_rect.contains(new Point2D.Double((double)rect.getX(),(double)rect.getY()))){           	
+        		&& !m_rect.contains(new Point2D.Double(rect.getX(),rect.getY()))){           	
         	return null;
         } 
-        
-        String[] parent = new String[4];
-        List<XQuadTree> destTree = new ArrayList<XQuadTree>();
-        destTree.add(this);
-        while(destTree != null){      
-        	if(destTree.size()>1){ 
-        		int i=0;
-        		for(XQuadTree tree: destTree){
-        			parent[i++] = tree.index;
-        		}
-        		break;
-        	}else{
-        		parent[0] = destTree.get(0).index;
-        	}        	
+        ArrayList<String> result = new ArrayList<String>();
+        Queue<XQuadTree> qe = new LinkedList<XQuadTree>();
+        qe.offer(this);
+        while(qe != null){
         	
-        	destTree = getDestinationTree(destTree.get(0),rect);
-        }
-        
-        return parent; 
+        	while(!qe.isEmpty() && qe.element().m_tl_child == null){
+        		XQuadTree leaf = qe.poll();
+        		result.add(leaf.index);        		
+        	}
+        	
+        	if(qe.isEmpty())
+        		break;
+        	
+        	XQuadTree leaf = qe.poll();        	
+        	getDestinationTree(leaf,rect,qe);      	                	        	    
+       }
+        return result; 
     }    
   
     /**
@@ -179,12 +177,11 @@ public class XQuadTree {
      * 				 if the rectangle crosses two trees, index is the string combined wit 
      * @return
      */
-    private List<XQuadTree> getDestinationTree(XQuadTree destTree,Rectangle2D.Double item)
+    private void getDestinationTree(XQuadTree destTree,Rectangle2D.Double item,Queue<XQuadTree> queue)
     {
-        // If a child can't contain an object, it will live in this Quad
-        //XQuadTree destTree = this;    	
+        // If a child can't contain an object, it will live in this Quad    	
         if (destTree.m_tl_child == null){        	
-        	return null;
+        	return;
         }
               	                
         boolean contain = false;
@@ -202,27 +199,23 @@ public class XQuadTree {
         {
             destTree = destTree.m_br_child;
             contain = true;
-        }
-        
-        List<XQuadTree> nodes = new ArrayList<XQuadTree>();
+        }        
         
         if(contain){
-        	nodes.add(destTree);
-        	return nodes;
-        }else{ // judge whether it is intersect
-            if(destTree.m_tl_child.getM_rect().intersects(item)){            	
-            	nodes.add(destTree.m_tl_child);
+        	queue.offer(destTree);        	
+        }else{ // judge whether it is intersect   	
+            if(destTree.m_tl_child.getM_rect().intersects(item)){            	            	
+            	queue.offer(destTree.m_tl_child);
             }
-            if(destTree.m_tr_child.getM_rect().intersects(item)){
-            	nodes.add(destTree.m_tr_child);
+            if(destTree.m_tr_child.getM_rect().intersects(item)){            	
+            	queue.offer(destTree.m_tr_child);
             }
-            if(destTree.m_bl_child.getM_rect().intersects(item)){
-            	nodes.add(destTree.m_bl_child);
+            if(destTree.m_bl_child.getM_rect().intersects(item)){                         
+            	queue.offer(destTree.m_bl_child);
             }
-            if(destTree.m_br_child.getM_rect().intersects(item)){
-            	nodes.add(destTree.m_br_child);
-            }
-            return nodes;
+            if(destTree.m_br_child.getM_rect().intersects(item)){            	
+            	queue.offer(destTree.m_br_child);
+            }            
         }
         
     }    

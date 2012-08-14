@@ -13,12 +13,15 @@ public class TestLocationQuery {
 
 	public static void main(String args[]){
 		
+		// 1.2064190766706284;longitude=1.1019155104863243
+		
 		double x = 1.111;//70.51038;
 		double y = 1.111;//3.55653;
-		double radius = 0.15;//100;//4
+		double radius = 0.11;//100;//4
 		
 		BixiLocationQueryS2 query2=new BixiLocationQueryS2();	
 		BixiLocationQueryS21 query21=new BixiLocationQueryS21();
+		//BixiLocationQueryS22 query22=new BixiLocationQueryS22();
 		
 		BixiLocationQueryS1 query1=new BixiLocationQueryS1();
 		BixiLocationQueryS1 query11=new BixiLocationQueryS11();
@@ -51,7 +54,8 @@ public class TestLocationQuery {
 			for(int i=0;i<runTime;i++){
 				s2Point = query2.debugColumnVersion("",x,y,radius);				
 				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
-				s21Point = query21.debugColumnVersion("",x,y,radius);				
+				s21Point = query21.debugColumnVersion("",x,y,radius);	
+				//query22.debugColumnVersion("",x,y,radius);	
 			}
 			
 		}else if(option ==3){ // debug for schema2 for different lenght of row, column and version
@@ -70,10 +74,10 @@ public class TestLocationQuery {
 				s11Point.removeAll(temp);
 				System.out.println("in S11 not in S1 : "+s11Point.size()+"=>"+s11Point.toString());
 				
-/*				query2.debugColumnVersion("",x,y,radius);
+				query2.debugColumnVersion("",x,y,radius);
 				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
 				query21.debugColumnVersion("",x,y,radius);
-				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");*/
+				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
 			}
 			
 		}

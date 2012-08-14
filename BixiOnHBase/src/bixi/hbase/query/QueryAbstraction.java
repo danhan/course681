@@ -5,6 +5,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.List;
 
+import util.log.XStatLog;
+
 import hbase.service.HBaseUtil;
 
 public abstract class QueryAbstraction {
@@ -13,6 +15,7 @@ public abstract class QueryAbstraction {
 	protected String tableName = "";
 	protected String familyName[] = null;
 	final int cacheSize = 5000;	
+	private XStatLog statLog = null;
 	
 	/**
 	 * This should be known before indexing with QuadTree.
@@ -42,6 +45,16 @@ public abstract class QueryAbstraction {
 				hbaseUtil.closeTableHandler();
 			e.printStackTrace();
 		}
+	}
+	protected void getStatLog(String filename){
+		this.statLog = new XStatLog(filename);
+	}
+	
+	protected void writeStat(String str){
+		this.statLog.write(str);
+	}
+	protected void closeStatLog(){
+		this.statLog.close();
 	}
 	
 	

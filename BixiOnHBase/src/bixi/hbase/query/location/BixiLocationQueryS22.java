@@ -20,5 +20,6 @@ public class BixiLocationQueryS22 extends BixiLocationQueryS2{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		this.STAT_FILE_NAME = "BixiLocationQueryS22.stat";
 	}
 }

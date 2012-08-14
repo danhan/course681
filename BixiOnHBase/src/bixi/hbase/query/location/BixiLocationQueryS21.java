@@ -8,8 +8,8 @@ import bixi.hbase.query.BixiConstant;
  * @author dan
  * 
  */
-public class BixiLocationQueryS21 extends BixiLocationQueryS2{
-
+public class BixiLocationQueryS21 extends BixiLocationQueryS2{	
+	
 	public BixiLocationQueryS21(){
 		this.max_num_of_column = 1000;
 		this.min_size_of_height = 0.01;
@@ -21,5 +21,6 @@ public class BixiLocationQueryS21 extends BixiLocationQueryS2{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		this.STAT_FILE_NAME = "BixiLocationQueryS21.stat";
 	}
 }

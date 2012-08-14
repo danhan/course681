@@ -12,6 +12,7 @@ public class BixiLocationQueryS11 extends BixiLocationQueryS1{
 			this.setHBase();
 		}catch(Exception e){
 			e.printStackTrace();
-		}	
+		}
+		this.STAT_FILE_NAME = "BixiLocationQueryS11.stat";
 	}
 }

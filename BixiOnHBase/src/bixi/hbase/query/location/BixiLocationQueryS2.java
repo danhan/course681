@@ -14,6 +14,7 @@ import org.apache.hadoop.hbase.client.coprocessor.Batch;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.util.Bytes;
 
+import util.log.XStatLog;
 import util.raster.XBox;
 import util.raster.XRaster;
 import bixi.dataset.collection.BixiReader;
@@ -31,8 +32,9 @@ import bixi.query.coprocessor.BixiProtocol;
 public class BixiLocationQueryS2 extends QueryAbstraction {
 
 	double min_size_of_height = BixiConstant.MIN_SIZE_OF_SUBSPACE;
-	int max_num_of_column = BixiConstant.MAX_NUM_OF_COLUMN;
-
+	int max_num_of_column = BixiConstant.MAX_NUM_OF_COLUMN;	
+	String STAT_FILE_NAME = "BixiLocationQueryS2.stat";	
+	
 	public BixiLocationQueryS2() {
 		tableName = BixiConstant.LOCATION_TABLE_NAME_2;
 		familyName = new String[] { BixiConstant.LOCATION_FAMILY_NAME };
@@ -46,6 +48,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 	@Override
 	public List<String> copQueryAvailableNear(String timestamp,
 			final double latitude, final double longitude, final double radius) {
+		this.getStatLog(STAT_FILE_NAME);
 		
 		long s_time = System.currentTimeMillis();
 		try {
@@ -100,6 +103,8 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			long exe_time = e_time - s_time;
 			// TODO store the time into database
 			System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.size());				
+			String outStr = "exe_time=>"+exe_time+";result=>"+callBack.res.size();
+			this.writeStat(outStr);
 			
 			return callBack.res;
 
@@ -109,6 +114,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			ee.printStackTrace();
 		}finally{
 			hbaseUtil.closeTableHandler();
+			this.closeStatLog();
 		}
 		return null;
 
@@ -117,6 +123,9 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 	@Override
 	public HashMap<String, String> scanQueryAvailableNear(String timestamp,
 			double latitude, double longitude, double radius) {
+		
+		this.getStatLog(STAT_FILE_NAME);
+		
 		long sTime = System.currentTimeMillis();
 		// build up a raster
 		XRaster raster = new XRaster(this.space, this.min_size_of_height,
@@ -184,11 +193,15 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>" + count + ";accepted=>"
 					+ accepted + ";time=>" + (eTime - sTime));
+			String outStr = "count=>" + count + ";accepted=>"
+					+ accepted + ";time=>" + (eTime - sTime);
+			this.writeStat(outStr);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally{
 			this.hbaseUtil.closeTableHandler();
+			this.closeStatLog();
 		}
 		return results;
 	}
@@ -256,11 +269,14 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			}
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>" + count + ";time=>"+ (eTime - sTime));
+			String outStr = "count=>" + count + ";time=>"+ (eTime - sTime);
+			this.writeStat(outStr);
 
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally{
 			this.hbaseUtil.closeTableHandler();
+			this.closeStatLog();
 		}
 
 	}
@@ -293,7 +309,8 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 	
 	public List<Point2D.Double> debugColumnVersion(String timestamp,
 			double latitude, double longitude, double radius) {
-		System.out.println("investigateColumnVersion....");
+		
+		this.getStatLog(this.STAT_FILE_NAME);		
 		long sTime = System.currentTimeMillis();
 		// build up a raster
 		XRaster raster = new XRaster(this.space, this.min_size_of_height,
@@ -391,11 +408,14 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>" + count + ";accepted=>"
 					+ accepted + ";time=>" + (eTime - sTime));
-
+			String outStr = "count=>" + count + ";accepted=>"+ accepted + ";time=>" + (eTime - sTime)+";row_stride=>"+this.min_size_of_height+";columns=>"+this.max_num_of_column;
+			this.writeStat(outStr);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally{
 			this.hbaseUtil.closeTableHandler();
+			this.closeStatLog();
 		}
 		return returnPoints;
 	}
