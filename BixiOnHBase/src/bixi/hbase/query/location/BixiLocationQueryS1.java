@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -89,8 +90,13 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 					fList.addFilter(rowFilter);	
 				}				
 			}
-		
-		    final Scan scan = hbaseUtil.generateScan(null,fList, null,null,-1);		    
+	    	Object[] objs = indexes.toArray();
+	    	Arrays.sort(objs);
+	    	String[] rowRanges= new String[2];
+	    	rowRanges[0] = (String)objs[0];
+	    	rowRanges[1] = (String)objs[objs.length-1]+"-*";
+			
+		    final Scan scan = hbaseUtil.generateScan(rowRanges,fList, null,null,-1);		    
 		    
 		    System.out.println("start to send the query to coprocessor.....");		    
 		    
@@ -111,7 +117,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			// TODO store the time into database
 			
 			System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.size());		
-			String outStr = "exe_time=>"+exe_time+";result=>"+callBack.res.size()+";match=>"+(match_time)+";subspace=>"+this.min_size_of_subspace;;
+			String outStr = "radius=>"+radius+";exe_time=>"+exe_time+";result=>"+callBack.res.size()+";match=>"+(match_time)+";subspace=>"+this.min_size_of_subspace;;
 			this.writeStat(outStr);
 			
 		    return callBack.res;
@@ -152,15 +158,19 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			long match_time = System.currentTimeMillis() - match_s;
 			// prepare filter for scan
 			FilterList fList = new FilterList(FilterList.Operator.MUST_PASS_ONE);
-			for(String s:indexes){
-				System.out.println(s);
+			for(String s:indexes){			
 				if(s!=null){
 					Filter rowFilter = hbaseUtil.getPrefixFilter(s);	
 					fList.addFilter(rowFilter);	
 				}				
 			}	
+	    	Object[] objs = indexes.toArray();
+	    	Arrays.sort(objs);
+	    	String[] rowRanges= new String[2];
+	    	rowRanges[0] = (String)objs[0];
+	    	rowRanges[1] = (String)objs[objs.length-1]+"-*";
 			
-			rScanner = this.hbaseUtil.getResultSet(null,fList, null,null,-1);
+			rScanner = this.hbaseUtil.getResultSet(rowRanges,fList, null,null,-1);
 			BixiReader reader = new BixiReader();
 			int count = 0;
 			int accepted = 0;
@@ -187,7 +197,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			}
 			long eTime = System.currentTimeMillis();			
 			System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
-			String outStr = "count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";match=>"+match_time+";subspace=>"+this.min_size_of_subspace;;
+			String outStr = "radius=>"+radius+";count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";match=>"+match_time+";subspace=>"+this.min_size_of_subspace;;
 			this.writeStat(outStr);
 			
 		}catch(Exception e){
@@ -282,15 +292,20 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			long match_time = System.currentTimeMillis() - match_s;
 			// prepare filter for scan
 			FilterList fList = new FilterList(FilterList.Operator.MUST_PASS_ONE);
-			for(String s:indexes){
-				System.out.println(s);
+			for(String s:indexes){			
 				if(s!=null){
 					Filter rowFilter = hbaseUtil.getPrefixFilter(s);	
 					fList.addFilter(rowFilter);	
 				}				
 			}	
-			
-			rScanner = this.hbaseUtil.getResultSet(null,fList, null,null,-1);
+			/****/
+	    	Object[] objs = indexes.toArray();
+	    	Arrays.sort(objs);
+	    	String[] rowRanges= new String[2];
+	    	rowRanges[0] = (String)objs[0];
+	    	rowRanges[1] = (String)objs[objs.length-1]+"-*";
+						
+			rScanner = this.hbaseUtil.getResultSet(rowRanges,fList, null,null,-1);
 			BixiReader reader = new BixiReader();
 			int count = 0;
 			int accepted = 0;
@@ -319,9 +334,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
 			String outStr = "count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";match=>"+(match_time)+";subspace=>"+this.min_size_of_subspace;
-			this.writeStat(outStr);
-			
-			System.out.println(results.toString());
+			this.writeStat(outStr);						
 			
 		}catch(Exception e){
 			e.printStackTrace();

@@ -15,9 +15,9 @@ public class TestLocationQuery {
 		
 		// 1.2064190766706284;longitude=1.1019155104863243
 		
-		double x = 1.111;//70.51038;
-		double y = 1.111;//3.55653;
-		double radius = 0.11;//100;//4
+		double x = 3.111;//70.51038;
+		double y = 3.111;//3.55653;
+		double radius = 3;//100;//4 // TODO there is a defect for the QuadTree, when the x<radius
 		
 		BixiLocationQueryS2 query2=new BixiLocationQueryS2();	
 		BixiLocationQueryS21 query21=new BixiLocationQueryS21();
@@ -56,6 +56,7 @@ public class TestLocationQuery {
 				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
 				s21Point = query21.debugColumnVersion("",x,y,radius);	
 				//query22.debugColumnVersion("",x,y,radius);	
+				
 			}
 			
 		}else if(option ==3){ // debug for schema2 for different lenght of row, column and version
@@ -63,21 +64,30 @@ public class TestLocationQuery {
 			List<Point2D.Double> s11Point = null;	
 			List<Point2D.Double> temp = new ArrayList<Point2D.Double>();
 			for(int i=0;i<runTime;i++){
-				s1Point = query1.debugColumnVersion("",x,y,radius);	
+				System.out.println("+++++++++++++++debug+++++++++++++++++++++++++++++++");
+				s1Point = query1.debugColumnVersion("",x,y,radius);
+				
+				System.out.println("+++++++++++++++Scan+++++++++++++++++++++++++++++++");
+				query1.scanQueryAvailableNear("",x,y,radius);
+	
+				System.out.println("+++++++++++++++debug+++++++++++++++++++++++++++++++");
+				s1Point = query1.debugColumnVersion("",x,y,radius);
+				
 				temp.addAll(s1Point);
-				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
+				System.out.println("++++++++++++++++++++debug++++++++++++++++++++++++++++");
 				s11Point = query11.debugColumnVersion("",x,y,radius);
 				
-				s1Point.removeAll(s11Point);
+/*				s1Point.removeAll(s11Point);
 				System.out.println("in S1 not in S11 : "+s1Point.size()+"=>"+s1Point.toString());
 				
 				s11Point.removeAll(temp);
-				System.out.println("in S11 not in S1 : "+s11Point.size()+"=>"+s11Point.toString());
+				System.out.println("in S11 not in S1 : "+s11Point.size()+"=>"+s11Point.toString());*/
 				
+				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
 				query2.debugColumnVersion("",x,y,radius);
 				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
 				query21.debugColumnVersion("",x,y,radius);
-				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
+				
 			}
 			
 		}

@@ -2,6 +2,8 @@ package util.quadtree.based.trie;
 
 
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import bixi.hbase.query.BixiConstant;
@@ -11,20 +13,35 @@ public class TestXQuadTree {
 
     public static void main(String args[]){
     	
-    	Rectangle2D.Double rect = new Rectangle2D.Double(
+    	List<String> result = new ArrayList<String>();
+    	result.add("110000");
+    	result.add("00");
+    	result.add("0010");
+    	result.add("0011");
+    	result.add("000011");
+    	result.add("000010");
+    	
+    	System.out.println(result.toString());
+    	Object[] objs = result.toArray();
+    	Arrays.sort(objs);
+    	System.out.println("======================");
+    	System.out.println(Arrays.asList(objs).toString());
+    	
+/*    	Rectangle2D.Double rect = new Rectangle2D.Double(
    			 0,0,10,10);
    	
     	XQuadTree tree = new XQuadTree(rect,0.1);
     	tree.buildTree();
     	//tree.print();
     	
+       	List<String> result = tree.match(1.15,0.1,1,0.01);
+    	System.out.println(result.size()+"match========="+result.toString()); //0100,0110
+*/    	
     	// get one point's index
 //    	XQuadTree subspace = tree.locate(0.15,0.15);
 //    	System.out.println("============");
 //    	subspace.print();
-    	
-       	List<String> result = tree.match(1.15,0.1,1,0.01);
-    	System.out.println(result.size()+"match========="+result.toString()); //0100,0110
+
 
     	
     	

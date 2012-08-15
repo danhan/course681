@@ -103,7 +103,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			long exe_time = e_time - s_time;
 			// TODO store the time into database
 			System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.size());				
-			String outStr = "exe_time=>"+exe_time+";result=>"+callBack.res.size();
+			String outStr = "radius=>"+radius+";exe_time=>"+exe_time+";result=>"+callBack.res.size();
 			this.writeStat(outStr);
 			
 			return callBack.res;
@@ -193,8 +193,8 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>" + count + ";accepted=>"
 					+ accepted + ";time=>" + (eTime - sTime));
-			String outStr = "count=>" + count + ";accepted=>"
-					+ accepted + ";time=>" + (eTime - sTime);
+			String outStr = "radius=>"+radius+";count=>" + count + ";accepted=>"
+					+ accepted + ";time=>" + (eTime - sTime)+";row_stride=>"+this.min_size_of_height+";columns=>"+this.max_num_of_column;;
 			this.writeStat(outStr);
 
 		} catch (Exception e) {
@@ -408,7 +408,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>" + count + ";accepted=>"
 					+ accepted + ";time=>" + (eTime - sTime));
-			String outStr = "count=>" + count + ";accepted=>"+ accepted + ";time=>" + (eTime - sTime)+";row_stride=>"+this.min_size_of_height+";columns=>"+this.max_num_of_column;
+			String outStr = "radius=>"+radius+";count=>" + count + ";accepted=>"+ accepted + ";time=>" + (eTime - sTime)+";row_stride=>"+this.min_size_of_height+";columns=>"+this.max_num_of_column;
 			this.writeStat(outStr);
 			
 		} catch (Exception e) {
