@@ -28,7 +28,7 @@ public class TestLocationQuery {
 		
 		int runTime = 1;
 		
-		int option = 3;
+		int option = 4;
 		if(option == 0){ // query neigbours
 			
 			for(int i=0;i<runTime;i++){
@@ -66,9 +66,6 @@ public class TestLocationQuery {
 			for(int i=0;i<runTime;i++){
 				System.out.println("+++++++++++++++debug+++++++++++++++++++++++++++++++");
 				s1Point = query1.debugColumnVersion("",x,y,radius);
-				
-				System.out.println("+++++++++++++++Scan+++++++++++++++++++++++++++++++");
-				query1.scanQueryAvailableNear("",x,y,radius);
 	
 				System.out.println("+++++++++++++++debug+++++++++++++++++++++++++++++++");
 				s1Point = query1.debugColumnVersion("",x,y,radius);
@@ -90,6 +87,19 @@ public class TestLocationQuery {
 				
 			}
 			
+		}else if(option == 4){
+			x = 17.369312631661337;
+			y = 1.9604564511438574;
+			for(int i=0;i<runTime;i++){
+				query1.scanQueryPoint(x, y);
+				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
+				query2.scanQueryPoint(x,y);
+				
+				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
+				query1.copQueryPoint(x, y);
+				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
+				query2.copQueryPoint(x,y);
+			}
 		}
 		
 

@@ -170,9 +170,13 @@ public class TableInsertLocationS2 extends TableInsertAbstraction {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-		} finally {
-			this.hbase.closeTableHandler();
-			
+		}  finally {
+			try{
+				this.hbase.getHTable().flushCommits();	
+			}catch(Exception ee){
+				ee.printStackTrace();
+			}
+			this.hbase.closeTableHandler();			
 		}
 	}
 	

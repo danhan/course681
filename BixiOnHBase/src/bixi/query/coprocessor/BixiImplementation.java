@@ -26,8 +26,7 @@ import bixi.hbase.query.BixiConstant;
 /**
  * @author 
  */
-public class BixiImplementation extends BaseEndpointCoprocessor implements
-BixiProtocol {
+public class BixiImplementation extends BaseEndpointCoprocessor implements BixiProtocol {
 
 	static final Log log = LogFactory.getLog(BixiImplementation.class);
 
@@ -89,6 +88,50 @@ BixiProtocol {
 		return results;	
 	}
 	
+	public String copQueryPoint4LS1(Scan scan,double latitude,double longitude)throws IOException{
+		
+		long sTime = System.currentTimeMillis();
+		System.out.println(sTime+": in the copQueryPoint4LS1....");
+		/**Step1: get internalScanner***/
+		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment()).getRegion().getScanner(scan);
+		List<KeyValue> keyvalues = new ArrayList<KeyValue>();		
+		boolean hasMoreResult = false;				
+		/**Step2: iterate the result from the scanner**/
+		int count = 0;		
+		String stationName = null;
+		try {
+			do {
+				hasMoreResult = scanner.next(keyvalues);
+				if(keyvalues != null && keyvalues.size() > 0){	
+					for(KeyValue kv:keyvalues){
+						//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
+						count++;
+						// get the distance between this point and the given point
+						XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));
+						if((station.getLatitude() == latitude && station.getlongitude() == longitude)){
+							stationName = Bytes.toString(kv.getQualifier());
+							System.out.println(Bytes.toString(kv.getQualifier()));
+							break;
+						}												
+					}
+				}								
+				keyvalues.clear();
+				
+				
+			} while (hasMoreResult);
+			
+			long eTime = System.currentTimeMillis();
+			
+			System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+stationName+";count=>"+count);			
+			
+		} finally {
+			scanner.close();
+		}
+						
+		return stationName;			
+	}
+	
+	
 	
 	/******************For Location Schema2*******************************/
 	
@@ -144,6 +187,51 @@ BixiProtocol {
 				
 	}	
 	
+	public String copQueryPoint4LS2(Scan scan,double latitude,double longitude)throws IOException{
+		
+		long sTime = System.currentTimeMillis();
+		System.out.println(sTime+": in the copQueryPoint4LS2....");
+		/**Step1: get internalScanner***/
+		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment()).getRegion().getScanner(scan);
+		List<KeyValue> keyvalues = new ArrayList<KeyValue>();		
+		boolean hasMoreResult = false;				
+		
+		/**Step2: iterate the scan result ***/
+		int count = 0;
+		int accepted = 0;
+		String stationName = null;
+		try {
+			do {
+				hasMoreResult = scanner.next(keyvalues);
+				if(keyvalues != null && keyvalues.size() > 0){	
+											
+					for(KeyValue kv:keyvalues){
+						//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
+						count++;						
+						// get the distance between this point and the given point
+						XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));
+						
+						if((station.getLatitude() == latitude && station.getlongitude() == longitude)){
+							stationName = station.getName();								
+							break;
+						}						
+					}
+				}								
+				keyvalues.clear();				
+				
+			} while (hasMoreResult);
+			
+			long eTime = System.currentTimeMillis();
+			
+			System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+stationName+";count=>"+count);			
+			
+			
+		} finally {
+			scanner.close();
+		}
+						
+		return stationName;		
+	}
 	
 	/***********************For Schema3******************/
 	@Override	
@@ -194,8 +282,7 @@ BixiProtocol {
 	}
 	
 	
-	
-	
+		
 	
 	@Override
 	public Map<String, Integer> giveAvailableBikes(long milliseconds,

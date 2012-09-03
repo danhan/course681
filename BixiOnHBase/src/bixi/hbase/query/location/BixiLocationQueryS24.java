@@ -8,19 +8,19 @@ import bixi.hbase.query.BixiConstant;
  * @author dan
  *
  */
-public class BixiLocationQueryS22 extends BixiLocationQueryS2{
+public class BixiLocationQueryS24 extends BixiLocationQueryS2{
 	
-	public BixiLocationQueryS22(){
+	public BixiLocationQueryS24(){
 		this.max_num_of_column = BixiConstant.MAX_NUM_OF_COLUMN;;
-		this.min_size_of_height = 0.001;
+		this.min_size_of_height = 2;
 		
-		this.tableName = BixiConstant.LOCATION_TABLE_NAME_2+"2";
+		this.tableName = BixiConstant.LOCATION_TABLE_NAME_2+"4";
 		familyName = new String[] { BixiConstant.LOCATION_FAMILY_NAME };
 		try {
 			this.setHBase();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		this.STAT_FILE_NAME = "BixiLocationQueryS22.stat";
+		this.STAT_FILE_NAME = "BixiLocationQueryS24.stat";
 	}
 }

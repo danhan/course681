@@ -1,12 +1,10 @@
 package bixi.hbase.query.location;
 
 import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.hadoop.hbase.KeyValue;
@@ -18,7 +16,6 @@ import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.util.Bytes;
 
-import util.log.XStatLog;
 import util.quadtree.based.trie.XQuadTree;
 import bixi.dataset.collection.BixiReader;
 import bixi.dataset.collection.XStation;
@@ -58,15 +55,21 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 		    class BixiCallBack implements Batch.Callback< List<String> > {
 		    	List<String>  res = new ArrayList<String> ();
 		    	int count = 0;
-
+		    	QueryAbstraction query = null;
+		    	
+		     public BixiCallBack(QueryAbstraction query){
+		    	this.query = query; 
+		     }
 		      @Override
 		      public void update(byte[] region, byte[] row,  List<String> result) {
-		    	  System.out.println((count++)+": come back region: "+Bytes.toString(region)+"; result: "+result.size());
+		    	  count++;
+		    	  //System.out.println((count)+": come back region: "+Bytes.toString(region)+"; result: "+result.size());
+		    	  String outStr="count=>"+count+";region=>"+Bytes.toString(region)+";result=>"+result.size();
+		    	  this.query.writeStat(outStr);
 		    	  res.addAll(result); // to verify the error when large data
-		      }
-		      
+		      }		      
 		    }		    
-		    BixiCallBack callBack = new BixiCallBack();
+		    BixiCallBack callBack = new BixiCallBack(this);
 		    
 		    /**Step2*** generate scan***/ 
 			// build up a quadtree.
@@ -83,8 +86,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			
 			// prepare filter for scan
 			FilterList fList = new FilterList(FilterList.Operator.MUST_PASS_ONE);
-			for(String s:indexes){
-				System.out.println(s);
+			for(String s:indexes){				
 				if(s!=null){
 					Filter rowFilter = hbaseUtil.getPrefixFilter(s);	
 					fList.addFilter(rowFilter);	
@@ -95,7 +97,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 	    	String[] rowRanges= new String[2];
 	    	rowRanges[0] = (String)objs[0];
 	    	rowRanges[1] = (String)objs[objs.length-1]+"-*";
-			
+				    	
 		    final Scan scan = hbaseUtil.generateScan(rowRanges,fList, null,null,-1);		    
 		    
 		    System.out.println("start to send the query to coprocessor.....");		    
@@ -116,8 +118,8 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			long exe_time = System.currentTimeMillis()- s_time;
 			// TODO store the time into database
 			
-			System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.size());		
-			String outStr = "radius=>"+radius+";exe_time=>"+exe_time+";result=>"+callBack.res.size()+";match=>"+(match_time)+";subspace=>"+this.min_size_of_subspace;;
+			//System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.size());		
+			String outStr = "m=>cop;"+"radius=>"+radius+";exe_time=>"+exe_time+";result=>"+callBack.res.size()+";match=>"+(match_time)+";subspace=>"+this.min_size_of_subspace;;
 			this.writeStat(outStr);
 			
 		    return callBack.res;
@@ -196,8 +198,8 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 				}
 			}
 			long eTime = System.currentTimeMillis();			
-			System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
-			String outStr = "radius=>"+radius+";count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";match=>"+match_time+";subspace=>"+this.min_size_of_subspace;;
+			//System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
+			String outStr = "m=>scan;"+"radius=>"+radius+";count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";match=>"+match_time+";subspace=>"+this.min_size_of_subspace;;
 			this.writeStat(outStr);
 			
 		}catch(Exception e){
@@ -211,13 +213,88 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 	
 
 	@Override
-	public void copQueryPoint(double latitude, double longitude) {
-
+	public String copQueryPoint(final double latitude, final double longitude) {
+		
+		this.getStatLog(STAT_FILE_NAME);
+		
+		long s_time = System.currentTimeMillis();
+		
+		try{			
+		    /**Step1** Call back class definition **/
+		    class BixiCallBack implements Batch.Callback< String> {
+		    	String  res = null;
+		    	int count = 0;
+		    	QueryAbstraction query = null;
+		    	
+		     public BixiCallBack(QueryAbstraction query){
+		    	this.query = query; 
+		     }
+		      @Override
+		      public void update(byte[] region, byte[] row,  String result) {
+		    	  count++;
+		    	  //System.out.println((count)+": come back region: "+Bytes.toString(region)+"; result: "+result.size());
+		    	  String outStr="count=>"+count+";region=>"+Bytes.toString(region)+";result=>"+result;
+		    	  this.query.writeStat(outStr);		    	  
+		    	  res = result;
+		      }		      
+		    }		    
+		    BixiCallBack callBack = new BixiCallBack(this);
+		    
+		    /**Step2*** generate scan***/ 
+			// build up a quadtree.
+			XQuadTree quadTree = new XQuadTree(space, min_size_of_subspace);
+			quadTree.buildTree();								   
+			// match rect to find the subspace it belongs to
+			
+			long match_s = System.currentTimeMillis();
+			XQuadTree node = quadTree.locate(latitude, longitude);
+			long match_time = System.currentTimeMillis() - match_s;			
+			
+	    	String[] rowRanges= new String[2];
+	    	rowRanges[0] = node.getIndex();
+	    	rowRanges[1] = node.getIndex()+"-*";
+				    	
+		    final Scan scan = hbaseUtil.generateScan(rowRanges,null, null,null,-1);		    		    		   
+		    
+		    System.out.println("start to send the query to coprocessor.....");		    
+		    
+		    /**Step3: send request to trigger Coprocessor execution**/
+		    hbaseUtil.getHTable().coprocessorExec(BixiProtocol.class, scan.getStartRow(),scan.getStopRow(),
+		    		new Batch.Call<BixiProtocol,  String >() {
+		      
+		    	public  String call(BixiProtocol instance)
+		          throws IOException {
+		    		
+		        return instance.copQueryPoint4LS1(scan, latitude, longitude);			        
+		        
+		      };
+		    }, callBack);
+		    		    		    
+			long exe_time = System.currentTimeMillis()- s_time;			
+			
+			//System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.size());		
+			String outStr = "q=point;m=>cop;"+";exe_time=>"+exe_time+";result=>"+callBack.res+";match=>"+(match_time)+";subspace=>"+this.min_size_of_subspace;;
+			this.writeStat(outStr);
+			
+		    return callBack.res;
+		    
+		}catch(Exception e){
+			e.printStackTrace();
+		}catch(Throwable ee){
+			ee.printStackTrace();
+		}finally{
+			hbaseUtil.closeTableHandler();
+			this.closeStatLog();
+		}
+		
+		return null;	
 		
 	}
 
 	@Override
-	public void scanQueryPoint(double latitude, double longitude) {
+	public String scanQueryPoint(double latitude, double longitude) {
+		
+		this.getStatLog(STAT_FILE_NAME);
 		
 		long sTime = System.currentTimeMillis();
 		// build up a quadtree.
@@ -256,15 +333,16 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			}	
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>"+count + "; time=>"+(eTime-sTime));
-			String outStr = "count=>"+count + "; time=>"+(eTime-sTime);
+			String outStr = "q=point;m=scan;"+"count=>"+count + "; time=>"+(eTime-sTime)+";result=>"+stationName;
 			this.writeStat(outStr);
-			
+			return stationName;
 		}catch(Exception e){
 			e.printStackTrace();
 		}finally{
 			this.hbaseUtil.closeTableHandler();
 			this.closeStatLog();
 		}
+		return null;
 		
 	}
 
@@ -304,12 +382,12 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 	    	String[] rowRanges= new String[2];
 	    	rowRanges[0] = (String)objs[0];
 	    	rowRanges[1] = (String)objs[objs.length-1]+"-*";
-						
+	    	
 			rScanner = this.hbaseUtil.getResultSet(rowRanges,fList, null,null,-1);
 			BixiReader reader = new BixiReader();
 			int count = 0;
-			int accepted = 0;
-			for(Result r: rScanner){
+			int accepted = 0;			
+			for(Result r: rScanner){				
 				//System.out.println(Bytes.toString(r.getRow()) + "=>");
 				List<KeyValue> pairs = r.list();
 				for(KeyValue kv:pairs){
@@ -330,7 +408,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 					}
 						
 				}
-			}			
+			}					
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
 			String outStr = "count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";match=>"+(match_time)+";subspace=>"+this.min_size_of_subspace;
@@ -347,13 +425,17 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 	}
 	
 	
-	
+	/**
+	 * Query the area north/south/west/east of the given point
+	 */
 	@Override
 	public void copQueryArea(double latitude, double longitude, int area) {
 		// TODO Auto-generated method stub
 		
 	}
-
+	/**
+	 * Query the area north/south/west/east of the given point
+	 */
 	@Override
 	public void scanQueryArea(double latitude, double longitude, int area) {
 		// TODO Auto-generated method stub
@@ -375,6 +457,5 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 		// TODO Auto-generated method stub
 	
 	}	
-	
-	
+		
 }

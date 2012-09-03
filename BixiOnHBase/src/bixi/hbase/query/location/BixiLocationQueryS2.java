@@ -25,7 +25,7 @@ import bixi.query.coprocessor.BixiProtocol;
 
 /**
  * This class is to process the location query based on Location Schema2
- * 
+ * row stride is 0.1
  * @author dan
  * 
  */
@@ -56,17 +56,21 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			class BixiCallBack implements Batch.Callback<List<String>> {
 				List<String> res = new ArrayList<String>();
 				int count = 0;
-
+				QueryAbstraction query = null;
+				
+			    public BixiCallBack(QueryAbstraction query){
+				    	this.query = query; 
+				}
 				@Override
-				public void update(byte[] region, byte[] row,
-						List<String> result) {
-					System.out.println((count++) + ": come back region: "
-							+ Bytes.toString(region) + "; result: "
-							+ result.size());
+				public void update(byte[] region, byte[] row,List<String> result) {
+					count++;
+					//System.out.println((count++) + ": come back region: "+ Bytes.toString(region) + "; result: "+ result.size());
+					String outStr="count=>"+count+";region=>"+Bytes.toString(region)+";result=>"+result.size();
+					this.query.writeStat(outStr);
 					res.addAll(result); // to verify the error when large data
 				}
 			}
-			BixiCallBack callBack = new BixiCallBack();
+			BixiCallBack callBack = new BixiCallBack(this);
 
 			/** Step2** generate the scan ***********/
 			// build up the Raster
@@ -103,7 +107,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			long exe_time = e_time - s_time;
 			// TODO store the time into database
 			System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.size());				
-			String outStr = "radius=>"+radius+";exe_time=>"+exe_time+";result=>"+callBack.res.size();
+			String outStr = "m=>cop;"+"radius=>"+radius+";exe_time=>"+exe_time+";result=>"+callBack.res.size();
 			this.writeStat(outStr);
 			
 			return callBack.res;
@@ -193,7 +197,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>" + count + ";accepted=>"
 					+ accepted + ";time=>" + (eTime - sTime));
-			String outStr = "radius=>"+radius+";count=>" + count + ";accepted=>"
+			String outStr = "m=scan;"+"radius=>"+radius+";count=>" + count + ";accepted=>"
 					+ accepted + ";time=>" + (eTime - sTime)+";row_stride=>"+this.min_size_of_height+";columns=>"+this.max_num_of_column;;
 			this.writeStat(outStr);
 
@@ -207,13 +211,85 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 	}
 
 	@Override
-	public void copQueryPoint(double latitude, double longitude) {
-		// TODO Auto-generated method stub
+	public String copQueryPoint(final double latitude, final double longitude) {
+		
+		this.getStatLog(STAT_FILE_NAME);
+		
+		long s_time = System.currentTimeMillis();
+		try {
+			/** Step1** Call back class definition **/
+			class BixiCallBack implements Batch.Callback<String> {
+				String res = null;
+				int count = 0;
+				QueryAbstraction query = null;
+				
+			    public BixiCallBack(QueryAbstraction query){
+				    	this.query = query; 
+				}
+				@Override
+				public void update(byte[] region, byte[] row,String result) {
+					count++;
+					//System.out.println((count++) + ": come back region: "+ Bytes.toString(region) + "; result: "+ result.size());
+					String outStr="count=>"+count+";region=>"+Bytes.toString(region)+";result=>"+result;
+					this.query.writeStat(outStr);	
+					res = result;
+				}
+			}
+			BixiCallBack callBack = new BixiCallBack(this);
+
+			/** Step2** generate the scan ***********/
+			// build up the Raster
+			XRaster raster = new XRaster(this.space, this.min_size_of_height,
+					this.max_num_of_column);
+			XBox match_box = raster.locate(latitude, Math.abs(longitude));
+			System.out.println("match_box is : " + match_box.toString());
+			String[] rowRange = new String[2];
+			rowRange[0] = match_box.getRow();
+			rowRange[1] = match_box.getRow()+"0";
+								
+			// generate the scan
+			final Scan scan = hbaseUtil.generateScan(rowRange, null, new String[]{BixiConstant.LOCATION_FAMILY_NAME},
+					new String[]{match_box.getColumn()}, 100000);
+			
+			/** Step3** send out the query to trigger the corresponding function in Coprocessor****/
+			hbaseUtil.getHTable().coprocessorExec(BixiProtocol.class,
+					scan.getStartRow(), scan.getStopRow(),
+					new Batch.Call<BixiProtocol, String>() {
+
+						public String call(BixiProtocol instance)
+								throws IOException {
+
+							return instance.copQueryPoint4LS2(scan, latitude, longitude);
+
+						};
+					}, callBack);
+			
+		    long e_time = System.currentTimeMillis();
+		    
+			long exe_time = e_time - s_time;
+			// TODO store the time into database
+			System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res);				
+			String outStr = "q=point;m=>cop;"+";exe_time=>"+exe_time+";result=>"+callBack.res;
+			this.writeStat(outStr);						
+
+			return callBack.res;
+					
+		} catch (Exception e) {
+			e.printStackTrace();
+		}catch(Throwable ee){
+			ee.printStackTrace();
+		}finally{
+			hbaseUtil.closeTableHandler();
+			this.closeStatLog();
+		}
+		return null;
 
 	}
 
 	@Override
-	public void scanQueryPoint(double latitude, double longitude) {
+	public String scanQueryPoint(double latitude, double longitude) {
+		this.getStatLog(STAT_FILE_NAME);
+		
 		long sTime = System.currentTimeMillis();
 		// build up a raster
 		XRaster raster = new XRaster(this.space, this.min_size_of_height,
@@ -226,7 +302,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			System.out.println("match_box is : " + match_box.toString());
 			String[] rowRange = new String[2];
 			rowRange[0] = match_box.getRow();
-			rowRange[1] = match_box.getRow()+"0";
+			rowRange[1] = match_box.getRow()+"-*";
 
 			// the version here is harded coded, because i cannot get how many
 			// objects in one cell now
@@ -253,7 +329,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 									.toString(values.get(version)));
 							
 							if((station.getLatitude() == latitude && station.getlongitude() == longitude)){
-								stationName = station.getName();								
+								stationName = station.getId();								
 								break;
 							}													
 						}
@@ -268,25 +344,34 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 					break;
 			}
 			long eTime = System.currentTimeMillis();
-			System.out.println("count=>" + count + ";time=>"+ (eTime - sTime));
-			String outStr = "count=>" + count + ";time=>"+ (eTime - sTime);
+			System.out.println("count=>" + count + ";time=>"+ (eTime - sTime)+";result=>"+stationName);
+			String outStr = "q=point;m=scan;count=>" + count + ";time=>"+ (eTime - sTime)+";result=>"+stationName;
 			this.writeStat(outStr);
-
+			
+			return stationName;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally{
 			this.hbaseUtil.closeTableHandler();
 			this.closeStatLog();
 		}
+		return null;
 
 	}
 
+	/**
+	 * Query the area north/south/west/east of the given point
+	 */
 	@Override
 	public void copQueryArea(double latitude, double longitude, int area) {
 		// TODO Auto-generated method stub
 
 	}
 
+	/**
+	 * Query the area north/south/west/east of the given point
+	 */
 	@Override
 	public void scanQueryArea(double latitude, double longitude, int area) {
 		// TODO Auto-generated method stub

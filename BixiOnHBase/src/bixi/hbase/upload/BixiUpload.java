@@ -35,8 +35,7 @@ public class BixiUpload {
 					String fileName = dir.getAbsolutePath() +"/"+ f+"-mockup.xml";
 					inserter.insert(fileName,batchNum);	
 					System.out.println("finish the file"+fileName);
-				}
-	
+				}	
 			}else if(schema == 111){ // location schema1
 				for(int f=0;f<fileNum;f++){
 					TableInsertLocationS11 inserter = new TableInsertLocationS11();
@@ -45,10 +44,53 @@ public class BixiUpload {
 					String fileName = dir.getAbsolutePath() +"/"+ f+"-mockup.xml";
 					inserter.insert(fileName,batchNum);	
 					System.out.println("finish the file"+fileName);
-				}
-	
-			}else if(schema == 12){ // location schema2				
-					
+				}	
+			}else if(schema == 112){ // location schema1
+				for(int f=0;f<fileNum;f++){
+					TableInsertLocationS12 inserter = new TableInsertLocationS12();
+					File dir = new File(fileDir);
+					int batchNum = 100;
+					String fileName = dir.getAbsolutePath() +"/"+ f+"-mockup.xml";
+					inserter.insert(fileName,batchNum);	
+					System.out.println("finish the file"+fileName);
+				}	
+			}else if(schema == 113){ // location schema1
+				for(int f=0;f<fileNum;f++){
+					TableInsertLocationS13 inserter = new TableInsertLocationS13();
+					File dir = new File(fileDir);
+					int batchNum = 100;
+					String fileName = dir.getAbsolutePath() +"/"+ f+"-mockup.xml";
+					inserter.insert(fileName,batchNum);	
+					System.out.println("finish the file"+fileName);
+				}	
+			}else if(schema == 114){ // location schema1
+				for(int f=0;f<fileNum;f++){
+					TableInsertLocationS14 inserter = new TableInsertLocationS14();
+					File dir = new File(fileDir);
+					int batchNum = 100;
+					String fileName = dir.getAbsolutePath() +"/"+ f+"-mockup.xml";
+					inserter.insert(fileName,batchNum);	
+					System.out.println("finish the file"+fileName);
+				}	
+			}else if(schema == 115){ // location schema1
+				for(int f=0;f<fileNum;f++){
+					TableInsertLocationS15 inserter = new TableInsertLocationS15();
+					File dir = new File(fileDir);
+					int batchNum = 100;
+					String fileName = dir.getAbsolutePath() +"/"+ f+"-mockup.xml";
+					inserter.insert(fileName,batchNum);	
+					System.out.println("finish the file"+fileName);
+				}	
+			}else if(schema == 116){ // location schema1
+				for(int f=0;f<fileNum;f++){
+					TableInsertLocationS16 inserter = new TableInsertLocationS16();
+					File dir = new File(fileDir);
+					int batchNum = 100;
+					String fileName = dir.getAbsolutePath() +"/"+ f+"-mockup.xml";
+					inserter.insert(fileName,batchNum);	
+					System.out.println("finish the file"+fileName);
+				}	
+			}else if(schema == 12){ // location schema2									
 				for(int f=0;f<fileNum;f++){
 					TableInsertLocationS2 inserter = new TableInsertLocationS2();
 					File dir = new File(fileDir);
@@ -67,8 +109,38 @@ public class BixiUpload {
 				inserter.insert(fileName);						
 				System.out.println("finish the file"+fileName);
 			}				
+		}else if(schema == 122){ // location schema2							
+			for(int f=0;f<fileNum;f++){
+				TableInsertLocationS22 inserter = new TableInsertLocationS22();
+				File dir = new File(fileDir);			
+				String fileName = dir.getAbsolutePath() +"/"+ f+"-mockup.xml";
+				inserter.insert(fileName);						
+				System.out.println("finish the file"+fileName);
+			}	   
+	    }else if(schema == 123){
+			for(int f=0;f<fileNum;f++){
+				TableInsertLocationS23 inserter = new TableInsertLocationS23();
+				File dir = new File(fileDir);			
+				String fileName = dir.getAbsolutePath() +"/"+ f+"-mockup.xml";
+				inserter.insert(fileName);						
+				System.out.println("finish the file"+fileName);
+			}				
+		}else if(schema == 124){
+			for(int f=0;f<fileNum;f++){
+				TableInsertLocationS24 inserter = new TableInsertLocationS24();
+				File dir = new File(fileDir);			
+				String fileName = dir.getAbsolutePath() +"/"+ f+"-mockup.xml";
+				inserter.insert(fileName);						
+				System.out.println("finish the file"+fileName);
+			}	
+		}else if(schema == 125){
+			for(int f=0;f<fileNum;f++){
+				TableInsertLocationS25 inserter = new TableInsertLocationS25();
+				File dir = new File(fileDir);			
+				String fileName = dir.getAbsolutePath() +"/"+ f+"-mockup.xml";
+				inserter.insert(fileName);						
+				System.out.println("finish the file"+fileName);
+			}			
 		}
-   
-	   
 	  }
 }

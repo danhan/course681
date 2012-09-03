@@ -46,14 +46,14 @@ public abstract class QueryAbstraction {
 			e.printStackTrace();
 		}
 	}
-	protected void getStatLog(String filename){
+	public void getStatLog(String filename){
 		this.statLog = new XStatLog(filename);
 	}
 	
-	protected void writeStat(String str){
+	public void writeStat(String str){
 		this.statLog.write(str);
 	}
-	protected void closeStatLog(){
+	public void closeStatLog(){
 		this.statLog.close();
 	}
 	
@@ -87,13 +87,13 @@ public abstract class QueryAbstraction {
 	 * @param latitude
 	 * @param longitude
 	 */
-	public abstract void copQueryPoint(double latitude, double longitude);
+	public abstract String copQueryPoint(double latitude, double longitude);
 	/**
 	 * This is for point query with scan
 	 * @param latitude
 	 * @param longitude
 	 */
-	public abstract void scanQueryPoint(double latitude, double longitude);
+	public abstract String scanQueryPoint(double latitude, double longitude);
 	
 	/**
 	 * 

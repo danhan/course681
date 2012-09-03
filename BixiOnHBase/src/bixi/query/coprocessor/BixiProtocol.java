@@ -8,6 +8,8 @@ import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.ipc.CoprocessorProtocol;
 
+import bixi.dataset.collection.XStation;
+
 /**
 * Provides Bixi specific utilities served as a Coprocessor.
 */
@@ -41,9 +43,11 @@ public interface BixiProtocol extends CoprocessorProtocol {
   
   /*******************For location Schema1**************************/
   List<String> copQueryNeighbor4LS1(Scan scan,double latitude,double longitude,double radius)throws IOException;
+  String copQueryPoint4LS1(Scan scan,double latitude,double longitude)throws IOException;
   
   /*******************For location Schema2**************************/
   List<String> copQueryNeighbor4LS2(Scan scan,double latitude,double longitude,double radius)throws IOException;
+  String copQueryPoint4LS2(Scan scan,double latitude,double longitude)throws IOException;
   
   
 }

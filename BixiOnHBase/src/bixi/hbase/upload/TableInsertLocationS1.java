@@ -70,6 +70,7 @@ public class TableInsertLocationS1 extends TableInsertAbstraction {
 	}
 
 	/**
+	 * Parse the xml file with DOM
 	 * Read the location from file, parse it, index it, and then insert it
 	 * TODO Normalize the point: enlarge the width and height, so all the points are in the scope now.
 	 * @param filename
@@ -212,14 +213,17 @@ public class TableInsertLocationS1 extends TableInsertAbstraction {
 			}
 		};	
 			saxParser.parse(filename, handler);
-
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			this.hbase.closeTableHandler();
-			
+			try{
+				this.hbase.getHTable().flushCommits();	
+			}catch(Exception ee){
+				ee.printStackTrace();
+			}
+			this.hbase.closeTableHandler();			
 		}
-
 	}
 	
 	
