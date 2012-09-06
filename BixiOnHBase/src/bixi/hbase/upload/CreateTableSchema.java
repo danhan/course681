@@ -109,7 +109,7 @@ public class CreateTableSchema {
 				int versions[] = {100000};
 				hbaseUtil.createTable(BixiConstant.LOCATION_TABLE_NAME_2+"5", families,versions);
 				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_2+"5");				
-			}			
+			}
 		} catch (Exception e) {
 			e.printStackTrace();	
 		}

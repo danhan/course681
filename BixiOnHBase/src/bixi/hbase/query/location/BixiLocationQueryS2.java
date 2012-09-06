@@ -3,18 +3,22 @@ package bixi.hbase.query.location;
 import java.awt.geom.Point2D;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.NavigableMap;
 
+import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.coprocessor.Batch;
+import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import util.log.XStatLog;
+import util.quadtree.based.trie.XQuadTree;
 import util.raster.XBox;
 import util.raster.XRaster;
 import bixi.dataset.collection.BixiReader;
@@ -86,7 +90,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			String[] c = raster.getColumns(match_boxes[0], match_boxes[1]);
 			// generate the scan
 			final Scan scan = hbaseUtil.generateScan(rowRange, null, new String[]{BixiConstant.LOCATION_FAMILY_NAME},
-					c, 100000);
+					c, 1000000);
 			
 			/** Step3** send out the query to trigger the corresponding function in Coprocessor****/
 			hbaseUtil.getHTable().coprocessorExec(BixiProtocol.class,
@@ -143,7 +147,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			XBox[] match_boxes = raster.match(latitude, longitude, radius);
 			String[] rowRange = new String[2];
 			rowRange[0] = match_boxes[0].getRow();
-			rowRange[1] = match_boxes[1].getRow()+"0";
+			rowRange[1] = match_boxes[1].getRow()+"-*";
 
 			String[] c = raster.getColumns(match_boxes[0], match_boxes[1]);
 			/*
@@ -308,7 +312,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			// objects in one cell now
 			rScanner = this.hbaseUtil.getResultSet(rowRange, null,
 					this.familyName, new String[] { match_box.getColumn() },
-					10000);
+					1000000);
 			BixiReader reader = new BixiReader();
 			int count = 0;
 			String stationName = null;
@@ -387,8 +391,113 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 
 	@Override
 	public void scanQueryAvailableKNN(String timestamp, double latitude,
-			double longitude, int n) {
+			double longitude, int k) {
+		this.getStatLog(STAT_FILE_NAME);
+		long sTime = System.currentTimeMillis();
+		// Step1: estimate the window circle for the first time
+		int total_points = Integer.valueOf(this.conf.getProperty("total_num_of_points"));
+		double areaOfMBB = this.min_size_of_height * this.min_size_of_height;
+		double DensityOfMBB = total_points / areaOfMBB;
+		double radius = Math.sqrt(k / DensityOfMBB);
+		XRaster raster = new XRaster(this.space, this.min_size_of_height,this.max_num_of_column);
 
+		longitude = Math.abs(longitude);
+		double x = latitude - radius;
+		double y = longitude - radius;
+		int count = 0;
+		int last_count = 0;
+		int accepted = 0;
+		ResultScanner rScanner = null;
+		
+		try{	
+			// Step2: trigger a scan to get the points based on the above window		
+			int iteration = 0;
+			
+			long match_s = System.currentTimeMillis();
+			do{
+				System.out.println("iteration"+ iteration+"; count=>"+count+";radius=>"+radius);			
+				// match rect to find the subspace it belongs to				
+				XBox[] match_boxes = raster.match(latitude, longitude, radius);
+				
+				String[] rowRange = new String[2];
+				rowRange[0] = match_boxes[0].getRow();
+				rowRange[1] = match_boxes[1].getRow()+"-*";
+
+				String[] c = raster.getColumns(match_boxes[0], match_boxes[1]);
+				rScanner = this.hbaseUtil.getResultSet(rowRange, null,
+						this.familyName, c, 1000000);				
+
+				count = 0;
+				for (Result r : rScanner) {
+					NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> resultMap = r
+							.getMap();
+
+					for (byte[] family : resultMap.keySet()) {
+						NavigableMap<byte[], NavigableMap<Long, byte[]>> columns = resultMap
+								.get(family);
+						for (byte[] col : columns.keySet()) {
+							NavigableMap<Long, byte[]> values = columns.get(col);
+							for (Long version : values.keySet()) {
+								count++;
+							}
+						}	
+					}
+				}
+				
+				radius = (radius*(iteration+1) > this.min_size_of_height*(iteration+1))? 
+									radius*(iteration+1): this.min_size_of_height*(iteration+1);
+				
+				// Step3: get the result,estimate the window circle next depending on the previous step result, util we got the K nodes
+//				if(count == 0 && iteration ==1){ // when the first time count == 0
+//					radius = radius * 2;
+//				}else if(count > 0 && iteration >0){ // when the first time count >0 && count < k					
+//					areaOfMBB = radius * radius;
+//					DensityOfMBB = count / areaOfMBB;
+//					radius = Math.sqrt(k / DensityOfMBB);						
+//				}
+				
+				last_count = count;
+				
+			}while(count < k && (++iteration>0));
+			
+			System.out.println("iteration"+ iteration+"; count=>"+count+";radius=>"+radius);	
+			long match_time = System.currentTimeMillis() - match_s;
+			
+			// Step4: get all possible points and sort them by the distance and get the top K
+			Point2D.Double point = new Point2D.Double(latitude,longitude);
+			//result container
+			HashMap<String,String> results = new HashMap<String,String>();			
+			for (Result r : rScanner) {
+				
+				NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> resultMap = r
+						.getMap();
+
+				for (byte[] f : resultMap.keySet()) {
+					NavigableMap<byte[], NavigableMap<Long, byte[]>> columns = resultMap
+							.get(f);
+					for (byte[] col : columns.keySet()) {
+						NavigableMap<Long, byte[]> values = columns.get(col);
+						for (Long version : values.keySet()) {
+							count++;
+
+						}
+					}
+				}
+			}			
+			
+			System.out.println("here...");
+			long eTime = System.currentTimeMillis();
+			
+			//System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
+			String outStr = "m=>scan;"+"radius=>"+radius+";count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";match=>"+match_time+";subspace=>"+this.min_size_of_height;;
+			this.writeStat(outStr);
+			
+		}catch(Exception e){
+				e.printStackTrace();
+		}finally{
+				this.hbaseUtil.closeTableHandler();
+				this.closeStatLog();
+		}
 
 	}
 	

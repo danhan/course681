@@ -15,7 +15,7 @@ public class TestLocationQuery {
 		
 		// 1.2064190766706284;longitude=1.1019155104863243
 		
-		double x = 3.111;//70.51038;
+		double x = 70.51038;
 		double y = 3.111;//3.55653;
 		double radius = 3;//100;//4 // TODO there is a defect for the QuadTree, when the x<radius
 		
@@ -28,7 +28,7 @@ public class TestLocationQuery {
 		
 		int runTime = 1;
 		
-		int option = 4;
+		int option = 5;
 		if(option == 0){ // query neigbours
 			
 			for(int i=0;i<runTime;i++){
@@ -100,6 +100,11 @@ public class TestLocationQuery {
 				System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
 				query2.copQueryPoint(x,y);
 			}
+		}else if(option ==5){
+			query1.scanQueryAvailableKNN("", x, y, 1000);
+			System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
+			query2.scanQueryAvailableKNN("", x, y, 1000);
+			
 		}
 		
 

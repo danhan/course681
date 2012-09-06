@@ -5,6 +5,8 @@ import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.List;
 
+import bixi.conf.XConfiguration;
+
 import util.log.XStatLog;
 
 import hbase.service.HBaseUtil;
@@ -16,6 +18,7 @@ public abstract class QueryAbstraction {
 	protected String familyName[] = null;
 	final int cacheSize = 5000;	
 	private XStatLog statLog = null;
+	protected XConfiguration conf = XConfiguration.getInstance();
 	
 	/**
 	 * This should be known before indexing with QuadTree.

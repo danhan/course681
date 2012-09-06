@@ -66,7 +66,10 @@ public class TableInsertLocationS1 extends TableInsertAbstraction {
 		File dir = new File("data2");
 		int batchNum = 100;
 		String fileName = dir.getAbsolutePath() +"/"+ args[0];
-		inserter.insert(fileName,batchNum);		
+		if(new File(fileName).exists()){
+			inserter.insert(fileName,batchNum);	
+		}
+				
 	}
 
 	/**
