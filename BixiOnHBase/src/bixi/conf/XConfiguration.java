@@ -4,7 +4,7 @@ import java.util.Properties;
 
 public class XConfiguration {
 
-	private String fileName = "bixi/conf/conf.properties";
+	private String fileName = "conf.properties";
 	private static XConfiguration instance = null;
 	Properties configFile = new Properties();
 	

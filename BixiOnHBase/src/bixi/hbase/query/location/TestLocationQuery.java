@@ -3,7 +3,10 @@ package bixi.hbase.query.location;
 import java.awt.geom.Point2D;
 import java.awt.geom.Point2D.Double;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -101,10 +104,76 @@ public class TestLocationQuery {
 				query2.copQueryPoint(x,y);
 			}
 		}else if(option ==5){
-			query1.scanQueryAvailableKNN("", x, y, 1000);
-			System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
-			query2.scanQueryAvailableKNN("", x, y, 1000);
 			
+			int knn = 90;
+			
+			TreeMap<java.lang.Double,String> result1 = query1.scanQueryAvailableKNN("", x, y, knn);
+			System.out.println("++++++++++++++++++++++++++++++++++++++++++++++++");
+			TreeMap<java.lang.Double,String> result2 = query2.scanQueryAvailableKNN("", x, y, knn);
+			int accepted = 0;
+			int not = 0;		
+			List<String> tmp1 = new ArrayList<String>();
+			tmp1.addAll(result1.values());
+			
+			List<String> tmp2 = new ArrayList<String>();
+			tmp2.addAll(result2.values());
+			
+			Collections.sort(tmp1);
+			Collections.sort(tmp2);
+			
+			int index=0;
+			Iterator<java.lang.Double> e = result2.keySet().iterator();
+			for(java.lang.Double key: result1.keySet()){
+				String value = result1.get(key);
+				index++;
+				java.lang.Double dis = e.next();
+				if(key.doubleValue() != dis.doubleValue()){
+					System.out.println(index+":=> ("+key+","+value+");("+dis+","+result2.get(dis)+")");
+				}
+
+			}
+			System.out.println();
+			
+			
+			System.out.println(result1.values());			
+			System.out.println(result2.values());
+			System.out.println(tmp1);
+			System.out.println(tmp2);
+			
+			System.out.println(result1.size()+"<==>"+result2.size());
+			int count = 0;
+			for(java.lang.Double key:result1.keySet()){	
+				String value = result1.get(key);
+				if(result2.values().contains(result1.get(key))){
+					accepted++;
+					//System.out.print(value+";");
+				}else{
+					not++;
+					System.out.print("("+key+","+value+");");
+				}
+				count++;
+				if(count == knn)
+					break;
+			}
+			System.out.println();
+			count =0;
+			not = 0;
+			accepted=0;
+			for(java.lang.Double key:result2.keySet()){	
+				String value = result2.get(key);
+				if(result1.values().contains(result2.get(key))){
+					accepted++;
+					//System.out.print(value+";");
+				}else{
+					not++;
+					System.out.print("("+key+","+value+");");
+				}
+				count++;
+				if(count == knn)
+					break;
+			}	
+			System.out.println();
+			System.out.println("the same number: "+accepted+";wrong:"+not);			
 		}
 		
 

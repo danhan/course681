@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Result;
@@ -116,10 +117,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 		    }, callBack);
 		    		    
 		    
-			long exe_time = System.currentTimeMillis()- s_time;
-			// TODO store the time into database
-			
-			//System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.size());		
+			long exe_time = System.currentTimeMillis()- s_time; 	
 			String outStr = "m=>cop;"+"radius=>"+radius+";exe_time=>"+exe_time+";result=>"+callBack.res.size()+";match=>"+(match_time)+";subspace=>"+this.min_size_of_subspace;;
 			this.writeStat(outStr);
 			
@@ -177,9 +175,11 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			BixiReader reader = new BixiReader();
 			int count = 0;
 			int accepted = 0;
+			int row = 0;
 			for(Result r: rScanner){
 				//System.out.println(Bytes.toString(r.getRow()) + "=>");
 				List<KeyValue> pairs = r.list();
+				row++;
 				for(KeyValue kv:pairs){
 					//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
 					count++;
@@ -200,7 +200,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			}
 			long eTime = System.currentTimeMillis();			
 			//System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
-			String outStr = "m=>scan;"+"radius=>"+radius+";count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";match=>"+match_time+";subspace=>"+this.min_size_of_subspace;;
+			String outStr = "m=>scan;"+"radius=>"+radius+";count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";row=>"+row+";match=>"+match_time+";subspace=>"+this.min_size_of_subspace;;
 			this.writeStat(outStr);
 			
 		}catch(Exception e){
@@ -310,11 +310,12 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 			BixiReader reader = new BixiReader();
 			rScanner = this.hbaseUtil.getResultSet(new String[]{node.getIndex(),node.getIndex()+"0"},null, null,null,-1);
 			int count = 0;
-		
+			int row = 0;
 			String stationName = null;
 			for(Result r: rScanner){
 				//System.out.println(Bytes.toString(r.getRow()) + "=>");
 				List<KeyValue> pairs = r.list();
+				row++;
 				for(KeyValue kv:pairs){
 					//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
 					XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));
@@ -332,11 +333,11 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 				if(stationName != null)
 					break;
 			}	
-			long eTime = System.currentTimeMillis();
-			System.out.println("count=>"+count + "; time=>"+(eTime-sTime));
-			String outStr = "q=point;m=scan;"+"count=>"+count + "; time=>"+(eTime-sTime)+";result=>"+stationName;
+			long eTime = System.currentTimeMillis();			
+			String outStr = "q=point;m=scan;"+"count=>"+count + "; time=>"+(eTime-sTime)+";row=>"+row+";result=>"+stationName;
 			this.writeStat(outStr);
 			return stationName;
+			
 		}catch(Exception e){
 			e.printStackTrace();
 		}finally{
@@ -455,32 +456,36 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 	 * Using density-based estimation method
 	 */
 	@Override
-	public void scanQueryAvailableKNN(String timestamp, double latitude,
+	public TreeMap<Double,String> scanQueryAvailableKNN(String timestamp, double latitude,
 			double longitude, int k) {
 		this.getStatLog(STAT_FILE_NAME);
 		long sTime = System.currentTimeMillis();
 		// Step1: estimate the window circle for the first time
-		int total_points = Integer.valueOf(this.conf.getProperty("total_num_of_points"));
-		double areaOfMBB = this.min_size_of_subspace * this.min_size_of_subspace;
+		int total_points = Integer.valueOf(this.conf.getProperty("total_num_of_points")); //1000000000;//
+		double areaOfMBB = this.space.width * this.space.height;
 		double DensityOfMBB = total_points / areaOfMBB;
-		double radius = Math.sqrt(k / DensityOfMBB);
+		double init_radius = Math.sqrt(k / DensityOfMBB);
 		
 		XQuadTree quadTree = new XQuadTree(space, min_size_of_subspace);
 		quadTree.buildTree();
 		longitude = Math.abs(longitude);
-		double x = latitude - radius;
-		double y = longitude - radius;
+		double x = latitude - init_radius;
+		double y = longitude - init_radius;
 		int count = 0;
 		int accepted = 0;
 		ResultScanner rScanner = null;
-		
+		HashMap<String,String> results = new HashMap<String,String>();
+		BixiReader reader = new BixiReader();
+		TreeMap<Double,String> sorted = null;
 		try{	
 			// Step2: trigger a scan to get the points based on the above window		
-			int iteration = 0;
-			
+			int iteration = 1;
+			double radius = (init_radius > this.min_size_of_subspace)? init_radius:this.min_size_of_subspace;
 			long match_s = System.currentTimeMillis();
 			do{
-				System.out.println("iteration"+ iteration+"; count=>"+count+";radius=>"+radius);			
+				String str = "iteration"+ iteration+"; count=>"+count+";radius=>"+radius;
+				this.writeStat(str);
+				
 				List<String> indexes = quadTree.match(x,y,2*radius,2*radius);
 				
 				// prepare filter for scan
@@ -500,19 +505,21 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 				
 				rScanner = this.hbaseUtil.getResultSet(rowRanges,fList, null,null,-1);
 				count = 0;
+				results.clear();
 				for(Result r: rScanner){
 					//System.out.println(Bytes.toString(r.getRow()) + "=>");
 					List<KeyValue> pairs = r.list();
 					for(KeyValue kv:pairs){
 						//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
+						results.put(Bytes.toString(kv.getQualifier()),Bytes.toString(kv.getValue()));
 						count++;						
 					}
 				}
-
+				radius = init_radius * (iteration+1);
 				
 				// Step3: get the result,estimate the window circle next depending on the previous step result, util we got the K nodes
-				radius = (radius*(iteration+1) > this.min_size_of_subspace*(iteration+1))? 
-						radius*(iteration+1): this.min_size_of_subspace*(iteration+1);
+/*				radius = (radius*(iteration+1) > this.min_size_of_subspace*(iteration+1))? 
+						radius*(iteration+1): this.min_size_of_subspace*(iteration+1);*/
 /*				if(count == 0 && iteration ==1){ // when the first time count == 0
 					radius = radius * 2;
 				}else if(count > 0 && iteration >0){ // when the first time count >0 && count < k
@@ -520,29 +527,32 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 					DensityOfMBB = count / areaOfMBB;
 					radius = Math.sqrt(k / DensityOfMBB);	
 					
-				}	*/			
+				}	*/		
 				
 			}while(count < k && (++iteration>0));
-			System.out.println("iteration"+ iteration+"; count=>"+count+";radius=>"+radius);	
+			
+			String str = "iteration"+ iteration+"; count=>"+count+";radius=>"+radius;
+			this.writeStat(str);
+			
 			long match_time = System.currentTimeMillis() - match_s;
 			
 			// Step4: get all possible points and sort them by the distance and get the top K
 			Point2D.Double point = new Point2D.Double(latitude,longitude);
 			//result container
-			HashMap<String,String> results = new HashMap<String,String>();			
-			for(Result r: rScanner){				
-				List<KeyValue> pairs = r.list();
-				for(KeyValue kv:pairs){
-					System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
-					count++;						
-				}
+			HashMap<Double,String> distanceMap = new HashMap<Double,String>();			
+			for(String key:results.keySet()){				
+				XStation station = reader.getStationFromJson(results.get(key));
+				station.setId(key);
+				
+				Point2D.Double resPoint = new Point2D.Double(station.getLatitude(),Math.abs(station.getlongitude()));
+				double distance = resPoint.distance(point);
+				distanceMap.put(distance,key);											
 			}			
 			
-			System.out.println("here...");
-			long eTime = System.currentTimeMillis();
+			sorted = new TreeMap<Double,String>(distanceMap);
 			
-			//System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
-			String outStr = "m=>scan;"+"radius=>"+radius+";count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";match=>"+match_time+";subspace=>"+this.min_size_of_subspace;;
+			long eTime = System.currentTimeMillis();						
+			String outStr = "q=knn;m=>scan;"+";count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";k=>"+k;
 			this.writeStat(outStr);
 			
 		}catch(Exception e){
@@ -551,8 +561,8 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 				this.hbaseUtil.closeTableHandler();
 				this.closeStatLog();
 		}
-
 	
+			return sorted;
 	}	
 		
 }

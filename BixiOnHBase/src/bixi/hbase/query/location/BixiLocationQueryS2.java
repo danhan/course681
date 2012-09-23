@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.NavigableMap;
+import java.util.TreeMap;
 
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.client.Result;
@@ -85,7 +86,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			XBox[] match_boxes = raster.match(latitude, longitude, radius);
 			String[] rowRange = new String[2];
 			rowRange[0] = match_boxes[0].getRow();
-			rowRange[1] = match_boxes[1].getRow()+"-**";
+			rowRange[1] = match_boxes[1].getRow()+"-*";
 
 			String[] c = raster.getColumns(match_boxes[0], match_boxes[1]);
 			// generate the scan
@@ -161,6 +162,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 					this.familyName, c, 1000000);
 			BixiReader reader = new BixiReader();
 			int count = 0;
+			int row = 0;
 			int accepted = 0;
 
 			for (Result r : rScanner) {
@@ -199,10 +201,8 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 				}
 			}
 			long eTime = System.currentTimeMillis();
-			System.out.println("count=>" + count + ";accepted=>"
-					+ accepted + ";time=>" + (eTime - sTime));
 			String outStr = "m=scan;"+"radius=>"+radius+";count=>" + count + ";accepted=>"
-					+ accepted + ";time=>" + (eTime - sTime)+";row_stride=>"+this.min_size_of_height+";columns=>"+this.max_num_of_column;;
+					+ accepted + ";time=>" + (eTime - sTime)+";row=>"+row+"row_stride=>"+this.min_size_of_height+";columns=>"+this.max_num_of_column;;
 			this.writeStat(outStr);
 
 		} catch (Exception e) {
@@ -315,11 +315,12 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 					1000000);
 			BixiReader reader = new BixiReader();
 			int count = 0;
+			int row = 0;
 			String stationName = null;
 			for (Result r : rScanner) {
 				NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> resultMap = r
 						.getMap();
-
+				row++;
 				for (byte[] family : resultMap.keySet()) {
 					NavigableMap<byte[], NavigableMap<Long, byte[]>> columns = resultMap
 							.get(family);
@@ -349,7 +350,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			}
 			long eTime = System.currentTimeMillis();
 			System.out.println("count=>" + count + ";time=>"+ (eTime - sTime)+";result=>"+stationName);
-			String outStr = "q=point;m=scan;count=>" + count + ";time=>"+ (eTime - sTime)+";result=>"+stationName;
+			String outStr = "q=point;m=scan;count=>" + count + ";time=>"+ (eTime - sTime)+";row=>"+row+";result=>"+stationName;
 			this.writeStat(outStr);
 			
 			return stationName;
@@ -390,32 +391,34 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 	}
 
 	@Override
-	public void scanQueryAvailableKNN(String timestamp, double latitude,
+	public TreeMap<Double,String> scanQueryAvailableKNN(String timestamp, double latitude,
 			double longitude, int k) {
 		this.getStatLog(STAT_FILE_NAME);
 		long sTime = System.currentTimeMillis();
 		// Step1: estimate the window circle for the first time
-		int total_points = Integer.valueOf(this.conf.getProperty("total_num_of_points"));
-		double areaOfMBB = this.min_size_of_height * this.min_size_of_height;
+		int total_points = Integer.valueOf(this.conf.getProperty("total_num_of_points"));//1000000000;//
+		double areaOfMBB = this.space.width * this.space.height;
 		double DensityOfMBB = total_points / areaOfMBB;
-		double radius = Math.sqrt(k / DensityOfMBB);
+		double init_radius = Math.sqrt(k / DensityOfMBB);
 		XRaster raster = new XRaster(this.space, this.min_size_of_height,this.max_num_of_column);
 
 		longitude = Math.abs(longitude);
-		double x = latitude - radius;
-		double y = longitude - radius;
-		int count = 0;
-		int last_count = 0;
+		int count = 0;		
 		int accepted = 0;
 		ResultScanner rScanner = null;
-		
+		List<String> resultsList = new ArrayList<String>();
+		BixiReader reader = new BixiReader();
+		TreeMap<Double,String> sorted = null;
 		try{	
 			// Step2: trigger a scan to get the points based on the above window		
-			int iteration = 0;
+			int iteration = 1;
 			
 			long match_s = System.currentTimeMillis();
+			double radius = (init_radius > this.min_size_of_height)? init_radius:this.min_size_of_height;
+			
 			do{
-				System.out.println("iteration"+ iteration+"; count=>"+count+";radius=>"+radius);			
+				String str = "iteration"+ iteration+"; count=>"+count+";radius=>"+radius;
+				this.writeStat(str);
 				// match rect to find the subspace it belongs to				
 				XBox[] match_boxes = raster.match(latitude, longitude, radius);
 				
@@ -428,6 +431,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 						this.familyName, c, 1000000);				
 
 				count = 0;
+				resultsList.clear();
 				for (Result r : rScanner) {
 					NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> resultMap = r
 							.getMap();
@@ -438,58 +442,52 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 						for (byte[] col : columns.keySet()) {
 							NavigableMap<Long, byte[]> values = columns.get(col);
 							for (Long version : values.keySet()) {
+								resultsList.add(Bytes.toString(values.get(version)));
 								count++;
 							}
 						}	
 					}
 				}
+				radius = init_radius * (iteration+1);
 				
-				radius = (radius*(iteration+1) > this.min_size_of_height*(iteration+1))? 
-									radius*(iteration+1): this.min_size_of_height*(iteration+1);
 				
 				// Step3: get the result,estimate the window circle next depending on the previous step result, util we got the K nodes
-//				if(count == 0 && iteration ==1){ // when the first time count == 0
-//					radius = radius * 2;
-//				}else if(count > 0 && iteration >0){ // when the first time count >0 && count < k					
-//					areaOfMBB = radius * radius;
-//					DensityOfMBB = count / areaOfMBB;
-//					radius = Math.sqrt(k / DensityOfMBB);						
-//				}
-				
-				last_count = count;
+/*				if(count == 0 && iteration ==1){ // when the first time count == 0
+					radius = radius * 2;
+				}else if(count > 0 && iteration >0){ // when the first time count >0 && count < k					
+					areaOfMBB = radius * radius;
+					DensityOfMBB = count / areaOfMBB;
+					radius = Math.sqrt(k / DensityOfMBB);						
+				}*/
+								
 				
 			}while(count < k && (++iteration>0));
+			String str = "iteration"+ iteration+"; count=>"+count+";radius=>"+radius;
+			this.writeStat(str);
 			
-			System.out.println("iteration"+ iteration+"; count=>"+count+";radius=>"+radius);	
 			long match_time = System.currentTimeMillis() - match_s;
 			
 			// Step4: get all possible points and sort them by the distance and get the top K
 			Point2D.Double point = new Point2D.Double(latitude,longitude);
 			//result container
-			HashMap<String,String> results = new HashMap<String,String>();			
-			for (Result r : rScanner) {
-				
-				NavigableMap<byte[], NavigableMap<byte[], NavigableMap<Long, byte[]>>> resultMap = r
-						.getMap();
-
-				for (byte[] f : resultMap.keySet()) {
-					NavigableMap<byte[], NavigableMap<Long, byte[]>> columns = resultMap
-							.get(f);
-					for (byte[] col : columns.keySet()) {
-						NavigableMap<Long, byte[]> values = columns.get(col);
-						for (Long version : values.keySet()) {
-							count++;
-
-						}
-					}
-				}
-			}			
+			HashMap<Double,String> distanceMap = new HashMap<Double,String>();			
 			
-			System.out.println("here...");
+			for(String value: resultsList){
+				
+				XStation station = reader.getStationFromJson(value);
+
+				Point2D.Double resPoint = new Point2D.Double(station.getLatitude(), station.getlongitude());
+				double distance = resPoint.distance(point);
+
+				distanceMap.put(distance,station.getId());
+			}
+			
+			sorted = new TreeMap<Double,String>(distanceMap);
+			
+						
 			long eTime = System.currentTimeMillis();
 			
-			//System.out.println("count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime));
-			String outStr = "m=>scan;"+"radius=>"+radius+";count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";match=>"+match_time+";subspace=>"+this.min_size_of_height;;
+			String outStr = "q=knn;m=>scan;"+";count=>"+count+";accepted=>"+accepted + ";time=>"+(eTime-sTime)+";k=>"+k;
 			this.writeStat(outStr);
 			
 		}catch(Exception e){
@@ -498,7 +496,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 				this.hbaseUtil.closeTableHandler();
 				this.closeStatLog();
 		}
-
+		return sorted;
 	}
 	
 	public List<Point2D.Double> debugColumnVersion(String timestamp,

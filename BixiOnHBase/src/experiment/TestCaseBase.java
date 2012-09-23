@@ -236,7 +236,7 @@ public abstract class TestCaseBase {
 		for(int i=0;i<times;i++){
 			System.out.println("~~~ "+i+" Time ~~");
 			locationQuery.scanQueryPoint(latitude, longitude);			
-		}		
+		}
 	}
 	private void callCopQueryPoint(String propertyName){
 		String property = tests.getProperty(propertyName);
@@ -249,6 +249,33 @@ public abstract class TestCaseBase {
 			locationQuery.copQueryPoint(latitude, longitude);			
 		}		
 	}
+	
+	/**Location query 3 ***/
+	private void callScanQueryKNN(String propertyName){
+		String property = tests.getProperty(propertyName);
+		String[] args = property.split(" ");		
+		Double latitude = Double.parseDouble(args[0]);
+		Double longitude = Double.parseDouble(args[1]);
+		int k = Integer.parseInt(args[2]);	
+		QueryAbstraction locationQuery = this.getBixiLocationQuery();
+		for(int i=0;i<times;i++){
+			System.out.println("~~~ "+i+" Time ~~");
+			locationQuery.scanQueryAvailableKNN("", latitude, longitude, k);			
+		}
+	}
+	private void callCopQueryKNN(String propertyName){
+		String property = tests.getProperty(propertyName);
+		String[] args = property.split(" ");		
+		Double latitude = Double.parseDouble(args[0]);
+		Double longitude = Double.parseDouble(args[1]);
+		int k = Integer.parseInt(args[2]);	
+		QueryAbstraction locationQuery = this.getBixiLocationQuery();
+		for(int i=0;i<times;i++){
+			System.out.println("~~~ "+i+" Time ~~");
+			locationQuery.copQueryAvailableKNN("", latitude, longitude, k);		
+		}		
+	}	
+	
 	
 	/***********************************************************************************
 	 * ***********Because execution time of scan descrease much when it run in program
@@ -293,6 +320,14 @@ public abstract class TestCaseBase {
 	public void runCopQueryPoint(String propertyName){
 		this.times = 1;
 		callCopQueryPoint(propertyName);
+	}
+	public void runScanQueryKNN(String propertyName){
+		this.times = 1;
+		callScanQueryKNN(propertyName);
+	}
+	public void runCopQueryKNN(String propertyName){
+		this.times = 1;
+		callCopQueryKNN(propertyName);
 	}
 	
 }

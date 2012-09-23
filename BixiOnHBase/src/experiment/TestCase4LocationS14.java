@@ -23,7 +23,9 @@ public class TestCase4LocationS14 extends TestCaseBase{
 					"1: runScanQueryAvailable propertyname\n" +
 		            "2: runCopQueryAvailable propertyname \n"+
 		            "3: runScanQueryPoint propertyname \n"+
-		            "4: runCopQueryPoint propertyname \n");
+		            "4: runCopQueryPoint propertyname \n"+
+            		"5: runScanQueryKNN propertyname \n"+
+            		"6: runCopQueryKNN propertyname \n");
 		}else{
 			if(args[0].equals("0")){
 				tests.runTests();
@@ -35,6 +37,10 @@ public class TestCase4LocationS14 extends TestCaseBase{
 				tests.runScanQueryPoint(args[1]); // args[1] is the property name from property file
 			}else if(args[0].equals("4")){
 				tests.runCopQueryPoint(args[1]); // args[1] is the property name from property file
+			}else if(args[0].equals("5")){
+				tests.runScanQueryKNN(args[1]); // args[1] is the property name from property file
+			}else if(args[0].equals("6")){
+				tests.runCopQueryKNN(args[1]); // args[1] is the property name from property file
 			}
 		}
 	}

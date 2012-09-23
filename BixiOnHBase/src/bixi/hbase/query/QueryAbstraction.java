@@ -4,6 +4,7 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 import bixi.conf.XConfiguration;
 
@@ -133,7 +134,7 @@ public abstract class QueryAbstraction {
 	 * @param longitude
 	 * @param radius
 	 */
-	public abstract void scanQueryAvailableKNN(String timestamp,
+	public abstract TreeMap<Double,String> scanQueryAvailableKNN(String timestamp,
 			double latitude, double longitude,int n);	
 
 	/**
