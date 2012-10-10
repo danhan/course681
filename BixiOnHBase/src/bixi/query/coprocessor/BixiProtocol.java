@@ -42,11 +42,11 @@ public interface BixiProtocol extends CoprocessorProtocol {
   Map<String, TotalNum> copGetTotalUsage4S3(Scan scan) throws IOException;
   
   /*******************For location Schema1**************************/
-  List<String> copQueryNeighbor4LS1(Scan scan,double latitude,double longitude,double radius)throws IOException;
+  RCopResult copQueryNeighbor4LS1(Scan scan,double latitude,double longitude,double radius)throws IOException;
   String copQueryPoint4LS1(Scan scan,double latitude,double longitude)throws IOException;
   
   /*******************For location Schema2**************************/
-  List<String> copQueryNeighbor4LS2(Scan scan,double latitude,double longitude,double radius)throws IOException;
+  RCopResult copQueryNeighbor4LS2(Scan scan,double latitude,double longitude,double radius)throws IOException;
   String copQueryPoint4LS2(Scan scan,double latitude,double longitude)throws IOException;
   
   

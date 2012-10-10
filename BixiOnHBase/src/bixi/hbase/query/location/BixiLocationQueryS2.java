@@ -27,6 +27,7 @@ import bixi.dataset.collection.XStation;
 import bixi.hbase.query.BixiConstant;
 import bixi.hbase.query.QueryAbstraction;
 import bixi.query.coprocessor.BixiProtocol;
+import bixi.query.coprocessor.RCopResult;
 
 /**
  * This class is to process the location query based on Location Schema2
@@ -54,12 +55,12 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 	public List<String> copQueryAvailableNear(String timestamp,
 			final double latitude, final double longitude, final double radius) {
 		this.getStatLog(STAT_FILE_NAME);
+		this.timePhase.clear();
 		
-		long s_time = System.currentTimeMillis();
 		try {
 			/** Step1** Call back class definition **/
-			class BixiCallBack implements Batch.Callback<List<String>> {
-				List<String> res = new ArrayList<String>();
+			class BixiCallBack implements Batch.Callback<RCopResult> {
+				RCopResult res = new RCopResult();
 				int count = 0;
 				QueryAbstraction query = null;
 				
@@ -67,17 +68,27 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 				    	this.query = query; 
 				}
 				@Override
-				public void update(byte[] region, byte[] row,List<String> result) {
+				public void update(byte[] region, byte[] row,RCopResult result) {
 					count++;
+					res.getRes().addAll(result.getRes()); // to verify the error when large data
+					res.setStart(result.getStart());
+					res.setEnd(result.getEnd());
 					//System.out.println((count++) + ": come back region: "+ Bytes.toString(region) + "; result: "+ result.size());
-					String outStr="count=>"+count+";region=>"+Bytes.toString(region)+";result=>"+result.size();
+					String outStr="count=>"+count+";start=>"+result.getStart()+";end=>"+result.getEnd()+";process=>"+(result.getEnd()-result.getStart())+
+							";tranmission=>"+(System.currentTimeMillis()-result.getEnd())+";region=>"+Bytes.toString(region)+
+							";row=>"+result.getRows()+";result=>"+result.getRes().size();
 					this.query.writeStat(outStr);
-					res.addAll(result); // to verify the error when large data
+			    	outStr = query.regions.get(Bytes.toString(region)).toString();
+			    	this.query.writeStat(outStr);					
+					
+			    	
 				}
 			}
 			BixiCallBack callBack = new BixiCallBack(this);
 
 			/** Step2** generate the scan ***********/
+			long s_time = System.currentTimeMillis();
+			this.timePhase.add(s_time);
 			// build up the Raster
 			XRaster raster = new XRaster(this.space, this.min_size_of_height,
 					this.max_num_of_column);
@@ -94,11 +105,12 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 					c, 1000000);
 			
 			/** Step3** send out the query to trigger the corresponding function in Coprocessor****/
+			this.timePhase.add(System.currentTimeMillis());
 			hbaseUtil.getHTable().coprocessorExec(BixiProtocol.class,
 					scan.getStartRow(), scan.getStopRow(),
-					new Batch.Call<BixiProtocol, List<String>>() {
+					new Batch.Call<BixiProtocol, RCopResult>() {
 
-						public List<String> call(BixiProtocol instance)
+						public RCopResult call(BixiProtocol instance)
 								throws IOException {
 
 							return instance.copQueryNeighbor4LS2(scan,
@@ -108,14 +120,15 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 					}, callBack);
 			
 		    long e_time = System.currentTimeMillis();
+		    this.timePhase.add(e_time);
 		    
 			long exe_time = e_time - s_time;
 			// TODO store the time into database
-			System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.size());				
-			String outStr = "m=>cop;"+"radius=>"+radius+";exe_time=>"+exe_time+";result=>"+callBack.res.size();
+			System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.getRes().size());				
+			String outStr = "m=>cop;"+"radius=>"+radius+";exe_time=>"+exe_time+";result=>"+callBack.res.getRes().size();
 			this.writeStat(outStr);
 			
-			return callBack.res;
+			return callBack.res.getRes();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -232,10 +245,12 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 				}
 				@Override
 				public void update(byte[] region, byte[] row,String result) {
-					count++;
-					//System.out.println((count++) + ": come back region: "+ Bytes.toString(region) + "; result: "+ result.size());
-					String outStr="count=>"+count+";region=>"+Bytes.toString(region)+";result=>"+result;
-					this.query.writeStat(outStr);	
+					count++;				
+					String outStr="endTime=>"+System.currentTimeMillis()+";region=>"+Bytes.toString(region)+
+							";count=>"+count+";result=>"+result;
+					this.query.writeStat(outStr);
+			    	outStr = query.regions.get(Bytes.toString(region)).toString();
+			    	this.query.writeStat(outStr);
 					res = result;
 				}
 			}

@@ -37,14 +37,15 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 
 	/******************For Location Schema1*******************************/
 	
-	public List<String> copQueryNeighbor4LS1(Scan scan,double latitude,double longitude,double radius)throws IOException{
+	public RCopResult copQueryNeighbor4LS1(Scan scan,double latitude,double longitude,double radius)throws IOException{
 		
 		long sTime = System.currentTimeMillis();
 		System.out.println(sTime+": in the copQueryNeighbor4LS1....");
 		/**Step1: get internalScanner***/
 		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment()).getRegion().getScanner(scan);
 		List<KeyValue> keyvalues = new ArrayList<KeyValue>();
-		List<String> results = new ArrayList<String>();
+		//List<String> results = new ArrayList<String>();
+		RCopResult results = new RCopResult();
 		boolean hasMoreResult = false;		
 		Point2D.Double point = new Point2D.Double(latitude,longitude);
 		/**Step2: iterate the result from the scanner**/
@@ -66,7 +67,7 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 						/**Step3: filter the false-positive points**/
 						if(distance <= radius){						
 							//System.out.println("row=>"+Bytes.toString(r.getRow()) + ";colum=>"+Bytes.toString(kv.getQualifier())+ ";station=>"+station.getId());
-							results.add(station.getId());
+							results.getRes().add(station.getId());
 							accepted++;
 						}
 							
@@ -79,8 +80,11 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 			
 			long eTime = System.currentTimeMillis();
 			
-			System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+results.size()+";count=>"+count+";accepted=>"+accepted);			
-			
+			results.setStart(sTime);
+			results.setEnd(eTime);
+			results.setRows(count);
+			System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+results.getRes().size()+";count=>"+count+";accepted=>"+accepted);	
+						
 		} finally {
 			scanner.close();
 		}
@@ -135,14 +139,14 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 	
 	/******************For Location Schema2*******************************/
 	
-	public List<String> copQueryNeighbor4LS2(Scan scan,double latitude,double longitude,double radius)throws IOException{
+	public RCopResult copQueryNeighbor4LS2(Scan scan,double latitude,double longitude,double radius)throws IOException{
 		
 		long sTime = System.currentTimeMillis();
 		System.out.println(sTime+": in the copQueryNeighbor4LS2....");
 		/**Step1: get internalScanner***/
 		InternalScanner scanner = ((RegionCoprocessorEnvironment) getEnvironment()).getRegion().getScanner(scan);
 		List<KeyValue> keyvalues = new ArrayList<KeyValue>();
-		List<String> results = new ArrayList<String>();
+		RCopResult results = new RCopResult();
 		boolean hasMoreResult = false;		
 		Point2D.Double point = new Point2D.Double(latitude,longitude);
 		
@@ -165,7 +169,7 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 						/**Step3: filter the false-positive points**/
 						if(distance <= radius){						
 							//System.out.println("row=>"+Bytes.toString(kv.getRow()) + ";colum=>"+Bytes.toString(kv.getQualifier())+ ";station=>"+station.getId());
-							results.add(station.getId());
+							results.getRes().add(station.getId());
 							accepted++;
 						}
 							
@@ -176,8 +180,10 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 			} while (hasMoreResult);
 			
 			long eTime = System.currentTimeMillis();
-			
-			System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+results.size()+";count=>"+count+";accepted=>"+accepted);			
+			results.setStart(sTime);
+			results.setEnd(eTime);
+			results.setRows(count);
+			System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+results.getRes().size()+";count=>"+count+";accepted=>"+accepted);			
 			
 		} finally {
 			scanner.close();

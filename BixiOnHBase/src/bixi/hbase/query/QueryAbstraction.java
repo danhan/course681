@@ -2,9 +2,12 @@ package bixi.hbase.query;
 
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
+
+import org.apache.hadoop.hbase.HRegionInfo;
 
 import bixi.conf.XConfiguration;
 
@@ -20,6 +23,8 @@ public abstract class QueryAbstraction {
 	final int cacheSize = 5000;	
 	private XStatLog statLog = null;
 	protected XConfiguration conf = XConfiguration.getInstance();
+	public HashMap<String, HRegionInfo> regions = null;
+	public List<Long> timePhase = new ArrayList<Long>();
 	
 	/**
 	 * This should be known before indexing with QuadTree.
@@ -44,6 +49,8 @@ public abstract class QueryAbstraction {
 			hbaseUtil = new HBaseUtil(null);
 			hbaseUtil.getTableHandler(tableName);
 			hbaseUtil.setScanConfig(cacheSize, true);
+			this.regions = hbaseUtil.getRegions(tableName);
+			
 		}catch(Exception e){
 			if(hbaseUtil != null)
 				hbaseUtil.closeTableHandler();

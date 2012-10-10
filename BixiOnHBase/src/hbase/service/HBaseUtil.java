@@ -2,6 +2,7 @@ package hbase.service;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -43,6 +44,7 @@ public class HBaseUtil {
 	private HTable table = null;
 	private int cacheSize = 5000;
 	private boolean blockCached = true;
+	private HashMap<String,HRegionInfo> regions = null;
 	
 	public HBaseUtil(Configuration conf){			
 		try{
@@ -60,6 +62,8 @@ public class HBaseUtil {
 			
 			
 			this.admin = new HBaseAdmin(this.conf);
+			regions = new HashMap<String,HRegionInfo>();
+			
 		}catch(Exception e){
 			e.printStackTrace();
 			log.info(e.fillInStackTrace());
@@ -75,6 +79,18 @@ public class HBaseUtil {
 		this.blockCached = blockCache;
 	}
 
+	public HashMap<String,HRegionInfo> getRegions(String tablename){
+		try{
+			List<HRegionInfo> list = this.admin.getTableRegions(Bytes.toBytes(tablename));
+			for(int i=0;i<list.size();i++){
+				this.regions.put(list.get(i).getRegionNameAsString(), list.get(i));				
+			}			
+			
+		}catch(Exception e){
+			e.printStackTrace();
+		}	
+		return this.regions;
+	}
 	
 	public HTable createTable(String tableName, String[] metrics,int[] max_version) throws IOException {				
 		System.out.println("create table for "+tableName);
