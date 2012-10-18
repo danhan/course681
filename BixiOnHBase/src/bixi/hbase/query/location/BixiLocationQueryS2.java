@@ -39,7 +39,8 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 
 	double min_size_of_height = BixiConstant.MIN_SIZE_OF_SUBSPACE;
 	int max_num_of_column = BixiConstant.MAX_NUM_OF_COLUMN;	
-	String STAT_FILE_NAME = "BixiLocationQueryS2.stat";	
+	String STAT_FILE_NAME = "BixiLocationQueryS2.stat";
+	String FILE_NAME_PREFIX = "BixiLocationQueryS2";
 	
 	public BixiLocationQueryS2() {
 		tableName = BixiConstant.LOCATION_TABLE_NAME_2;
@@ -55,6 +56,9 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 	public List<String> copQueryAvailableNear(String timestamp,
 			final double latitude, final double longitude, final double radius) {
 		this.getStatLog(STAT_FILE_NAME);
+		this.getCSVLog(this.FILE_NAME_PREFIX, 0);
+		this.getCSVLog(this.FILE_NAME_PREFIX, 1);
+		this.getCSVLog(this.FILE_NAME_PREFIX, 2);
 		this.timePhase.clear();
 		
 		try {
@@ -69,19 +73,28 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 				}
 				@Override
 				public void update(byte[] region, byte[] row,RCopResult result) {
+					long current = System.currentTimeMillis();
 					count++;
 					res.getRes().addAll(result.getRes()); // to verify the error when large data
 					res.setStart(result.getStart());
 					res.setEnd(result.getEnd());
+					res.setRows((res.getRows()+result.getRows()));
+					res.setCells(res.getCells()+result.getCells());
 					//System.out.println((count++) + ": come back region: "+ Bytes.toString(region) + "; result: "+ result.size());
 					String outStr="count=>"+count+";start=>"+result.getStart()+";end=>"+result.getEnd()+";process=>"+(result.getEnd()-result.getStart())+
-							";tranmission=>"+(System.currentTimeMillis()-result.getEnd())+";region=>"+Bytes.toString(region)+
+							";tranmission=>"+(System.currentTimeMillis()-result.getEnd())+
+							";region=>"+Bytes.toString(region)+
 							";row=>"+result.getRows()+";result=>"+result.getRes().size();
 					this.query.writeStat(outStr);
 			    	outStr = query.regions.get(Bytes.toString(region)).toString();
 			    	this.query.writeStat(outStr);					
-					
-			    	
+			    	  // write them into csv file
+			    	  outStr = "";
+			    	  outStr += "within,"+"cop,"+result.getParameter()+","+result.getStart()+","+
+			    			  	result.getEnd()+","+current+","+
+			    			  	result.getRows()+","+result.getCells()+","+result.getRes().size()+","+
+			    			  	this.query.stat.getRSbyRegion(this.query.getTableName(),Bytes.toString(region));
+			    	  this.query.writeCSVLog(outStr,1);								    	
 				}
 			}
 			BixiCallBack callBack = new BixiCallBack(this);
@@ -94,7 +107,9 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 					this.max_num_of_column);
 			// match the query area in Raster to get the row range and column
 			// range
+			long match_s = System.currentTimeMillis();
 			XBox[] match_boxes = raster.match(latitude, longitude, radius);
+			long match_time = System.currentTimeMillis()-match_s;
 			String[] rowRange = new String[2];
 			rowRange[0] = match_boxes[0].getRow();
 			rowRange[1] = match_boxes[1].getRow()+"-*";
@@ -111,8 +126,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 					new Batch.Call<BixiProtocol, RCopResult>() {
 
 						public RCopResult call(BixiProtocol instance)
-								throws IOException {
-
+								throws IOException {							
 							return instance.copQueryNeighbor4LS2(scan,
 									latitude, longitude, radius);
 
@@ -127,6 +141,19 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			System.out.println("exe_time=>"+exe_time+";result=>"+callBack.res.getRes().size());				
 			String outStr = "m=>cop;"+"radius=>"+radius+";exe_time=>"+exe_time+";result=>"+callBack.res.getRes().size();
 			this.writeStat(outStr);
+			// write to csv file
+			outStr = "";
+			outStr += "within,"+"cop,"+callBack.res.getCells()+","+callBack.res.getRes().size()+","+
+						exe_time+","+callBack.res.getRows()+","+
+						match_time+","+this.min_size_of_height+","+radius;	
+					
+			this.writeCSVLog(outStr, 0);			
+
+			String timeStr = "within,cop,"+radius+",";
+			for(int i=0;i<this.timePhase.size();i++){														
+				timeStr +=this.timePhase.get(i)+",";
+			}					
+			this.writeCSVLog(timeStr,2);			
 			
 			return callBack.res.getRes();
 
@@ -136,7 +163,9 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			ee.printStackTrace();
 		}finally{
 			hbaseUtil.closeTableHandler();
+			this.stat.closeStat();
 			this.closeStatLog();
+			this.closeCSVLog();			
 		}
 		return null;
 
@@ -147,8 +176,11 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			double latitude, double longitude, double radius) {
 		
 		this.getStatLog(STAT_FILE_NAME);
-		
+		this.getCSVLog(FILE_NAME_PREFIX,0);		
+		this.getCSVLog(FILE_NAME_PREFIX,2);
+		this.timePhase.clear();
 		long sTime = System.currentTimeMillis();
+		this.timePhase.add(sTime);
 		// build up a raster
 		XRaster raster = new XRaster(this.space, this.min_size_of_height,
 				this.max_num_of_column);
@@ -158,7 +190,9 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 		HashMap<String, String> results = new HashMap<String, String>();
 		try {
 			// match rect to find the subspace it belongs to
+			long match_s = System.currentTimeMillis();
 			XBox[] match_boxes = raster.match(latitude, longitude, radius);
+			long match_time = System.currentTimeMillis() - match_s;
 			String[] rowRange = new String[2];
 			rowRange[0] = match_boxes[0].getRow();
 			rowRange[1] = match_boxes[1].getRow()+"-*";
@@ -171,6 +205,7 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 			 */
 			// the version here is harded coded, because i cannot get how many
 			// objects in one cell now
+			this.timePhase.add(System.currentTimeMillis());
 			rScanner = this.hbaseUtil.getResultSet(rowRange, null,
 					this.familyName, c, 1000000);
 			BixiReader reader = new BixiReader();
@@ -214,15 +249,31 @@ public class BixiLocationQueryS2 extends QueryAbstraction {
 				}
 			}
 			long eTime = System.currentTimeMillis();
+			this.timePhase.add(eTime);
 			String outStr = "m=scan;"+"radius=>"+radius+";count=>" + count + ";accepted=>"
 					+ accepted + ";time=>" + (eTime - sTime)+";row=>"+row+"row_stride=>"+this.min_size_of_height+";columns=>"+this.max_num_of_column;;
 			this.writeStat(outStr);
 
+			// write to csv file
+			outStr = "";
+			outStr += "within,"+"scan,"+count+","+accepted+","+(eTime-sTime)+","+row+
+					  ","+match_time+","+this.min_size_of_height+","+radius;				
+			
+			this.writeCSVLog(outStr, 0);
+			
+			String timeStr = "within,scan,"+radius+",";			
+			for(int i=0;i<this.timePhase.size();i++){
+				timeStr += this.timePhase.get(i)+",";
+			}
+			this.writeCSVLog(timeStr, 2);			
+			
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}finally{
 			this.hbaseUtil.closeTableHandler();
 			this.closeStatLog();
+			this.closeCSVLog();
 		}
 		return results;
 	}

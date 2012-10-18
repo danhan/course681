@@ -54,23 +54,23 @@ public class HBaseUtil_Original {
 		return new HTable(conf, tableName);
 	}
 	
-	public HTable updateTable(String tableName,String[] metrics)throws IOException{
-		//log.info("entry: "+tableName + ":"+metrics);
-		try{
-			
-			HTableDescriptor td = this.createTableDescription(tableName, metrics);
-			this.admin.disableTable(tableName);
-			this.admin.modifyTable(tableName.getBytes(), td);
-			this.admin.enableTable(tableName);	
-			
-		}catch(Exception e){
-			log.info(e.fillInStackTrace());
-			e.printStackTrace();
-		}
-		//log.info("exit");
-		return new HTable(tableName);
-
-	}
+//	public HTable updateTable(String tableName,String[] metrics)throws IOException{
+//		//log.info("entry: "+tableName + ":"+metrics);
+//		try{
+//			
+//			HTableDescriptor td = this.createTableDescription(tableName, metrics);
+//			this.admin.disableTable(tableName);
+//			this.admin.modifyTable(tableName.getBytes(), td);
+//			this.admin.enableTable(tableName);	
+//			
+//		}catch(Exception e){
+//			log.info(e.fillInStackTrace());
+//			e.printStackTrace();
+//		}
+//		//log.info("exit");
+//		return new HTable(tableName);
+//
+//	}
 	
 	public void deleteTable(String tableName)throws IOException{
 		//log.info("entry: "+tableName);

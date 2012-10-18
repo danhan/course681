@@ -50,7 +50,8 @@ public class BixiReaderToTable
 		}
 		
 		//added by Wei
-		hTab = new HTable(Bytes.toBytes(dstTable));
+		// This is commented because the upgrade
+		//hTab = new HTable(Bytes.toBytes(dstTable));
 	}
 	
 	public BixiReaderToTable(String dstTable) throws IOException
@@ -66,7 +67,8 @@ public class BixiReaderToTable
 		}
 		
 		//added by Wei
-		hTab = new HTable(Bytes.toBytes(dstTable));
+		// This is commented because the upgrade
+		//hTab = new HTable(Bytes.toBytes(dstTable));
 	}
 	
 	public static void main(String[] argc) throws IOException

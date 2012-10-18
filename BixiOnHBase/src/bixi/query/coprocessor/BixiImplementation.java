@@ -49,15 +49,17 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 		boolean hasMoreResult = false;		
 		Point2D.Double point = new Point2D.Double(latitude,longitude);
 		/**Step2: iterate the result from the scanner**/
-		int count = 0;
+		int cell = 0;
+		int row = 0;
 		int accepted = 0;
 		try {
 			do {
 				hasMoreResult = scanner.next(keyvalues);
 				if(keyvalues != null && keyvalues.size() > 0){	
+					row++;
 					for(KeyValue kv:keyvalues){
 						//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
-						count++;
+						cell++;
 						// get the distance between this point and the given point
 						XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));
 						station.setId(Bytes.toString(kv.getQualifier()));
@@ -82,8 +84,10 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 			
 			results.setStart(sTime);
 			results.setEnd(eTime);
-			results.setRows(count);
-			System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+results.getRes().size()+";count=>"+count+";accepted=>"+accepted);	
+			results.setRows(row);
+			results.setCells(cell);
+			results.setParameter(String.valueOf(radius));
+			//System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+results.getRes().size()+";count=>"+count+";accepted=>"+accepted);	
 						
 		} finally {
 			scanner.close();
@@ -151,16 +155,17 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 		Point2D.Double point = new Point2D.Double(latitude,longitude);
 		
 		/**Step2: iterate the scan result ***/
-		int count = 0;
+		int row = 0;
+		int cell = 0;
 		int accepted = 0;
 		try {
 			do {
 				hasMoreResult = scanner.next(keyvalues);
 				if(keyvalues != null && keyvalues.size() > 0){	
-											
+					row++;						
 					for(KeyValue kv:keyvalues){
 						//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
-						count++;						
+						cell++;						
 						// get the distance between this point and the given point
 						XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));						
 						
@@ -182,8 +187,10 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 			long eTime = System.currentTimeMillis();
 			results.setStart(sTime);
 			results.setEnd(eTime);
-			results.setRows(count);
-			System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+results.getRes().size()+";count=>"+count+";accepted=>"+accepted);			
+			results.setRows(row);
+			results.setCells(cell);
+			results.setParameter(String.valueOf(radius));
+			//System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+results.getRes().size()+";count=>"+row+";accepted=>"+accepted);			
 			
 		} finally {
 			scanner.close();

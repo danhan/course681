@@ -10,10 +10,13 @@ import java.util.TreeMap;
 import org.apache.hadoop.hbase.HRegionInfo;
 
 import bixi.conf.XConfiguration;
+import bixi.dataset.statistics.XConstant;
 
+import util.log.XCSVLog;
 import util.log.XStatLog;
 
 import hbase.service.HBaseUtil;
+import hbase.service.StatUtil;
 
 public abstract class QueryAbstraction {
 	
@@ -22,9 +25,13 @@ public abstract class QueryAbstraction {
 	protected String familyName[] = null;
 	final int cacheSize = 5000;	
 	private XStatLog statLog = null;
+	private XCSVLog mainLog = null;
+	private XCSVLog copLog = null;
+	private XCSVLog timeLog = null;
 	protected XConfiguration conf = XConfiguration.getInstance();
 	public HashMap<String, HRegionInfo> regions = null;
 	public List<Long> timePhase = new ArrayList<Long>();
+	public StatUtil stat = null;
 	
 	/**
 	 * This should be known before indexing with QuadTree.
@@ -50,10 +57,12 @@ public abstract class QueryAbstraction {
 			hbaseUtil.getTableHandler(tableName);
 			hbaseUtil.setScanConfig(cacheSize, true);
 			this.regions = hbaseUtil.getRegions(tableName);
-			
+			this.stat = new StatUtil();
 		}catch(Exception e){
 			if(hbaseUtil != null)
 				hbaseUtil.closeTableHandler();
+			if(this.stat != null)
+				this.stat.closeStat();
 			e.printStackTrace();
 		}
 	}
@@ -68,7 +77,49 @@ public abstract class QueryAbstraction {
 		this.statLog.close();
 	}
 	
+	/**
+	 * 
+	 * @param filename
+	 * @param header
+	 * @param n 0-main, 1-cop, 2-time
+	 */
+	public void getCSVLog(String filename,int n){
+		if(n == 0){
+			filename += "-main.csv";
+			this.mainLog = new XCSVLog(filename,XConstant.main_header);
+		}else if(n == 1){
+			filename += "-cop.csv";
+			this.copLog = new XCSVLog(filename,XConstant.cop_header);
+		}else if(n == 2){
+			filename += "-time.csv";
+			this.timeLog = new XCSVLog(filename,XConstant.time_header);
+		}
+		
+	}
 	
+	public void writeCSVLog(String str,int n){
+		if(n == 0){
+			this.mainLog.write(str);			
+		}else if(n == 1){		
+			this.copLog.write(str);
+		}else if(n == 2){		
+			this.timeLog.write(str);
+		}
+		
+	}
+	public void closeCSVLog(){
+		if(this.mainLog != null)
+			this.mainLog.close();
+		if(this.copLog != null)
+			this.copLog.close();
+		if(this.timeLog != null)
+			this.timeLog.close();
+				
+	}	
+
+	public String getTableName() {
+		return tableName;
+	}
 	/**Some one wants to know at this time, how many available bikes in the
 	 * stations nearest to me
 	 * 

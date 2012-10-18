@@ -13,6 +13,9 @@ public class RCopResult implements Serializable{
 	long end = 0;
 	List<String> res = null;
 	int rows = 0; // the number of row scanned
+	int cells = 0;
+	String parameter = null;
+	
 	public RCopResult(){
 		this.res = new ArrayList<String>();		
 	}
@@ -44,5 +47,23 @@ public class RCopResult implements Serializable{
 	public void setRows(int rows) {
 		this.rows = rows;
 	}
+
+	public String getParameter() {
+		return parameter;
+	}
+
+	public void setParameter(String parameter) {
+		this.parameter = parameter;
+	}
+
+	public int getCells() {
+		return cells;
+	}
+
+	public void setCells(int cells) {
+		this.cells = cells;
+	}
+	
+	
 
 }

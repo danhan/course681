@@ -34,6 +34,7 @@ import org.apache.hadoop.hbase.filter.TimestampsFilter;
 import org.apache.hadoop.hbase.io.hfile.Compression;
 import org.apache.hadoop.hbase.regionserver.StoreFile.BloomType;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.hadoop.hbase.util.MetaUtils;
 
 
 public class HBaseUtil {
@@ -84,7 +85,8 @@ public class HBaseUtil {
 			List<HRegionInfo> list = this.admin.getTableRegions(Bytes.toBytes(tablename));
 			for(int i=0;i<list.size();i++){
 				this.regions.put(list.get(i).getRegionNameAsString(), list.get(i));				
-			}			
+			}				
+			
 			
 		}catch(Exception e){
 			e.printStackTrace();
@@ -184,24 +186,24 @@ public class HBaseUtil {
 		}
 
 	}
-	
-	public HTable updateTable(String tableName,String[] metrics,int[] max_version)throws IOException{
-		//log.info("entry: "+tableName + ":"+metrics);
-		try{
-			
-			HTableDescriptor td = this.createTableDescription(tableName, metrics,max_version);
-			this.admin.disableTable(tableName);
-			this.admin.modifyTable(tableName.getBytes(), td);
-			this.admin.enableTable(tableName);	
-			
-		}catch(Exception e){
-			log.info(e.fillInStackTrace());
-			e.printStackTrace();
-		}
-		//log.info("exit");
-		return new HTable(tableName);
-
-	}
+	// @deprecated because of new HTable();
+//	public HTable updateTable(String tableName,String[] metrics,int[] max_version)throws IOException{
+//		//log.info("entry: "+tableName + ":"+metrics);
+//		try{
+//			
+//			HTableDescriptor td = this.createTableDescription(tableName, metrics,max_version);
+//			this.admin.disableTable(tableName);
+//			this.admin.modifyTable(tableName.getBytes(), td);
+//			this.admin.enableTable(tableName);	
+//			
+//		}catch(Exception e){
+//			log.info(e.fillInStackTrace());
+//			e.printStackTrace();
+//		}
+//		//log.info("exit");
+//		return new HTable(tableName);
+//
+//	}
 	
 	public void deleteTable(String tableName)throws IOException{
 		//log.info("entry: "+tableName);

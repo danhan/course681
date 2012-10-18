@@ -6,7 +6,12 @@ import java.io.IOException;
 
 import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.coprocessor.ColumnInterpreter;
-
+/**
+ * @deprecated
+ *
+ * @param <T>
+ * @param <S>
+ */
 public class BixiColumnInterpreter<T, S> implements ColumnInterpreter<T, S> {
 
   @Override
