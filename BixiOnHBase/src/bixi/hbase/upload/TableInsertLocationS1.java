@@ -35,7 +35,7 @@ public class TableInsertLocationS1 extends TableInsertAbstraction {
 	/**
 	 * This should be known before indexing with QuadTree.
 	 */
-	double min_size_of_subspace = BixiConstant.MIN_SIZE_OF_SUBSPACE;
+	double min_size_of_subspace = BixiConstant.MIN_SIZE_OF_SUBSPACE0;
 	
 
 	public TableInsertLocationS1() {				

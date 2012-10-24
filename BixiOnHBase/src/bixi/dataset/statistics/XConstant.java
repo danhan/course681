@@ -23,7 +23,9 @@ public class XConstant {
 		"reachClient",		
 		"scannedRow",
 		"scannedCell",
+		"kvLength",
 		"accpted",
+		"RS",
 		"region"				
 	};
 	
@@ -38,5 +40,7 @@ public class XConstant {
 		"total"
 		
 	};
+	
+	
 	
 }

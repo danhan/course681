@@ -31,7 +31,7 @@ public abstract class QueryAbstraction {
 	protected XConfiguration conf = XConfiguration.getInstance();
 	public HashMap<String, HRegionInfo> regions = null;
 	public List<Long> timePhase = new ArrayList<Long>();
-	public StatUtil stat = null;
+	public HashMap<String,String> regionAndRS = null;
 	
 	/**
 	 * This should be known before indexing with QuadTree.
@@ -57,12 +57,12 @@ public abstract class QueryAbstraction {
 			hbaseUtil.getTableHandler(tableName);
 			hbaseUtil.setScanConfig(cacheSize, true);
 			this.regions = hbaseUtil.getRegions(tableName);
-			this.stat = new StatUtil();
+			StatUtil stat  = new StatUtil();
+			regionAndRS = stat.getAllRegionAndRS(tableName); 
+			stat.closeStat();
 		}catch(Exception e){
 			if(hbaseUtil != null)
 				hbaseUtil.closeTableHandler();
-			if(this.stat != null)
-				this.stat.closeStat();
 			e.printStackTrace();
 		}
 	}

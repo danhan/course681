@@ -13,8 +13,8 @@ public class TableInsertLocationS24 extends TableInsertLocationS2{
 	
 	public TableInsertLocationS24() throws IOException {
 		
-		this.min_size_of_height = 2;
-		this.num_of_column = BixiConstant.MAX_NUM_OF_COLUMN;
+		this.min_size_of_height = BixiConstant.MIN_SIZE_OF_SUBSPACE4;
+		this.num_of_column = BixiConstant.MAX_NUM_OF_COLUMN4;
 		
 		this.tableName = BixiConstant.LOCATION_TABLE_NAME_2+"4";
 		this.familyName = BixiConstant.LOCATION_FAMILY_NAME;

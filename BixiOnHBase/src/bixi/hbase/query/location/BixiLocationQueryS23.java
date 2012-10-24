@@ -11,8 +11,8 @@ import bixi.hbase.query.BixiConstant;
 public class BixiLocationQueryS23 extends BixiLocationQueryS2{
 	
 	public BixiLocationQueryS23(){
-		this.max_num_of_column = BixiConstant.MAX_NUM_OF_COLUMN;;
-		this.min_size_of_height = 1;
+		this.max_num_of_column = BixiConstant.MAX_NUM_OF_COLUMN3;
+		this.min_size_of_height = BixiConstant.MIN_SIZE_OF_SUBSPACE3;
 		
 		this.tableName = BixiConstant.LOCATION_TABLE_NAME_2+"3";
 		familyName = new String[] { BixiConstant.LOCATION_FAMILY_NAME };

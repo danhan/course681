@@ -48,12 +48,12 @@ public class TableInsertLocationS2 extends TableInsertAbstraction {
 	/**
 	 * This should be known before indexing with Raster
 	 */
-	double min_size_of_height = BixiConstant.MIN_SIZE_OF_SUBSPACE;
+	double min_size_of_height = BixiConstant.MIN_SIZE_OF_SUBSPACE0;
 
 	/**
 	 * This should be known before indexing with Raster
 	 */
-	int num_of_column = BixiConstant.MAX_NUM_OF_COLUMN;
+	int num_of_column = BixiConstant.MAX_NUM_OF_COLUMN0;
 
 	public TableInsertLocationS2() throws IOException {		
 		

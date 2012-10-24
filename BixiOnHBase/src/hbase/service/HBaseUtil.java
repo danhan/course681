@@ -58,8 +58,8 @@ public class HBaseUtil {
 			this.conf.set("hbase.client.pause", "20");
 			this.conf.set("hbase.client.retries.number", "11");
 			this.conf.set("hbase.ipc.client.tcpnodelay","true");
-			this.conf.set("ipc.ping.interval", "60000"); // 1min
-			this.conf.set("ipc.socket.timeout", "300000"); // 
+			//this.conf.set("ipc.ping.interval", "60000"); // 1min
+			//this.conf.set("ipc.socket.timeout", "300000"); // 
 			
 			
 			this.admin = new HBaseAdmin(this.conf);

@@ -35,7 +35,7 @@ public abstract class TableInsertAbstraction {
 				BixiConstant.MONTREAL_AREA_WIDTH,
 				BixiConstant.MONTREAL_AREA_HEIGHT);
 		// The min size of subspace, this is based on the queries
-		this.min_size_of_subspace = (float) BixiConstant.MIN_SIZE_OF_SUBSPACE;		
+		this.min_size_of_subspace = (float) BixiConstant.MIN_SIZE_OF_SUBSPACE0;		
 	  }
 	  
 	  public void setHBase() throws IOException{

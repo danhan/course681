@@ -15,7 +15,7 @@ public class TableInsertLocationS11 extends TableInsertLocationS1{
 	public TableInsertLocationS11() throws IOException {		
 		
 		tableName = BixiConstant.LOCATION_TABLE_NAME_1+"1";
-		this.min_size_of_subspace = 1;
+		this.min_size_of_subspace = BixiConstant.MIN_SIZE_OF_SUBSPACE1;
 		familyName = BixiConstant.LOCATION_FAMILY_NAME;
 		try{
 			this.setHBase();	

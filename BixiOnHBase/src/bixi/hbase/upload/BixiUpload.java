@@ -27,7 +27,7 @@ public class BixiUpload {
 			}else if(schema == 4){
 				TableInsertSchema4 inserter = new TableInsertSchema4();	
 				inserter.insertXmlData(schema,batchRow,fileDir);			
-			}else if(schema == 11){ // location schema1
+			}else if(schema == 1){ // location schema1
 				for(int f=0;f<fileNum;f++){
 					TableInsertLocationS1 inserter = new TableInsertLocationS1();
 					File dir = new File(fileDir);
@@ -36,7 +36,7 @@ public class BixiUpload {
 					inserter.insert(fileName,batchNum);	
 					System.out.println("finish the file"+fileName);
 				}	
-			}else if(schema == 111){ // location schema1
+			}else if(schema == 11){ // location schema1
 				for(int f=0;f<fileNum;f++){
 					TableInsertLocationS11 inserter = new TableInsertLocationS11();
 					File dir = new File(fileDir);
@@ -45,7 +45,7 @@ public class BixiUpload {
 					inserter.insert(fileName,batchNum);	
 					System.out.println("finish the file"+fileName);
 				}	
-			}else if(schema == 112){ // location schema1
+			}else if(schema == 12){ // location schema1
 				for(int f=0;f<fileNum;f++){
 					TableInsertLocationS12 inserter = new TableInsertLocationS12();
 					File dir = new File(fileDir);
@@ -54,7 +54,7 @@ public class BixiUpload {
 					inserter.insert(fileName,batchNum);	
 					System.out.println("finish the file"+fileName);
 				}	
-			}else if(schema == 113){ // location schema1
+			}else if(schema == 13){ // location schema1
 				for(int f=0;f<fileNum;f++){
 					TableInsertLocationS13 inserter = new TableInsertLocationS13();
 					File dir = new File(fileDir);
@@ -63,7 +63,7 @@ public class BixiUpload {
 					inserter.insert(fileName,batchNum);	
 					System.out.println("finish the file"+fileName);
 				}	
-			}else if(schema == 114){ // location schema1
+			}else if(schema == 14){ // location schema1
 				for(int f=0;f<fileNum;f++){
 					TableInsertLocationS14 inserter = new TableInsertLocationS14();
 					File dir = new File(fileDir);
@@ -72,7 +72,7 @@ public class BixiUpload {
 					inserter.insert(fileName,batchNum);	
 					System.out.println("finish the file"+fileName);
 				}	
-			}else if(schema == 115){ // location schema1
+			}else if(schema == 15){ // location schema1
 				for(int f=0;f<fileNum;f++){
 					TableInsertLocationS15 inserter = new TableInsertLocationS15();
 					File dir = new File(fileDir);
@@ -81,7 +81,7 @@ public class BixiUpload {
 					inserter.insert(fileName,batchNum);	
 					System.out.println("finish the file"+fileName);
 				}	
-			}else if(schema == 116){ // location schema1
+			}else if(schema == 16){ // location schema1
 				for(int f=0;f<fileNum;f++){
 					TableInsertLocationS16 inserter = new TableInsertLocationS16();
 					File dir = new File(fileDir);
@@ -90,7 +90,7 @@ public class BixiUpload {
 					inserter.insert(fileName,batchNum);	
 					System.out.println("finish the file"+fileName);
 				}	
-			}else if(schema == 12){ // location schema2									
+			}else if(schema == 2){ // location schema2									
 				for(int f=0;f<fileNum;f++){
 					TableInsertLocationS2 inserter = new TableInsertLocationS2();
 					File dir = new File(fileDir);
@@ -99,7 +99,7 @@ public class BixiUpload {
 					inserter.insert(fileName);						
 					System.out.println("finish the file"+fileName);
 				}				
-			}else if(schema == 121){ // location schema2				
+			}else if(schema == 21){ // location schema2				
 				
 			for(int f=0;f<fileNum;f++){
 				TableInsertLocationS21 inserter = new TableInsertLocationS21();
@@ -109,7 +109,7 @@ public class BixiUpload {
 				inserter.insert(fileName);						
 				System.out.println("finish the file"+fileName);
 			}				
-		}else if(schema == 122){ // location schema2							
+		}else if(schema == 22){ // location schema2							
 			for(int f=0;f<fileNum;f++){
 				TableInsertLocationS22 inserter = new TableInsertLocationS22();
 				File dir = new File(fileDir);			
@@ -117,7 +117,7 @@ public class BixiUpload {
 				inserter.insert(fileName);						
 				System.out.println("finish the file"+fileName);
 			}	   
-	    }else if(schema == 123){
+	    }else if(schema == 23){
 			for(int f=0;f<fileNum;f++){
 				TableInsertLocationS23 inserter = new TableInsertLocationS23();
 				File dir = new File(fileDir);			
@@ -125,7 +125,7 @@ public class BixiUpload {
 				inserter.insert(fileName);						
 				System.out.println("finish the file"+fileName);
 			}				
-		}else if(schema == 124){
+		}else if(schema == 24){
 			for(int f=0;f<fileNum;f++){
 				TableInsertLocationS24 inserter = new TableInsertLocationS24();
 				File dir = new File(fileDir);			
@@ -133,7 +133,7 @@ public class BixiUpload {
 				inserter.insert(fileName);						
 				System.out.println("finish the file"+fileName);
 			}	
-		}else if(schema == 125){
+		}else if(schema == 25){
 			for(int f=0;f<fileNum;f++){
 				TableInsertLocationS25 inserter = new TableInsertLocationS25();
 				File dir = new File(fileDir);			

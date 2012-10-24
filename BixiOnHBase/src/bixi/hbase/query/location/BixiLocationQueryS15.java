@@ -5,7 +5,7 @@ import bixi.hbase.query.BixiConstant;
 public class BixiLocationQueryS15 extends BixiLocationQueryS1{
 	
 	public BixiLocationQueryS15(){
-		this.min_size_of_subspace = 5;
+		this.min_size_of_subspace = BixiConstant.MIN_SIZE_OF_SUBSPACE5;
 		tableName = BixiConstant.LOCATION_TABLE_NAME_1+"5";
 		familyName = new String[]{BixiConstant.LOCATION_FAMILY_NAME};
 		try{

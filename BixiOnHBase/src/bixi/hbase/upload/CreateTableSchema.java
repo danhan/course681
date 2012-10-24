@@ -81,32 +81,32 @@ public class CreateTableSchema {
 				
 			}else if(args[0].equals("l2")){
 				String families[] = {BixiConstant.LOCATION_FAMILY_NAME};
-				int versions[] = {100000};
+				int versions[] = {1000000};
 				hbaseUtil.createTable(BixiConstant.LOCATION_TABLE_NAME_2, families,versions);
 				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_2);				
 			}else if(args[0].equals("l21")){ // debug for l2
 				String families[] = {BixiConstant.LOCATION_FAMILY_NAME};
-				int versions[] = {100000};
+				int versions[] = {1000000};
 				hbaseUtil.createTable(BixiConstant.LOCATION_TABLE_NAME_2+"1", families,versions);
 				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_2+"1");				
 			}else if(args[0].equals("l22")){ // debug for l2
 				String families[] = {BixiConstant.LOCATION_FAMILY_NAME};
-				int versions[] = {100000};
+				int versions[] = {1000000};
 				hbaseUtil.createTable(BixiConstant.LOCATION_TABLE_NAME_2+"2", families,versions);
 				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_2+"2");				
 			}else if(args[0].equals("l23")){ // debug for l2
 				String families[] = {BixiConstant.LOCATION_FAMILY_NAME};
-				int versions[] = {100000};
+				int versions[] = {1000000};
 				hbaseUtil.createTable(BixiConstant.LOCATION_TABLE_NAME_2+"3", families,versions);
 				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_2+"3");				
 			}else if(args[0].equals("l24")){ // debug for l2
 				String families[] = {BixiConstant.LOCATION_FAMILY_NAME};
-				int versions[] = {100000};
+				int versions[] = {1000000};
 				hbaseUtil.createTable(BixiConstant.LOCATION_TABLE_NAME_2+"4", families,versions);
 				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_2+"4");				
 			}else if(args[0].equals("l25")){ // debug for l2
 				String families[] = {BixiConstant.LOCATION_FAMILY_NAME};
-				int versions[] = {100000};
+				int versions[] = {1000000};
 				hbaseUtil.createTable(BixiConstant.LOCATION_TABLE_NAME_2+"5", families,versions);
 				System.out.println("finish creating the table: " + BixiConstant.LOCATION_TABLE_NAME_2+"5");				
 			}

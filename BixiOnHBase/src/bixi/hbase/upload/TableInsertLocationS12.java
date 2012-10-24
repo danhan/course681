@@ -6,7 +6,7 @@ import util.quadtree.based.trie.XQuadTree;
 import bixi.hbase.query.BixiConstant;
 
 /**
- * the subspace is 2
+ * the subspace is 0.01
  * @author dan
  *
  */
@@ -15,7 +15,7 @@ public class TableInsertLocationS12 extends TableInsertLocationS1{
 	public TableInsertLocationS12() throws IOException {		
 		
 		tableName = BixiConstant.LOCATION_TABLE_NAME_1+"2";
-		this.min_size_of_subspace = 2;
+		this.min_size_of_subspace = BixiConstant.MIN_SIZE_OF_SUBSPACE2;
 		familyName = BixiConstant.LOCATION_FAMILY_NAME;
 		try{
 			this.setHBase();	

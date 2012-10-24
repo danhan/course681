@@ -15,6 +15,7 @@ public class RCopResult implements Serializable{
 	int rows = 0; // the number of row scanned
 	int cells = 0;
 	String parameter = null;
+	int kvLength = 0;
 	
 	public RCopResult(){
 		this.res = new ArrayList<String>();		
@@ -63,6 +64,15 @@ public class RCopResult implements Serializable{
 	public void setCells(int cells) {
 		this.cells = cells;
 	}
+
+	public int getKvLength() {
+		return kvLength;
+	}
+
+	public void setKvLength(int kvLength) {
+		this.kvLength = kvLength;
+	}
+
 	
 	
 

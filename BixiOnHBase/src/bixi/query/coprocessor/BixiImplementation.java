@@ -52,6 +52,7 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 		int cell = 0;
 		int row = 0;
 		int accepted = 0;
+		int kvLength = 0;
 		try {
 			do {
 				hasMoreResult = scanner.next(keyvalues);
@@ -59,6 +60,7 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 					row++;
 					for(KeyValue kv:keyvalues){
 						//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
+						kvLength = (kvLength < kv.getLength())? kv.getLength():kvLength;
 						cell++;
 						// get the distance between this point and the given point
 						XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));
@@ -86,6 +88,7 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 			results.setEnd(eTime);
 			results.setRows(row);
 			results.setCells(cell);
+			results.setKvLength(kvLength);
 			results.setParameter(String.valueOf(radius));
 			//System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+results.getRes().size()+";count=>"+count+";accepted=>"+accepted);	
 						
@@ -158,14 +161,17 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 		int row = 0;
 		int cell = 0;
 		int accepted = 0;
+		int kvLength = 0;
 		try {
 			do {
 				hasMoreResult = scanner.next(keyvalues);
 				if(keyvalues != null && keyvalues.size() > 0){	
-					row++;						
+					row++;	
+					
 					for(KeyValue kv:keyvalues){
 						//System.out.println(Bytes.toString(kv.getRow())+"=>"+Bytes.toString(kv.getValue()));
-						cell++;						
+						cell++;	
+						kvLength = (kvLength < kv.getLength())? kv.getLength():kvLength;
 						// get the distance between this point and the given point
 						XStation station = reader.getStationFromJson(Bytes.toString(kv.getValue()));						
 						
@@ -189,6 +195,7 @@ public class BixiImplementation extends BaseEndpointCoprocessor implements BixiP
 			results.setEnd(eTime);
 			results.setRows(row);
 			results.setCells(cell);
+			results.setKvLength(kvLength);
 			results.setParameter(String.valueOf(radius));
 			//System.out.println("exe_time=>"+(eTime-sTime)+";result=>"+results.getRes().size()+";count=>"+row+";accepted=>"+accepted);			
 			

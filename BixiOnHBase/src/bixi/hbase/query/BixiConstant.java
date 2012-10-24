@@ -26,11 +26,6 @@ public class BixiConstant {
   
   public final static double MONTREAL_AREA_HEIGHT = 100;//0.17;
   
-  public final static double MIN_SIZE_OF_SUBSPACE = 0.1;//0.1;//2;//0.001;    
-  /**
-   * This should be used in Raster indexing
-   */
-  public final static int MAX_NUM_OF_COLUMN = 1000;//1000;//10000;
   /**
    * static metrics in data
    */
@@ -72,6 +67,27 @@ public class BixiConstant {
 	public static String LOCATION_TABLE_NAME_2 = "bixi.location.2";
 	
 
-  
+	/********************Different Size of Subpace for two schema***************************************/
+	  
+	//  public final static double MIN_SIZE_OF_SUBSPACE = 0.1;//0.1;//2;//0.001;    
+	  /**
+	   * This should be used in Raster indexing
+	   */
+	//  public final static int MAX_NUM_OF_COLUMN = 1000;//1000;//10000;
+	
+	public final static double MIN_SIZE_OF_SUBSPACE0 = 0.1;
+	public final static double MIN_SIZE_OF_SUBSPACE1 = 1;
+	public final static double MIN_SIZE_OF_SUBSPACE2 = 0.01;
+	public final static double MIN_SIZE_OF_SUBSPACE3 = -1;
+	public final static double MIN_SIZE_OF_SUBSPACE4 = -1;
+	public final static double MIN_SIZE_OF_SUBSPACE5 = -1;
+	
+	/*This is for Schema2, 100 means the maximum width of the whole space*/
+	public final static int MAX_NUM_OF_COLUMN0 = (int)(100 / MIN_SIZE_OF_SUBSPACE0);
+	public final static int MAX_NUM_OF_COLUMN1 = (int)(100 / MIN_SIZE_OF_SUBSPACE1);
+	public final static int MAX_NUM_OF_COLUMN2 = (int)(100 / MIN_SIZE_OF_SUBSPACE2);
+	public final static int MAX_NUM_OF_COLUMN3 = (int)(100 / MIN_SIZE_OF_SUBSPACE2);
+	public final static int MAX_NUM_OF_COLUMN4 = (int)(100 / MIN_SIZE_OF_SUBSPACE2);
+	public final static int MAX_NUM_OF_COLUMN5 = (int)(100 / MIN_SIZE_OF_SUBSPACE2);
   
 }

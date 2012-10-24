@@ -56,7 +56,7 @@ public class StatUtil {
 	 * @param tableName
 	 * @return server, startkey, endkey, < HRegionInfo, server>
 	 */
-	public String getRSbyRegion(String tableName,String regionName){	
+	public String getRSbyRegion(String regionName){	
 		String serverName = null;
 		try{
 						
@@ -86,36 +86,30 @@ public class StatUtil {
 	 * return all mapping between regions and the region server 
 	 * @return
 	 */
-	public HashMap<HRegionInfo,String> getAllRegionAndRS(String tableName){
-		List<HRegionInfo> regionList = this.getRegionInfoByTable(tableName);
-		HashMap<HRegionInfo,String> regionInfoAndRS = new HashMap<HRegionInfo,String>();
-		try{
-			
-			HashMap<String,String> regionAndRS = new HashMap<String,String>();
+	public HashMap<String,String> getAllRegionAndRS(String tableName){		
+		HashMap<String,String> regionAndRS = new HashMap<String,String>();
+		
+		try{						
 			ResultScanner result = hbaseUtil.getResultSet(null,null,null,null,1);
 			for(Result r: result){				
-				String rowKey = Bytes.toString(r.getRow());								
+				String rowKey = Bytes.toString(r.getRow());	
+				if(rowKey.contains(tableName)){
 					List<KeyValue> pairs = r.list();				
 					for(KeyValue kv:pairs){							
 						if(Bytes.toString(kv.getQualifier()).equals("server")){							
 							regionAndRS.put(rowKey, Bytes.toString(kv.getValue()));
 							break;
 						}
-					}														
-			}						
-			
-			for(int i=0;i<regionList.size();i++){
-				HRegionInfo region = regionList.get(i);
-				if(regionAndRS.containsKey(region.getRegionNameAsString())){
-					regionInfoAndRS.put(region, regionAndRS.get(region.getRegionNameAsString()));					
-				}				
-			}						
+					}						
+				}
+													
+			}												
 		}catch(Exception e){
 			e.printStackTrace();
 			this.closeStat();
 		}
 		
-		return regionInfoAndRS;	
+		return regionAndRS;	
 	}
 	
 	public int getNumOfRegion(String tableName){

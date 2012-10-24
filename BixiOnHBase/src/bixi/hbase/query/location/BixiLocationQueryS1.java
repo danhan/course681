@@ -27,6 +27,7 @@ import bixi.query.coprocessor.BixiProtocol;
 import bixi.query.coprocessor.RCopResult;
 
 /**
+ * Subspace = 0.1
  * This class is to process the location query based on Location Schema1
  * Schema1 is to group locations with QuadTree
  * @author dan
@@ -34,9 +35,9 @@ import bixi.query.coprocessor.RCopResult;
  */
 public class BixiLocationQueryS1 extends QueryAbstraction{
 	
-	double min_size_of_subspace = BixiConstant.MIN_SIZE_OF_SUBSPACE;
-	String STAT_FILE_NAME = "BixiLocationQueryS1.stat";
-	String FILE_NAME_PREFIX = "BixiLocationQueryS1";
+	double min_size_of_subspace = BixiConstant.MIN_SIZE_OF_SUBSPACE0;
+	String STAT_FILE_NAME = "SpaceS1-01.stat";
+	String FILE_NAME_PREFIX = "SpaceS1-01";
 	
 	
 	public BixiLocationQueryS1(){
@@ -81,18 +82,20 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 		    	  res.setRows((res.getRows()+result.getRows()));	
 		    	  res.setCells(res.getCells()+result.getCells());
 		    	  
-		    	  String outStr="count=>"+count+";start=>"+result.getStart()+";end=>"+result.getEnd()+";process=>"+(result.getEnd()-result.getStart())+
+/*		    	  String outStr="count=>"+count+";start=>"+result.getStart()+";end=>"+result.getEnd()+";process=>"+(result.getEnd()-result.getStart())+
 		    			  ";transmission=>"+(System.currentTimeMillis()-result.getEnd())+
 		    			  ";rs=>"+Bytes.toString(region)+
 		    			  ";row=>"+result.getRows()+";result=>"+result.getRes().size();		    	  
 		    	  this.query.writeStat(outStr);
 		    	  outStr = query.regions.get(Bytes.toString(region)).toString();
-		    	  this.query.writeStat(outStr);
+		    	  this.query.writeStat(outStr);*/
 		    	  // write them into csv file
-		    	  outStr = "";
+		    	  String outStr = "";
 		    	  outStr += "within,"+"cop,"+result.getParameter()+","+result.getStart()+","+
 		    			  	result.getEnd()+","+current+","+
-		    			  	result.getRows()+","+result.getCells()+","+result.getRes().size()+","+this.query.stat.getRSbyRegion(this.query.getTableName(),Bytes.toString(region));
+		    			  	result.getRows()+","+result.getCells()+","+result.getKvLength()+","+result.getRes().size()+","+
+		    			  	this.query.regionAndRS.get(Bytes.toString(region))+","+Bytes.toString(region);
+		    			  	//this.query.regionAndRS.get(Bytes.toString(region));
 		    	  this.query.writeCSVLog(outStr,1);
 		    	  		    	  
 		      }		      
@@ -154,11 +157,11 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 		    this.timePhase.add(cop_end);				   
 		    
 			long exe_time = cop_end- s_time; 	
-			String outStr = "q=>within;m=>cop;"+"radius=>"+radius+";exe_time=>"+exe_time+";cop_start=>"+cop_start+
+/*			String outStr = "q=>within;m=>cop;"+"radius=>"+radius+";exe_time=>"+exe_time+";cop_start=>"+cop_start+
 					";result=>"+callBack.res.getRes().size()+";match=>"+(match_time)+";subspace=>"+this.min_size_of_subspace;
-			this.writeStat(outStr);
+			this.writeStat(outStr);*/
 			// write to csv file
-			outStr = "";
+			String outStr = "";
 			outStr += "within,"+"cop,"+callBack.res.getCells()+","+callBack.res.getRes().size()+","+exe_time+","
 						+callBack.res.getRows()+","+match_time+","+this.min_size_of_subspace+","+radius;	
 					
@@ -173,7 +176,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 				timeStr +=this.timePhase.get(i)+",";
 			}
 			outStr += (tail-this.timePhase.get(0))+"\n";
-			this.writeStat(outStr);
+			//this.writeStat(outStr);
 			// write it to csv file
 			this.writeCSVLog(timeStr,2);
 			
@@ -184,8 +187,7 @@ public class BixiLocationQueryS1 extends QueryAbstraction{
 		}catch(Throwable ee){
 			ee.printStackTrace();
 		}finally{
-			hbaseUtil.closeTableHandler();
-			this.stat.closeStat();
+			hbaseUtil.closeTableHandler();			
 			this.closeStatLog();
 			this.closeCSVLog();			
 		}
